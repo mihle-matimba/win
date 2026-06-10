@@ -1,0 +1,7 @@
+{
+  "rewrites": [
+    { "source": "/index", "destination": "/index.html" },
+    { "source": "/homepage", "destination": "/homepage.html" },
+    { "source": "/win-index", "destination": "/win-index.html" }
+  ]
+}
