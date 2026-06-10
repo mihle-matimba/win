@@ -268,6 +268,7 @@
               <span class="err"></span>
             </div>
           </div>
+          <p id="formMsg" style="display:none;font:500 13px 'Inter';padding:10px 14px;border-radius:10px;margin-top:8px;text-align:center"></p>
           <button class="btn" type="submit" id="submitBtn">
             Reserve My Spot <span class="arrow">↗</span>
           </button>
@@ -363,7 +364,11 @@ form.addEventListener('submit', async (e)=>{
     const data = await res.json();
     if(!res.ok){
       if(data.error && data.error.includes('duplicate key')){
-        toast('You\'re already on the list — we\'ll be in touch!');
+        const msg = document.getElementById('formMsg');
+        msg.textContent = 'You\'re already on the list — we\'ll be in touch!';
+        msg.style.display = 'block';
+        msg.style.background = 'rgba(47,123,255,.12)';
+        msg.style.color = 'var(--blue)';
         btn.disabled = false;
         btn.firstChild.textContent = 'Reserve My Spot ';
         return;
