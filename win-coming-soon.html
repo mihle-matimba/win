@@ -1,0 +1,381 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>WIN — Coming Soon</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Space+Grotesk:wght@500;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#0a0a0b;
+    --card:#141417;
+    --card-2:#18181c;
+    --line:rgba(255,255,255,.08);
+    --line-2:rgba(255,255,255,.14);
+    --txt:#f5f6f8;
+    --muted:#9b9ca3;
+    --muted-2:#6f7077;
+    --blue:#2f7bff;
+    --blue-hover:#4a8dff;
+    --blue-glow:rgba(47,123,255,.35);
+    --green:#2ecc71;
+    --red:#ff5c5c;
+  }
+  *{margin:0;padding:0;box-sizing:border-box}
+  body{
+    background:var(--bg);color:var(--txt);
+    font-family:'Inter',system-ui,sans-serif;
+    -webkit-font-smoothing:antialiased;
+    min-height:100vh;display:flex;flex-direction:column;
+    overflow-x:hidden;
+  }
+  a{color:inherit;text-decoration:none}
+  ::selection{background:var(--blue);color:#fff}
+
+  /* ---------- backdrop ---------- */
+  .stage{
+    flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;
+    text-align:center;position:relative;padding:60px 24px 80px;
+    background:radial-gradient(640px 380px at 50% -80px, rgba(47,123,255,.16), transparent 70%), var(--bg);
+  }
+  .stage::before{
+    content:"";position:absolute;inset:0;pointer-events:none;
+    background-image:linear-gradient(var(--line) 1px,transparent 1px),linear-gradient(90deg,var(--line) 1px,transparent 1px);
+    background-size:90px 90px;
+    mask-image:radial-gradient(760px 520px at 50% 20%,black 30%,transparent 78%);
+    opacity:.35;
+  }
+  .stage::after{
+    content:"";position:absolute;left:50%;bottom:-420px;transform:translateX(-50%);
+    width:980px;height:980px;border-radius:50%;border:1px solid rgba(47,123,255,.12);
+    box-shadow:0 0 0 100px rgba(47,123,255,.03), 0 0 0 200px rgba(47,123,255,.02);
+    pointer-events:none;
+  }
+  .inner{position:relative;max-width:660px;width:100%}
+
+  /* ---------- logo ---------- */
+  .logo{
+    font:800 30px 'Space Grotesk',sans-serif;letter-spacing:-1px;
+    font-style:italic;transform:skewX(-8deg);display:inline-block;margin-bottom:46px;
+  }
+  .logo span{color:var(--blue)}
+
+  /* ---------- shiny pill ---------- */
+  .pill{
+    display:inline-flex;align-items:center;gap:8px;
+    font:600 12.5px 'Inter';padding:9px 22px;border-radius:99px;
+    color:#fff;margin-bottom:26px;position:relative;
+    border:1.5px solid transparent;
+    background:
+      linear-gradient(#121215,#121215) padding-box,
+      linear-gradient(115deg,rgba(255,255,255,.95),rgba(167,139,250,.7) 30%,rgba(47,123,255,.45) 55%,rgba(255,255,255,.08) 80%) border-box;
+    box-shadow:
+      0 0 18px rgba(122,92,255,.25),
+      0 0 40px rgba(47,123,255,.12),
+      inset 0 1px 0 rgba(255,255,255,.06);
+  }
+  .pill .live-dot{
+    width:7px;height:7px;border-radius:50%;background:var(--blue);
+    box-shadow:0 0 10px var(--blue);animation:pulse 1.8s ease-in-out infinite;
+  }
+  @keyframes pulse{0%,100%{opacity:1}50%{opacity:.35}}
+  .pill::after{
+    content:"";position:absolute;inset:-1.5px;border-radius:99px;pointer-events:none;
+    background:linear-gradient(115deg,transparent 30%,rgba(255,255,255,.35) 50%,transparent 70%) border-box;
+    -webkit-mask:linear-gradient(#fff 0 0) padding-box, linear-gradient(#fff 0 0);
+    -webkit-mask-composite:xor;mask-composite:exclude;
+    padding:1.5px;opacity:0;animation:pillShine 4s ease-in-out infinite;
+  }
+  @keyframes pillShine{
+    0%,60%,100%{opacity:0;transform:translateX(-20%)}
+    75%{opacity:1;transform:translateX(0)}
+    90%{opacity:0;transform:translateX(20%)}
+  }
+
+  /* ---------- headline ---------- */
+  h1{
+    font:800 clamp(40px,7.4vw,72px)/1.06 'Space Grotesk',sans-serif;letter-spacing:-2px;
+    background:linear-gradient(90deg,#ffffff 8%,#d9dade 42%,#8c8d95 75%,#5d5e66 100%);
+    -webkit-background-clip:text;background-clip:text;color:transparent;
+  }
+  .sub{
+    color:var(--muted);font-size:16px;line-height:1.65;
+    max-width:480px;margin:22px auto 40px;
+  }
+
+
+
+  /* ---------- waitlist card ---------- */
+  .wait{
+    background:var(--card);border:1px solid var(--line);border-radius:18px;
+    padding:30px 30px 26px;text-align:left;position:relative;
+    box-shadow:0 30px 80px rgba(0,0,0,.45);
+  }
+  .wait::before{
+    content:"";position:absolute;inset:0;border-radius:18px;pointer-events:none;
+    background:linear-gradient(180deg,rgba(47,123,255,.08),transparent 40%);
+  }
+  .wait h3{font:700 19px 'Space Grotesk';letter-spacing:-.4px;position:relative}
+  .wait .hint{font-size:13px;color:var(--muted);margin:6px 0 22px;position:relative}
+  .fields{display:grid;grid-template-columns:1fr 1fr;gap:14px;position:relative}
+  .field{display:flex;flex-direction:column;gap:7px}
+  .field.full{grid-column:1/-1}
+  label{font:600 12px 'Inter';color:var(--muted)}
+  input{
+    background:var(--card-2);border:1px solid var(--line-2);border-radius:10px;
+    padding:13px 15px;font:500 14px 'Inter';color:var(--txt);outline:none;
+    transition:border-color .2s, box-shadow .2s;width:100%;
+  }
+  input::placeholder{color:var(--muted-2)}
+  input:focus{border-color:var(--blue);box-shadow:0 0 0 3px rgba(47,123,255,.18)}
+  input.bad{border-color:var(--red);box-shadow:0 0 0 3px rgba(255,92,92,.15)}
+  .err{font:500 11.5px 'Inter';color:var(--red);min-height:14px}
+
+  .btn{
+    display:inline-flex;align-items:center;justify-content:center;gap:8px;
+    font:600 14.5px 'Inter';padding:15px 24px;border-radius:999px;border:none;cursor:pointer;
+    background:var(--blue);color:#fff;width:100%;margin-top:8px;position:relative;
+    box-shadow:0 0 24px var(--blue-glow);
+    transition:transform .15s ease, box-shadow .2s ease, background .2s ease;
+  }
+  .btn:hover{background:var(--blue-hover);box-shadow:0 0 36px var(--blue-glow)}
+  .btn:active{transform:scale(.98)}
+  .btn:disabled{opacity:.6;cursor:wait}
+  .btn .arrow{
+    width:22px;height:22px;border-radius:50%;background:rgba(255,255,255,.22);
+    display:inline-flex;align-items:center;justify-content:center;font-size:11px;
+  }
+  .privacy{font-size:11.5px;color:var(--muted-2);text-align:center;margin-top:14px;position:relative}
+
+  /* ---------- success state ---------- */
+  .success{display:none;text-align:center;padding:26px 10px 18px;position:relative}
+  .success.show{display:block}
+  .tick{
+    width:60px;height:60px;border-radius:50%;margin:0 auto 18px;
+    background:rgba(46,204,113,.12);border:1px solid rgba(46,204,113,.4);
+    display:flex;align-items:center;justify-content:center;
+    color:var(--green);font-size:26px;
+    box-shadow:0 0 30px rgba(46,204,113,.18);
+  }
+  .success h3{font:700 20px 'Space Grotesk'}
+  .success p{font-size:13.5px;color:var(--muted);margin-top:8px;line-height:1.6}
+
+  /* ---------- social proof strip ---------- */
+  .proof{
+    display:flex;align-items:center;justify-content:center;gap:12px;
+    margin-top:34px;font-size:13px;color:var(--muted);position:relative;
+  }
+  .avatars{display:flex}
+  .avatar{
+    width:30px;height:30px;border-radius:50%;border:2px solid var(--bg);
+    display:flex;align-items:center;justify-content:center;
+    font:700 10px 'Inter';color:#fff;margin-left:-8px;
+  }
+  .avatar:first-child{margin-left:0}
+  .av-1{background:linear-gradient(135deg,#5b6bff,#2f7bff)}
+  .av-2{background:linear-gradient(135deg,#9a5bff,#5b3bd6)}
+  .av-3{background:linear-gradient(135deg,#2fb8ff,#1f6dd6)}
+  .av-4{background:linear-gradient(135deg,#3ddb9b,#1f9d6d)}
+  .proof b{color:#fff}
+
+  /* ---------- footer ---------- */
+  footer{
+    border-top:1px solid var(--line);position:relative;background:var(--bg);
+  }
+  .foot{
+    max-width:1140px;margin:0 auto;padding:18px 24px;
+    display:flex;align-items:center;justify-content:space-between;
+    font-size:12px;color:var(--muted-2);
+  }
+  .socials{display:flex;gap:10px}
+  .soc{
+    width:34px;height:34px;border-radius:50%;background:var(--card);border:1px solid var(--line);
+    display:flex;align-items:center;justify-content:center;font-size:13px;color:var(--muted);
+    transition:color .2s,border-color .2s;
+  }
+  .soc:hover{color:#fff;border-color:var(--blue)}
+
+  /* ---------- toast ---------- */
+  .toast{
+    position:fixed;bottom:28px;left:50%;transform:translate(-50%,80px);
+    background:#1a1a1f;border:1px solid rgba(47,123,255,.5);color:#fff;
+    font:500 13.5px 'Inter';padding:13px 22px;border-radius:99px;z-index:99;
+    opacity:0;transition:transform .35s cubic-bezier(.2,.8,.2,1),opacity .35s;
+    box-shadow:0 12px 40px rgba(0,0,0,.5);
+  }
+  .toast.show{transform:translate(-50%,0);opacity:1}
+
+  /* ---------- reveal ---------- */
+  .reveal{opacity:0;transform:translateY(20px);animation:in .8s ease forwards}
+  .d1{animation-delay:.05s}.d2{animation-delay:.15s}.d3{animation-delay:.25s}
+  .d4{animation-delay:.35s}.d5{animation-delay:.45s}.d6{animation-delay:.55s}
+  @keyframes in{to{opacity:1;transform:none}}
+  @media (prefers-reduced-motion:reduce){
+    .reveal{opacity:1;transform:none;animation:none}
+    .pill::after,.pill .live-dot{animation:none}
+  }
+
+  @media (max-width:560px){
+    .fields{grid-template-columns:1fr}
+    .unit{width:72px;padding:13px 0 11px}
+    .unit .n{font-size:24px}
+    .wait{padding:24px 20px 20px}
+    .foot{flex-direction:column;gap:12px}
+  }
+</style>
+</head>
+<body>
+
+<main class="stage">
+  <div class="inner">
+    <div class="logo reveal d1">W<span>I</span>N</div>
+    <br>
+    <span class="pill reveal d2"><span class="live-dot"></span> Coming Soon</span>
+
+    <h1 class="reveal d3">Something Big<br>Is Loading</h1>
+    <p class="sub reveal d4">The Wealthy Individuals Network is almost here — daily market insights, structured education, and a community built on results. Be first in line.</p>
+
+    <div class="wait reveal d6">
+      <div id="formWrap">
+        <h3>Join the waitlist</h3>
+        <p class="hint">Get early access and launch-day perks before the doors open to everyone.</p>
+        <form id="waitForm" novalidate>
+          <div class="fields">
+            <div class="field">
+              <label for="fname">First name</label>
+              <input type="text" id="fname" placeholder="e.g. Mihle" autocomplete="given-name">
+              <span class="err" id="e-fname"></span>
+            </div>
+            <div class="field">
+              <label for="lname">Last name</label>
+              <input type="text" id="lname" placeholder="e.g. Khumalo" autocomplete="family-name">
+              <span class="err" id="e-lname"></span>
+            </div>
+            <div class="field full">
+              <label for="email">Email address</label>
+              <input type="email" id="email" placeholder="you@example.com" autocomplete="email">
+              <span class="err" id="e-email"></span>
+            </div>
+            <div class="field full">
+              <label for="phone">Phone / WhatsApp <span style="color:var(--muted-2);font-weight:500">(optional)</span></label>
+              <input type="tel" id="phone" placeholder="+27 ..." autocomplete="tel">
+              <span class="err"></span>
+            </div>
+          </div>
+          <button class="btn" type="submit" id="submitBtn">
+            Reserve My Spot <span class="arrow">↗</span>
+          </button>
+        </form>
+        <p class="privacy">No spam. We'll only email you about the launch.</p>
+      </div>
+
+      <div class="success" id="successBox">
+        <div class="tick">✓</div>
+        <h3>You're on the list</h3>
+        <p id="successMsg">Welcome aboard. Keep an eye on your inbox — early access details are coming your way before launch day.</p>
+      </div>
+    </div>
+
+    <div class="proof reveal d6">
+      <div class="avatars">
+        <div class="avatar av-1">TK</div>
+        <div class="avatar av-2">SN</div>
+        <div class="avatar av-3">LM</div>
+        <div class="avatar av-4">DJ</div>
+      </div>
+      <span><b>2,400+</b> traders already waiting</span>
+    </div>
+  </div>
+</main>
+
+<footer>
+  <div class="foot">
+    <span>©WIN 2026. All rights reserved.</span>
+    <div class="socials">
+      <a class="soc" href="#" onclick="toast('X / Twitter coming soon');return false" aria-label="Twitter">𝕏</a>
+      <a class="soc" href="#" onclick="toast('Instagram coming soon');return false" aria-label="Instagram">◎</a>
+      <a class="soc" href="https://t.me/" target="_blank" aria-label="Telegram">✈</a>
+      <a class="soc" href="#" onclick="toast('Facebook coming soon');return false" aria-label="Facebook">f</a>
+    </div>
+  </div>
+</footer>
+
+<div class="toast" id="toast"></div>
+
+<script>
+/* ================= CONFIG ================= */
+// Optional: point this at your backend (e.g. Supabase Edge Function / Formspree endpoint).
+// Leave as null to run in demo mode (stores nothing, just shows success).
+const SUBMIT_ENDPOINT = null; // e.g. 'https://yourproject.supabase.co/functions/v1/waitlist'
+
+/* ================= toast ================= */
+let toastTimer;
+function toast(msg){
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(()=>t.classList.remove('show'), 2600);
+}
+
+
+
+/* ================= form ================= */
+const form = document.getElementById('waitForm');
+const emailRe = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
+
+function setErr(id, msg){
+  const input = document.getElementById(id);
+  const err = document.getElementById('e-'+id);
+  if(err) err.textContent = msg || '';
+  input.classList.toggle('bad', !!msg);
+}
+
+['fname','lname','email'].forEach(id=>{
+  document.getElementById(id).addEventListener('input', ()=>setErr(id,''));
+});
+
+form.addEventListener('submit', async (e)=>{
+  e.preventDefault();
+  const fname = document.getElementById('fname').value.trim();
+  const lname = document.getElementById('lname').value.trim();
+  const email = document.getElementById('email').value.trim();
+  const phone = document.getElementById('phone').value.trim();
+
+  let ok = true;
+  if(!fname){ setErr('fname','Please enter your first name'); ok = false; }
+  if(!lname){ setErr('lname','Please enter your last name'); ok = false; }
+  if(!email){ setErr('email','Please enter your email'); ok = false; }
+  else if(!emailRe.test(email)){ setErr('email','That email doesn\'t look right'); ok = false; }
+  if(!ok) return;
+
+  const btn = document.getElementById('submitBtn');
+  btn.disabled = true;
+  btn.firstChild.textContent = 'Reserving... ';
+
+  try{
+    if(SUBMIT_ENDPOINT){
+      const res = await fetch(SUBMIT_ENDPOINT, {
+        method:'POST',
+        headers:{'Content-Type':'application/json'},
+        body: JSON.stringify({ first_name:fname, last_name:lname, email, phone, source:'coming-soon' })
+      });
+      if(!res.ok) throw new Error('Request failed');
+    }
+    document.getElementById('formWrap').style.display = 'none';
+    const box = document.getElementById('successBox');
+    document.getElementById('successMsg').textContent =
+      `Welcome aboard, ${fname}. Keep an eye on ${email} — early access details are coming your way before launch day.`;
+    box.classList.add('show');
+    toast('You\'re on the waitlist 🎉');
+  }catch(err){
+    toast('Couldn\'t submit right now — please try again.');
+    btn.disabled = false;
+    btn.firstChild.textContent = 'Reserve My Spot ';
+  }
+});
+</script>
+</body>
+</html>
