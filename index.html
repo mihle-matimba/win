@@ -356,7 +356,16 @@ form.addEventListener('submit', async (e)=>{
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ first_name: fname, last_name: lname, email, phone, source: 'coming-soon' })
     });
-    if(!res.ok) throw new Error('Request failed');
+    const data = await res.json();
+    if(!res.ok){
+      if(data.error && data.error.includes('duplicate key')){
+        toast('You\'re already on the list — we\'ll be in touch!');
+        btn.disabled = false;
+        btn.firstChild.textContent = 'Reserve My Spot ';
+        return;
+      }
+      throw new Error('Request failed');
+    }
 
     document.getElementById('formWrap').style.display = 'none';
     const box = document.getElementById('successBox');
