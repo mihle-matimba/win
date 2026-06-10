@@ -199,13 +199,17 @@
 
   /* ---------- toast ---------- */
   .toast{
-    position:fixed;bottom:28px;left:50%;transform:translate(-50%,80px);
+    position:fixed;bottom:calc(28px + env(safe-area-inset-bottom));left:50%;transform:translate(-50%,80px);
     background:#1a1a1f;border:1px solid rgba(47,123,255,.5);color:#fff;
-    font:500 13.5px 'Inter';padding:13px 22px;border-radius:99px;z-index:99;
+    font:500 13.5px 'Inter';padding:13px 22px;border-radius:99px;z-index:9999;
     opacity:0;transition:transform .35s cubic-bezier(.2,.8,.2,1),opacity .35s;
     box-shadow:0 12px 40px rgba(0,0,0,.5);
+    width:max-content;max-width:90vw;text-align:center;
   }
   .toast.show{transform:translate(-50%,0);opacity:1}
+  @media(max-width:560px){
+    .toast{bottom:calc(80px + env(safe-area-inset-bottom));font-size:13px;padding:12px 20px}
+  }
 
   /* ---------- reveal ---------- */
   .reveal{opacity:0;transform:translateY(20px);animation:in .8s ease forwards}
