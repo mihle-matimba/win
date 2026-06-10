@@ -304,11 +304,13 @@
 
 <div class="toast" id="toast"></div>
 
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
 /* ================= CONFIG ================= */
-// Optional: point this at your backend (e.g. Supabase Edge Function / Formspree endpoint).
-// Leave as null to run in demo mode (stores nothing, just shows success).
-const SUBMIT_ENDPOINT = null; // e.g. 'https://yourproject.supabase.co/functions/v1/waitlist'
+const SUPABASE_URL = 'YOUR_SUPABASE_URL'; // e.g. https://xxxxx.supabase.co
+const SUPABASE_ANON_KEY = 'YOUR_SUPABASE_ANON_KEY'; // Your public anon key
+
+const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
 /* ================= toast ================= */
 let toastTimer;
@@ -319,8 +321,6 @@ function toast(msg){
   clearTimeout(toastTimer);
   toastTimer = setTimeout(()=>t.classList.remove('show'), 2600);
 }
-
-
 
 /* ================= form ================= */
 const form = document.getElementById('waitForm');
@@ -356,14 +356,20 @@ form.addEventListener('submit', async (e)=>{
   btn.firstChild.textContent = 'Reserving... ';
 
   try{
-    if(SUBMIT_ENDPOINT){
-      const res = await fetch(SUBMIT_ENDPOINT, {
-        method:'POST',
-        headers:{'Content-Type':'application/json'},
-        body: JSON.stringify({ first_name:fname, last_name:lname, email, phone, source:'coming-soon' })
-      });
-      if(!res.ok) throw new Error('Request failed');
-    }
+    const { data, error } = await supabase
+      .from('waitlist')
+      .insert([
+        {
+          first_name: fname,
+          last_name: lname,
+          email: email,
+          phone: phone || null,
+          source: 'coming-soon'
+        }
+      ]);
+
+    if(error) throw new Error(error.message);
+
     document.getElementById('formWrap').style.display = 'none';
     const box = document.getElementById('successBox');
     document.getElementById('successMsg').textContent =
