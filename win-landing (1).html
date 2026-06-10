@@ -1,0 +1,739 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>WIN — Wealthy Individuals Network</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#0a0a0b;
+    --bg-soft:#101012;
+    --card:#141417;
+    --card-2:#18181c;
+    --line:rgba(255,255,255,.08);
+    --line-2:rgba(255,255,255,.14);
+    --txt:#f5f6f8;
+    --muted:#9b9ca3;
+    --muted-2:#6f7077;
+    --blue:#2f7bff;
+    --blue-hover:#4a8dff;
+    --blue-glow:rgba(47,123,255,.35);
+    --green:#2ecc71;
+    --red:#ff5c5c;
+    --radius:14px;
+  }
+  *{margin:0;padding:0;box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{
+    background:var(--bg);
+    color:var(--txt);
+    font-family:'Inter',system-ui,sans-serif;
+    -webkit-font-smoothing:antialiased;
+    overflow-x:hidden;
+  }
+  a{color:inherit;text-decoration:none}
+  ::selection{background:var(--blue);color:#fff}
+
+  .wrap{max-width:1140px;margin:0 auto;padding:0 24px}
+
+  /* ---------- buttons ---------- */
+  .btn{
+    display:inline-flex;align-items:center;gap:8px;
+    font:600 14px/1 'Inter',sans-serif;
+    padding:13px 24px;border-radius:999px;border:none;cursor:pointer;
+    transition:transform .15s ease, box-shadow .2s ease, background .2s ease;
+  }
+  .btn:active{transform:scale(.97)}
+  .btn-blue{background:var(--blue);color:#fff;box-shadow:0 0 24px var(--blue-glow)}
+  .btn-blue:hover{background:var(--blue-hover);box-shadow:0 0 36px var(--blue-glow)}
+  .btn-white{background:#fff;color:#0a0a0b}
+  .btn-white:hover{background:#e8e8ec}
+  .btn-dark{background:#1e1e23;color:#fff;border:1px solid var(--line-2)}
+  .btn-dark:hover{background:#26262c}
+  .btn .arrow{
+    width:22px;height:22px;border-radius:50%;background:rgba(255,255,255,.22);
+    display:inline-flex;align-items:center;justify-content:center;font-size:11px;
+  }
+
+  /* ---------- nav ---------- */
+  header{
+    position:sticky;top:0;z-index:50;
+    background:rgba(10,10,11,.78);backdrop-filter:blur(14px);
+    border-bottom:1px solid var(--line);
+  }
+  .nav{display:flex;align-items:center;justify-content:space-between;height:68px}
+  .logo{
+    font:800 24px 'Space Grotesk',sans-serif;letter-spacing:-1px;
+    font-style:italic;transform:skewX(-8deg);display:inline-block;
+  }
+  .logo span{color:var(--blue)}
+  .nav-links{display:flex;gap:36px;font:500 14px 'Inter',sans-serif;color:var(--muted)}
+  .nav-links a{transition:color .15s}
+  .nav-links a:hover{color:#fff}
+
+  /* ---------- hero ---------- */
+  .hero{
+    position:relative;text-align:center;padding:110px 0 70px;
+    background:
+      radial-gradient(600px 320px at 50% -60px, rgba(47,123,255,.14), transparent 70%),
+      var(--bg);
+  }
+  .hero::before{
+    content:"";position:absolute;inset:0;pointer-events:none;
+    background-image:linear-gradient(var(--line) 1px,transparent 1px),linear-gradient(90deg,var(--line) 1px,transparent 1px);
+    background-size:90px 90px;
+    mask-image:radial-gradient(700px 420px at 50% 0,black 30%,transparent 75%);
+    opacity:.35;
+  }
+  .rating{
+    display:inline-flex;align-items:center;gap:10px;font:500 13px 'Inter';color:var(--muted);
+    margin-bottom:26px;position:relative;
+  }
+  .stars{color:var(--blue);letter-spacing:2px;font-size:14px}
+  .hero h1{
+    font:800 clamp(40px,6.4vw,76px)/1.05 'Space Grotesk',sans-serif;
+    letter-spacing:-2px;position:relative;
+    background:linear-gradient(90deg,#ffffff 8%,#d9dade 42%,#8c8d95 75%,#5d5e66 100%);
+    -webkit-background-clip:text;background-clip:text;color:transparent;
+  }
+  .hero h1 .dim{color:inherit}
+  .hero p{
+    max-width:560px;margin:22px auto 34px;color:var(--muted);
+    font-size:16px;line-height:1.65;position:relative;
+  }
+
+  /* ---------- hero stats row ---------- */
+  .stats-row{
+    display:grid;grid-template-columns:1.4fr .8fr 1.1fr;gap:18px;
+    margin:70px auto 0;position:relative;
+  }
+  .stat-card{
+    background:var(--card);border:1px solid var(--line);border-radius:var(--radius);
+    padding:22px;text-align:left;
+  }
+  .stat-card h4{font:600 15px 'Inter';margin-bottom:4px}
+  .stat-card .sub{font-size:12.5px;color:var(--muted)}
+  .avatars{display:flex;margin:16px 0 14px}
+  .avatar{
+    width:42px;height:42px;border-radius:50%;border:2px solid var(--card);
+    display:flex;align-items:center;justify-content:center;
+    font:700 13px 'Inter';color:#fff;margin-left:-10px;
+  }
+  .avatar:first-child{margin-left:0}
+  .av-1{background:linear-gradient(135deg,#5b6bff,#2f7bff)}
+  .av-2{background:linear-gradient(135deg,#9a5bff,#5b3bd6)}
+  .av-3{background:linear-gradient(135deg,#2fb8ff,#1f6dd6)}
+  .av-4{background:linear-gradient(135deg,#3ddb9b,#1f9d6d)}
+  .av-5{background:linear-gradient(135deg,#ff8b5b,#d6562f)}
+  .av-names{display:flex;gap:14px;font-size:10.5px;color:var(--muted-2);margin-bottom:16px;flex-wrap:wrap}
+  .big-stat{display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center;position:relative}
+  .big-stat .num{font:800 34px 'Space Grotesk';letter-spacing:-1px}
+  .big-stat .lbl{font-size:12.5px;color:var(--muted);margin-top:6px;line-height:1.4}
+  .badge-plus{
+    position:absolute;top:14px;right:14px;width:34px;height:34px;border-radius:50%;
+    background:#1e1e23;border:1px solid var(--line-2);
+    display:flex;align-items:center;justify-content:center;font:700 12px 'Inter';color:var(--muted);
+  }
+  .video-card{
+    border-radius:var(--radius);border:1px solid var(--line);overflow:hidden;position:relative;
+    background:linear-gradient(135deg,#101626,#0b0e18);
+    display:flex;align-items:center;justify-content:center;min-height:190px;cursor:pointer;
+  }
+  .video-card svg{position:absolute;inset:0;width:100%;height:100%;opacity:.6}
+  .play-btn{
+    position:relative;width:58px;height:58px;border-radius:50%;
+    background:rgba(47,123,255,.92);display:flex;align-items:center;justify-content:center;
+    box-shadow:0 0 40px var(--blue-glow);transition:transform .2s;
+  }
+  .video-card:hover .play-btn{transform:scale(1.1)}
+  .play-btn::after{
+    content:"";border-style:solid;border-width:9px 0 9px 15px;
+    border-color:transparent transparent transparent #fff;margin-left:4px;
+  }
+
+  /* ---------- network section ---------- */
+  section{padding:96px 0}
+  .network{background:var(--bg-soft);border-top:1px solid var(--line);border-bottom:1px solid var(--line)}
+  .network .wrap{display:grid;grid-template-columns:1.1fr 1fr;gap:64px;align-items:center}
+  h2{
+    font:700 clamp(28px,4vw,42px)/1.12 'Space Grotesk';letter-spacing:-1.2px;
+    background:linear-gradient(90deg,#ffffff 5%,#d9dade 40%,#8c8d95 78%,#5d5e66 100%);
+    -webkit-background-clip:text;background-clip:text;color:transparent;
+    width:fit-content;
+  }
+  .features h2,.testi h2{margin-inline:auto}
+  h2 .dim{color:inherit}
+  .network p{color:var(--muted);margin-top:18px;font-size:15.5px;line-height:1.65;max-width:420px}
+  .feed{
+    background:var(--card);border:1px solid var(--line);border-radius:var(--radius);
+    padding:14px;display:flex;flex-direction:column;gap:10px;
+  }
+  .feed-item{
+    background:var(--card-2);border:1px solid var(--line);border-radius:10px;
+    padding:14px 16px;display:flex;align-items:center;gap:14px;
+    transition:border-color .2s, transform .2s;
+  }
+  .feed-item:hover{border-color:rgba(47,123,255,.45);transform:translateX(4px)}
+  .feed-dot{width:9px;height:9px;border-radius:50%;background:var(--green);box-shadow:0 0 10px var(--green);flex-shrink:0}
+  .feed-item .who{font:700 12.5px 'Space Grotesk';letter-spacing:.6px}
+  .feed-item .what{font-size:12px;color:var(--muted);margin-top:3px}
+  .feed-item .pct{margin-left:auto;font:700 13px 'Inter';color:var(--green)}
+
+  /* ---------- features ---------- */
+  .features{text-align:center}
+  .features .lead{color:var(--muted);max-width:480px;margin:18px auto 56px;font-size:15.5px;line-height:1.6}
+  .cards{display:grid;grid-template-columns:repeat(3,1fr);gap:20px;text-align:left}
+  .f-card{
+    background:var(--card);border:1px solid var(--line);border-radius:var(--radius);
+    padding:30px 26px;display:flex;flex-direction:column;
+    transition:transform .25s ease,border-color .25s ease,box-shadow .25s ease;
+  }
+  .f-card:hover{transform:translateY(-6px);border-color:rgba(47,123,255,.4);box-shadow:0 20px 50px rgba(0,0,0,.45)}
+  .f-card.highlight{border-color:rgba(47,123,255,.5);background:linear-gradient(180deg,rgba(47,123,255,.08),var(--card) 45%)}
+  .eyebrow{font:600 12px 'Inter';letter-spacing:1.5px;text-transform:uppercase;color:var(--muted);text-align:center}
+  .f-icon{
+    width:44px;height:44px;border-radius:12px;background:#1e1e23;border:1px solid var(--line-2);
+    display:flex;align-items:center;justify-content:center;margin:18px auto 14px;color:#fff;
+  }
+  .f-icon svg{width:22px;height:22px;stroke-width:1.8}
+  .f-card h3{font:700 19px 'Space Grotesk';text-align:center;letter-spacing:-.4px}
+  .f-card .desc{font-size:13.5px;color:var(--muted);text-align:center;margin:10px 0 22px;line-height:1.6}
+  .f-list{list-style:none;display:flex;flex-direction:column;gap:12px;margin-bottom:28px}
+  .f-list li{
+    display:flex;align-items:center;gap:10px;font-size:13.5px;color:#d6d7dd;
+    padding-bottom:12px;border-bottom:1px solid var(--line);
+  }
+  .f-list li:last-child{border-bottom:none;padding-bottom:0}
+  .check{
+    width:18px;height:18px;border-radius:50%;background:rgba(47,123,255,.15);color:var(--blue);
+    display:inline-flex;align-items:center;justify-content:center;font-size:10px;flex-shrink:0;
+  }
+  .f-card .btn{margin-top:auto;align-self:center;width:100%;justify-content:center}
+
+  /* ---------- dashboard ---------- */
+  .dash{background:var(--bg-soft);border-top:1px solid var(--line);border-bottom:1px solid var(--line)}
+  .dash-head{max-width:520px;margin-bottom:46px}
+  .dash-head p{color:var(--muted);margin-top:16px;font-size:15.5px;line-height:1.6}
+  .dash-grid{
+    display:grid;grid-template-columns:1fr 1fr;gap:18px;
+    background:linear-gradient(140deg,rgba(47,123,255,.16),rgba(47,123,255,.02) 60%);
+    border:1px solid rgba(47,123,255,.25);border-radius:20px;padding:18px;
+    box-shadow:0 30px 80px rgba(47,123,255,.08);
+  }
+  .panel{background:rgba(13,13,16,.85);border:1px solid var(--line);border-radius:14px;padding:24px}
+  .panel h4{font:600 15px 'Inter';margin-bottom:18px}
+  .p-label{font-size:12px;color:var(--muted-2)}
+  .balance{font:800 34px 'Space Grotesk';letter-spacing:-1px;margin:6px 0 4px}
+  .delta{font:600 12.5px 'Inter';color:var(--green)}
+  .split{display:flex;gap:40px;margin-top:20px}
+  .split .val{font:700 17px 'Inter';margin-top:4px}
+  .perf-row{display:flex;align-items:center;gap:14px;margin-bottom:18px}
+  .perf-row:last-child{margin-bottom:0}
+  .perf-row .name{font-size:13px;color:var(--muted);width:90px;flex-shrink:0}
+  .bar{flex:1;height:6px;border-radius:99px;background:#222228;overflow:hidden}
+  .bar i{display:block;height:100%;border-radius:99px;background:linear-gradient(90deg,#2f7bff,#6aa6ff);width:0;transition:width 1.2s cubic-bezier(.2,.7,.2,1)}
+  .perf-row .v{font:700 13.5px 'Inter';width:58px;text-align:right}
+  .trade{display:flex;align-items:center;justify-content:space-between;padding:12px 0;border-bottom:1px solid var(--line)}
+  .trade:last-child{border-bottom:none}
+  .pair{font:600 13.5px 'Inter'}
+  .side{font:600 10.5px 'Inter';letter-spacing:1px;margin-top:3px}
+  .side.buy{color:var(--green)} .side.sell{color:var(--red)}
+  .pnl{font:700 13.5px 'Inter'}
+  .pnl.up{color:var(--green)} .pnl.down{color:var(--red)}
+  .alloc-row{margin-bottom:16px}
+  .alloc-row:last-child{margin-bottom:0}
+  .alloc-top{display:flex;justify-content:space-between;font-size:13px;color:var(--muted);margin-bottom:8px}
+  .alloc-top b{color:#fff;font-weight:700}
+  .dash-cta{text-align:center;margin-top:34px}
+
+  /* ---------- testimonials ---------- */
+  .testi{text-align:center}
+  .pill{
+    display:inline-block;font:600 12.5px 'Inter';padding:9px 22px;border-radius:99px;
+    color:#fff;margin-bottom:20px;position:relative;
+    border:1.5px solid transparent;
+    background:
+      linear-gradient(#121215,#121215) padding-box,
+      linear-gradient(115deg,rgba(255,255,255,.95),rgba(167,139,250,.7) 30%,rgba(47,123,255,.45) 55%,rgba(255,255,255,.08) 80%) border-box;
+    box-shadow:
+      0 0 18px rgba(122,92,255,.25),
+      0 0 40px rgba(47,123,255,.12),
+      inset 0 1px 0 rgba(255,255,255,.06);
+  }
+  .pill::after{
+    content:"";position:absolute;inset:-1.5px;border-radius:99px;pointer-events:none;
+    background:linear-gradient(115deg,transparent 30%,rgba(255,255,255,.35) 50%,transparent 70%) border-box;
+    -webkit-mask:linear-gradient(#fff 0 0) padding-box, linear-gradient(#fff 0 0);
+    -webkit-mask-composite:xor;mask-composite:exclude;
+    padding:1.5px;opacity:0;animation:pillShine 4s ease-in-out infinite;
+  }
+  @keyframes pillShine{
+    0%,60%,100%{opacity:0;transform:translateX(-20%)}
+    75%{opacity:1;transform:translateX(0)}
+    90%{opacity:0;transform:translateX(20%)}
+  }
+  @media (prefers-reduced-motion:reduce){.pill::after{animation:none}}
+  .t-viewport{max-width:760px;margin:48px auto 0;position:relative}
+  .t-card{
+    background:var(--card);border:1px solid var(--line);border-radius:var(--radius);
+    padding:34px 38px;text-align:left;min-height:230px;
+  }
+  .t-head{display:flex;align-items:center;gap:14px;margin-bottom:18px}
+  .t-ava{width:46px;height:46px;border-radius:50%;display:flex;align-items:center;justify-content:center;font:700 15px 'Inter';color:#fff}
+  .t-name{font:700 15px 'Inter'}
+  .t-meta{font-size:12px;color:var(--muted-2);margin-top:3px}
+  .t-body{font-size:14.5px;color:#cfd0d6;line-height:1.75}
+  .t-nav{
+    position:absolute;top:50%;transform:translateY(-50%);
+    width:40px;height:40px;border-radius:50%;background:var(--card);border:1px solid var(--line-2);
+    color:#fff;font-size:16px;cursor:pointer;transition:background .2s;
+  }
+  .t-nav:hover{background:#26262c}
+  .t-prev{left:-58px}.t-next{right:-58px}
+  .dots{display:flex;gap:8px;justify-content:center;margin-top:24px}
+  .dot{width:7px;height:7px;border-radius:50%;background:#2c2c33;border:none;cursor:pointer;padding:0;transition:background .2s,width .2s}
+  .dot.on{background:var(--blue);width:20px;border-radius:99px}
+
+  /* ---------- footer ---------- */
+  footer{
+    position:relative;text-align:center;padding:110px 0 0;overflow:hidden;
+    background:radial-gradient(700px 460px at 50% 105%, rgba(47,123,255,.12), transparent 70%), var(--bg);
+    border-top:1px solid var(--line);
+  }
+  footer::before{
+    content:"";position:absolute;left:50%;bottom:-340px;transform:translateX(-50%);
+    width:900px;height:900px;border-radius:50%;border:1px solid rgba(47,123,255,.12);
+    box-shadow:0 0 0 90px rgba(47,123,255,.03), 0 0 0 180px rgba(47,123,255,.02);
+    pointer-events:none;
+  }
+  .foot-logo{
+    display:inline-flex;align-items:center;gap:22px;position:relative;
+  }
+  .foot-logo .mark{
+    font:900 clamp(90px,15vw,170px) 'Space Grotesk';font-style:italic;
+    letter-spacing:-8px;transform:skewX(-8deg);line-height:.9;
+  }
+  .foot-logo .words{
+    text-align:left;font:700 clamp(14px,2vw,21px)/1.35 'Space Grotesk';letter-spacing:1px;
+  }
+  footer .btn{margin:44px 0 70px;position:relative}
+  .foot-links{
+    display:flex;justify-content:center;gap:38px;font:600 11px 'Inter';
+    letter-spacing:2px;color:var(--muted-2);margin-bottom:34px;position:relative;
+  }
+  .foot-links a:hover{color:#fff}
+  .foot-bottom{
+    display:flex;align-items:center;justify-content:space-between;
+    padding:18px 0;border-top:1px solid var(--line);font-size:12px;color:var(--muted-2);position:relative;
+  }
+  .socials{display:flex;gap:10px}
+  .soc{
+    width:34px;height:34px;border-radius:50%;background:var(--card);border:1px solid var(--line);
+    display:flex;align-items:center;justify-content:center;font-size:13px;color:var(--muted);
+    transition:color .2s,border-color .2s;
+  }
+  .soc:hover{color:#fff;border-color:var(--blue)}
+
+  /* ---------- toast ---------- */
+  .toast{
+    position:fixed;bottom:28px;left:50%;transform:translate(-50%,80px);
+    background:#1a1a1f;border:1px solid rgba(47,123,255,.5);color:#fff;
+    font:500 13.5px 'Inter';padding:13px 22px;border-radius:99px;z-index:99;
+    opacity:0;transition:transform .35s cubic-bezier(.2,.8,.2,1),opacity .35s;
+    box-shadow:0 12px 40px rgba(0,0,0,.5);
+  }
+  .toast.show{transform:translate(-50%,0);opacity:1}
+
+  /* ---------- reveal on scroll ---------- */
+  .reveal{opacity:0;transform:translateY(24px);transition:opacity .7s ease,transform .7s ease}
+  .reveal.in{opacity:1;transform:none}
+  @media (prefers-reduced-motion:reduce){
+    .reveal{opacity:1;transform:none;transition:none}
+    html{scroll-behavior:auto}
+  }
+
+  /* ---------- responsive ---------- */
+  @media (max-width:980px){
+    .stats-row{grid-template-columns:1fr 1fr}
+    .video-card{grid-column:span 2}
+    .network .wrap{grid-template-columns:1fr;gap:40px}
+    .cards{grid-template-columns:1fr}
+    .dash-grid{grid-template-columns:1fr}
+    .t-prev{left:-10px}.t-next{right:-10px}
+  }
+  @media (max-width:640px){
+    .nav-links{display:none}
+    .stats-row{grid-template-columns:1fr}
+    .video-card{grid-column:span 1}
+    .split{gap:24px}
+    .t-card{padding:26px 22px}
+    .t-prev,.t-next{display:none}
+    .foot-bottom{flex-direction:column;gap:14px}
+  }
+</style>
+</head>
+<body>
+
+<!-- ============ NAV ============ -->
+<header>
+  <div class="wrap nav">
+    <a href="#top" class="logo">W<span>I</span>N</a>
+    <nav class="nav-links">
+      <a href="#top">Home</a>
+      <a href="#community">Community</a>
+      <a href="#contact">Contact</a>
+    </nav>
+    <button class="btn btn-white" onclick="toast('Welcome to WIN — let\'s get you started.')">Start Now</button>
+  </div>
+</header>
+
+<!-- ============ HERO ============ -->
+<section class="hero" id="top">
+  <div class="wrap">
+    <div class="rating">
+      <span class="stars">★★★★★</span> 4.5 (from 200+ reviews)
+    </div>
+    <h1>Where Consistency<br><span class="dim">Becomes The Standard</span></h1>
+    <p>Get access to daily market insights, breakdowns, and educational sessions designed to help you understand the markets.</p>
+    <button class="btn btn-blue" onclick="toast('Access request received — we\'ll be in touch.')">
+      Request Access <span class="arrow">↗</span>
+    </button>
+
+    <div class="stats-row">
+      <div class="stat-card reveal">
+        <h4>✦ Learn From Experienced Mentors</h4>
+        <div class="sub">Access live guidance and trade insights</div>
+        <div class="avatars">
+          <div class="avatar av-1">D</div>
+          <div class="avatar av-2">D</div>
+          <div class="avatar av-3">P</div>
+          <div class="avatar av-4">M</div>
+          <div class="avatar av-5">D</div>
+        </div>
+        <div class="av-names">
+          <span>Dennis</span><span>Dominic</span><span>Peter</span><span>Michael</span><span>David</span>
+        </div>
+        <button class="btn btn-dark" onclick="window.open('https://t.me/','_blank')">Join Private Telegram</button>
+      </div>
+
+      <div class="reveal" style="display:flex;flex-direction:column;gap:18px">
+        <div class="stat-card big-stat" style="flex:1">
+          <span class="badge-plus">+9</span>
+          <div class="num">6000+</div>
+          <div class="lbl">Active Members</div>
+        </div>
+        <div class="stat-card big-stat" style="flex:1">
+          <div class="num">$20M+</div>
+          <div class="lbl">Withdrawn Through<br>The Platform</div>
+        </div>
+      </div>
+
+      <div class="video-card reveal" onclick="toast('Video coming soon.')" title="Watch the platform tour">
+        <svg viewBox="0 0 400 220" preserveAspectRatio="none">
+          <polyline points="0,170 50,150 90,160 130,120 170,135 210,95 250,110 290,70 330,85 400,40"
+            fill="none" stroke="#2f7bff" stroke-width="2.5" opacity=".8"/>
+          <polyline points="0,190 60,180 110,185 160,160 210,168 260,140 310,150 400,110"
+            fill="none" stroke="#3ddb9b" stroke-width="1.5" opacity=".4"/>
+        </svg>
+        <div class="play-btn"></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ NETWORK ============ -->
+<section class="network" id="community">
+  <div class="wrap">
+    <div class="reveal">
+      <h2>A Network That <span class="dim">Moves</span><br>Markets</h2>
+      <p>Connect with traders who understand that success isn't about talking — it's about results.</p>
+    </div>
+    <div class="feed reveal">
+      <div class="feed-item">
+        <span class="feed-dot"></span>
+        <div>
+          <div class="who">ALPHA_SEEKER</div>
+          <div class="what">Top of Leaderboard</div>
+        </div>
+        <span class="pct">#1</span>
+      </div>
+      <div class="feed-item">
+        <span class="feed-dot"></span>
+        <div>
+          <div class="who">MARKET_GHOST</div>
+          <div class="what">Just closed a setup</div>
+        </div>
+        <span class="pct">+42%</span>
+      </div>
+      <div class="feed-item">
+        <span class="feed-dot"></span>
+        <div>
+          <div class="who">EDGE_HUNTER</div>
+          <div class="what">Just closed a setup</div>
+        </div>
+        <span class="pct">+42%</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ FEATURES ============ -->
+<section class="features">
+  <div class="wrap">
+    <h2 class="reveal">Everything you need<br><span class="dim">to conquer the markets</span></h2>
+    <p class="lead reveal">WIN provides the tools, education, and community to turn any beginner into a precision trader.</p>
+
+    <div class="cards">
+      <div class="f-card reveal">
+        <div class="eyebrow">Education</div>
+        <div class="f-icon"><i data-lucide="book-user"></i></div>
+        <h3>Structured Learning</h3>
+        <p class="desc">Go from zero to confident beginner with our 4+ professional courses.</p>
+        <ul class="f-list">
+          <li><span class="check">✓</span> FX Basics to Precision Flow</li>
+          <li><span class="check">✓</span> Self-paced Video Modules</li>
+          <li><span class="check">✓</span> Expert Instructor Guidance</li>
+        </ul>
+        <button class="btn btn-blue" onclick="toast('Courses open soon — request access above.')">Browse Courses</button>
+      </div>
+
+      <div class="f-card highlight reveal">
+        <div class="eyebrow">Community</div>
+        <div class="f-icon"><i data-lucide="users"></i></div>
+        <h3>Private Hubs</h3>
+        <p class="desc">Trade alongside proven names inside our members-only channels.</p>
+        <ul class="f-list">
+          <li><span class="check">✓</span> RocheFx Trade Ideas</li>
+          <li><span class="check">✓</span> Stof's Insider Flow</li>
+          <li><span class="check">✓</span> WIN OpenChat Participation</li>
+        </ul>
+        <button class="btn btn-blue" onclick="window.open('https://t.me/','_blank')">Join Community</button>
+      </div>
+
+      <div class="f-card reveal">
+        <div class="eyebrow">Tools</div>
+        <div class="f-icon"><i data-lucide="settings"></i></div>
+        <h3>Advanced Execution</h3>
+        <p class="desc">Precision tooling built for traders who treat this like a business.</p>
+        <ul class="f-list">
+          <li><span class="check">✓</span> Intuitive Trading Dashboard</li>
+          <li><span class="check">✓</span> Live Performance Tracking</li>
+          <li><span class="check">✓</span> Portfolio &amp; Risk Analytics</li>
+        </ul>
+        <button class="btn btn-blue" onclick="document.getElementById('dashboard').scrollIntoView({behavior:'smooth'})">Explore Tools</button>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ DASHBOARD ============ -->
+<section class="dash" id="dashboard">
+  <div class="wrap">
+    <div class="dash-head reveal">
+      <h2>Intuitive Trading <span class="dim">Dashboard</span></h2>
+      <p>Monitor your portfolio, analyze trades, and manage your account with our premium interface.</p>
+    </div>
+
+    <div class="dash-grid reveal">
+      <div class="panel">
+        <h4>Wallet Overview</h4>
+        <div class="p-label">Total Balance</div>
+        <div class="balance">$127,482.50</div>
+        <div class="delta">▲ 12% this Month</div>
+        <div class="split">
+          <div>
+            <div class="p-label">Available</div>
+            <div class="val">$95,240.00</div>
+          </div>
+          <div>
+            <div class="p-label">In Positions</div>
+            <div class="val">$32,242.50</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="panel">
+        <h4>Performance</h4>
+        <div class="perf-row">
+          <span class="name">Win Rate</span>
+          <div class="bar"><i data-w="58%"></i></div>
+          <span class="v">57.9%</span>
+        </div>
+        <div class="perf-row">
+          <span class="name">Profit Factor</span>
+          <div class="bar"><i data-w="47%"></i></div>
+          <span class="v">2.35</span>
+        </div>
+        <div class="perf-row">
+          <span class="name">ROI</span>
+          <div class="bar"><i data-w="45%"></i></div>
+          <span class="v" style="color:var(--green)">+45.5%</span>
+        </div>
+      </div>
+
+      <div class="panel">
+        <h4>Recent Trades</h4>
+        <div class="trade">
+          <div><div class="pair">EUR/USD</div><div class="side buy">BUY</div></div>
+          <span class="pnl up">+$453.80</span>
+        </div>
+        <div class="trade">
+          <div><div class="pair">GBP/JPY</div><div class="side sell">SELL</div></div>
+          <span class="pnl up">+$128.67</span>
+        </div>
+        <div class="trade">
+          <div><div class="pair">BTC/USD</div><div class="side buy">BUY</div></div>
+          <span class="pnl down">-$78.45</span>
+        </div>
+      </div>
+
+      <div class="panel">
+        <h4>Asset Allocation</h4>
+        <div class="alloc-row">
+          <div class="alloc-top"><span>Forex</span><b>40%</b></div>
+          <div class="bar"><i data-w="40%"></i></div>
+        </div>
+        <div class="alloc-row">
+          <div class="alloc-top"><span>Crypto</span><b>25%</b></div>
+          <div class="bar"><i data-w="25%"></i></div>
+        </div>
+        <div class="alloc-row">
+          <div class="alloc-top"><span>Commodities</span><b>18%</b></div>
+          <div class="bar"><i data-w="18%"></i></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="dash-cta reveal">
+      <button class="btn btn-blue" onclick="toast('Account linking opens at launch.')">Link Account</button>
+    </div>
+  </div>
+</section>
+
+<!-- ============ TESTIMONIALS ============ -->
+<section class="testi" id="testimonials">
+  <div class="wrap">
+    <span class="pill reveal">Testimonials</span>
+    <h2 class="reveal">What our users say<br><span class="dim">about us</span></h2>
+
+    <div class="t-viewport reveal">
+      <div class="t-card" id="tCard"></div>
+      <button class="t-nav t-prev" onclick="slide(-1)" aria-label="Previous testimonial">‹</button>
+      <button class="t-nav t-next" onclick="slide(1)" aria-label="Next testimonial">›</button>
+      <div class="dots" id="tDots"></div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ FOOTER ============ -->
+<footer id="contact">
+  <div class="wrap">
+    <div class="foot-logo">
+      <span class="mark">W<span style="color:var(--blue)">I</span>N</span>
+      <span class="words">WEALTHY<br>INDIVIDUALS<br>NETWORK</span>
+    </div>
+    <br>
+    <button class="btn btn-blue" onclick="document.getElementById('top').scrollIntoView({behavior:'smooth'})">Begin Your Trading Journey</button>
+
+    <div class="foot-links">
+      <a href="#top">HOME</a>
+      <a href="#community">COMMUNITY</a>
+      <a href="#testimonials">TESTIMONIALS</a>
+    </div>
+
+    <div class="foot-bottom">
+      <span>©WIN 2026. All rights reserved.</span>
+      <div class="socials">
+        <a class="soc" href="#" onclick="toast('X / Twitter coming soon');return false" aria-label="Twitter">𝕏</a>
+        <a class="soc" href="#" onclick="toast('Instagram coming soon');return false" aria-label="Instagram">◎</a>
+        <a class="soc" href="https://t.me/" target="_blank" aria-label="Telegram">✈</a>
+        <a class="soc" href="#" onclick="toast('Facebook coming soon');return false" aria-label="Facebook">f</a>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<div class="toast" id="toast"></div>
+
+<script>
+/* ---------- toast ---------- */
+let toastTimer;
+function toast(msg){
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(()=>t.classList.remove('show'), 2600);
+}
+
+/* ---------- testimonial carousel ---------- */
+const testimonials = [
+  {
+    name:"David J. Karem", meta:"Businessman · 1 day ago", initials:"DK", grad:"linear-gradient(135deg,#5b6bff,#2f7bff)",
+    body:"I've been through a lot of trading communities, and most of them feel the same after a while — a lot of noise, opinions, and no real accountability. What stood out here immediately was the structure. You're not just learning or watching… you're being measured. The leaderboard changes everything. It forces you to take your trading seriously because your performance is visible."
+  },
+  {
+    name:"Thandi M.", meta:"Funded Trader · 3 days ago", initials:"TM", grad:"linear-gradient(135deg,#3ddb9b,#1f9d6d)",
+    body:"The structured courses took me from blowing accounts to passing my first prop challenge in four months. The mentors actually trade live in front of you — no theory dumps, just real execution and honest reviews of your trades."
+  },
+  {
+    name:"Sipho N.", meta:"Member since 2025 · 1 week ago", initials:"SN", grad:"linear-gradient(135deg,#9a5bff,#5b3bd6)",
+    body:"What I value most is the private hubs. Seeing how experienced traders plan a session before the market even opens changed how I prepare. The community holds you to a standard — consistency really does become the norm here."
+  }
+];
+
+let idx = 0;
+const card = document.getElementById('tCard');
+const dotsBox = document.getElementById('tDots');
+
+function renderDots(){
+  dotsBox.innerHTML = testimonials.map((_,i)=>
+    `<button class="dot ${i===idx?'on':''}" onclick="go(${i})" aria-label="Testimonial ${i+1}"></button>`
+  ).join('');
+}
+function renderCard(){
+  const t = testimonials[idx];
+  card.style.opacity = 0;
+  setTimeout(()=>{
+    card.innerHTML = `
+      <div class="t-head">
+        <div class="t-ava" style="background:${t.grad}">${t.initials}</div>
+        <div>
+          <div class="t-name">${t.name}</div>
+          <div class="t-meta">${t.meta}</div>
+        </div>
+      </div>
+      <p class="t-body">${t.body}</p>`;
+    card.style.transition = 'opacity .3s';
+    card.style.opacity = 1;
+  }, 150);
+  renderDots();
+}
+function slide(dir){ idx = (idx + dir + testimonials.length) % testimonials.length; renderCard(); }
+function go(i){ idx = i; renderCard(); }
+renderCard();
+
+/* auto-advance every 7s, pause on hover */
+let auto = setInterval(()=>slide(1), 7000);
+card.parentElement.addEventListener('mouseenter', ()=>clearInterval(auto));
+card.parentElement.addEventListener('mouseleave', ()=>auto = setInterval(()=>slide(1), 7000));
+
+/* ---------- scroll reveal + bar animation ---------- */
+const io = new IntersectionObserver(entries=>{
+  entries.forEach(e=>{
+    if(e.isIntersecting){
+      e.target.classList.add('in');
+      e.target.querySelectorAll('.bar i').forEach(b=>b.style.width = b.dataset.w);
+      io.unobserve(e.target);
+    }
+  });
+},{threshold:.15});
+document.querySelectorAll('.reveal').forEach(el=>io.observe(el));
+</script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/lucide/0.460.0/lucide.min.js"></script>
+<script>if(window.lucide){lucide.createIcons();}</script>
+</body>
+</html>
