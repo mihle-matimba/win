@@ -43,10 +43,15 @@ const SIDEBAR_HTML = `
 const TOPBAR_HTML = `
   <button class="icon-rnd hamburger" id="hamburger" aria-label="Open menu"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12h18M3 6h18M3 18h18"/></svg></button>
   <button class="icon-rnd collapse-btn" id="collapseBtn" aria-label="Collapse sidebar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m13 17-5-5 5-5M19 17l-5-5 5-5"/></svg></button>
-  <div class="acct">
-    <div class="r2"><span class="acct-name">Test Account</span><span class="acct-num">#54845698</span>
-      <svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="m6 9 6 6 6-6"/></svg></div>
-    <div class="r3"><span class="mut">VT Markets (Pty) Ltd</span><span class="sep">&bull;</span><span class="mut">Synced 1 hour ago</span></div>
+  <div class="acct" id="acctMenu">
+    <button class="acct-trigger" id="acctTrigger" aria-expanded="false">
+      <span class="acct-tx">
+        <span class="r2"><span class="acct-name" id="acctName">Test Account</span><span class="acct-num" id="acctNum">#54845698</span></span>
+        <span class="r3"><span class="mut" id="acctBroker">VT Markets (Pty) Ltd</span><span class="sep">&bull;</span><span class="mut">Synced 1 hour ago</span></span>
+      </span>
+      <svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="m6 9 6 6 6-6"/></svg>
+    </button>
+    <div class="acct-drop" id="acctDrop"></div>
   </div>
   <div class="tb-spacer"></div>
   <button class="tb-btn" id="refresh" aria-label="Refresh"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12a9 9 0 0 1 9-9 9 9 0 0 1 6.7 3L21 8"/><path d="M21 3v5h-5M21 12a9 9 0 0 1-9 9 9 9 0 0 1-6.7-3L3 16"/><path d="M3 21v-5h5"/></svg></button>
@@ -54,11 +59,55 @@ const TOPBAR_HTML = `
 
 const DASH_SUBS = ['performance','calendar','journal'];
 
+const ACCOUNTS = [
+  { name:'Test Account', num:'#54845698', broker:'VT Markets (Pty) Ltd', synced:'Synced 1 hour ago' },
+  { name:'Main Live',    num:'#88213004', broker:'VT Markets (Pty) Ltd', synced:'Synced 5 min ago' },
+  { name:'Practice',     num:'#10029384', broker:'MetaQuotes Demo',      synced:'Synced just now' },
+];
+
+/* Component CSS injected once so both pages stay in sync */
+const SHELL_CSS = `
+.acct{position:relative}
+.acct-trigger{display:flex;align-items:center;gap:9px;cursor:pointer;text-align:left;padding:5px 8px;border-radius:11px;transition:background .15s}
+.acct-trigger:hover{background:rgba(255,255,255,.045)}
+.acct-tx{display:flex;flex-direction:column;min-width:0}
+.acct .chev{transition:transform .2s ease;flex:0 0 17px}
+.acct.open .chev{transform:rotate(180deg)}
+.acct-drop{position:absolute;top:calc(100% + 8px);left:0;z-index:90;min-width:280px;background:var(--card);
+  border:1px solid var(--line);border-radius:14px;padding:8px;box-shadow:0 26px 56px -22px rgba(0,0,0,.92);
+  display:none;opacity:0;transform:translateY(-6px);transition:opacity .16s ease,transform .16s ease}
+.acct.open .acct-drop{display:block;opacity:1;transform:translateY(0)}
+.acct-drop .dm-label{font-size:10px;font-weight:700;letter-spacing:.8px;color:var(--faint);text-transform:uppercase;padding:8px 10px 6px}
+.acct-opt{display:flex;align-items:center;gap:11px;width:100%;padding:10px 12px;border-radius:10px;text-align:left;transition:background .12s}
+.acct-opt:hover{background:rgba(255,255,255,.045)}
+.acct-opt.sel{background:var(--accent-soft)}
+.acct-opt .ao-tx{flex:1;min-width:0}
+.acct-opt .ao-name{font-size:14px;font-weight:700;color:var(--ink);display:flex;align-items:center;gap:8px}
+.acct-opt .ao-num{font-size:11px;font-weight:700;color:var(--muted);background:var(--card-2);border:1px solid var(--line);border-radius:999px;padding:1px 8px}
+.acct-opt .ao-meta{font-size:12px;color:var(--muted);margin-top:2px}
+.acct-opt .ao-check{width:17px;height:17px;color:var(--accent);flex:0 0 17px;opacity:0}
+.acct-opt.sel .ao-check{opacity:1}
+/* collapse icon rotates 180 when sidebar is collapsed */
+.collapse-btn svg{transition:transform .25s ease}
+.app.collapsed .collapse-btn svg{transform:rotate(180deg)}
+`;
+
+function injectCSS() {
+  if (document.getElementById('win-shell-css')) return;
+  const s = document.createElement('style');
+  s.id = 'win-shell-css';
+  s.textContent = SHELL_CSS;
+  document.head.appendChild(s);
+}
+
 function initShell({ activePage = '' } = {}) {
+  injectCSS();
   const sidebar = document.getElementById('sidebar');
   const topbar  = document.querySelector('.topbar');
   if (sidebar) sidebar.innerHTML = SIDEBAR_HTML;
   if (topbar)  topbar.innerHTML  = TOPBAR_HTML;
+
+  initAccountMenu();
 
   // logo fallback
   const brandLogo = document.getElementById('brandLogo');
@@ -113,6 +162,45 @@ function initShell({ activePage = '' } = {}) {
   // refresh spin
   const rf = document.getElementById('refresh');
   if (rf) rf.onclick = () => { rf.classList.add('spin'); setTimeout(() => rf.classList.remove('spin'), 650); };
+}
+
+const checkIcon = '<svg class="ao-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6"><path d="m5 12 5 5L20 7"/></svg>';
+
+function initAccountMenu() {
+  const menu = document.getElementById('acctMenu');
+  const trigger = document.getElementById('acctTrigger');
+  const drop = document.getElementById('acctDrop');
+  if (!menu || !trigger || !drop) return;
+  let selected = 0;
+
+  function renderOptions() {
+    drop.innerHTML = '<div class="dm-label">Switch account</div>' + ACCOUNTS.map((a, i) => `
+      <button class="acct-opt${i === selected ? ' sel' : ''}" data-i="${i}">
+        <span class="ao-tx">
+          <span class="ao-name">${a.name}<span class="ao-num">${a.num}</span></span>
+          <span class="ao-meta">${a.broker} &bull; ${a.synced}</span>
+        </span>
+        ${checkIcon}
+      </button>`).join('');
+  }
+  function applyAccount(i) {
+    const a = ACCOUNTS[i];
+    document.getElementById('acctName').textContent = a.name;
+    document.getElementById('acctNum').textContent = a.num;
+    document.getElementById('acctBroker').textContent = a.broker;
+    const synced = document.querySelector('#acctMenu .r3 .mut:last-child');
+    if (synced) synced.textContent = a.synced;
+  }
+  function open() { renderOptions(); menu.classList.add('open'); trigger.setAttribute('aria-expanded', 'true'); }
+  function close() { menu.classList.remove('open'); trigger.setAttribute('aria-expanded', 'false'); }
+
+  trigger.addEventListener('click', e => { e.stopPropagation(); menu.classList.contains('open') ? close() : open(); });
+  drop.addEventListener('click', e => {
+    const opt = e.target.closest('.acct-opt'); if (!opt) return;
+    selected = +opt.dataset.i; applyAccount(selected); close();
+  });
+  document.addEventListener('click', e => { if (!e.target.closest('#acctMenu')) close(); });
+  addEventListener('keydown', e => { if (e.key === 'Escape') close(); });
 }
 
 return { initShell };
