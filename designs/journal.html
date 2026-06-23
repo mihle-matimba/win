@@ -238,15 +238,14 @@ td.pos{color:var(--green-val)}td.neg{color:var(--red-val)}
 .td-save{margin-top:12px;width:100%;padding:12px;border-radius:11px;background:var(--accent);color:#fff;font-size:14px;font-weight:700;transition:background .12s}
 .td-save:hover{background:#6f84ff}
 
-.td-tags{display:flex;flex-wrap:wrap;gap:8px}
-.td-tag{padding:6px 12px;border-radius:999px;border:1px solid var(--line);background:var(--card-2);color:var(--ink-2);font-size:12.5px;font-weight:600;transition:all .12s}
-.td-tag:hover,.td-tag.on{border-color:var(--accent);color:var(--accent);background:var(--accent-soft)}
-
-.td-ai{padding:16px;border-radius:12px;border:1px solid rgba(168,130,255,.28);background:linear-gradient(180deg,var(--purple-soft),rgba(168,130,255,.02));font-size:13.5px;line-height:1.6;color:var(--ink-2)}
-.td-ai .ai-head{display:flex;align-items:center;gap:8px;font-weight:700;color:var(--purple-val);margin-bottom:8px}
-.td-ai .ai-head svg{width:16px;height:16px}
-
-.td-chart-stub{height:200px;border-radius:12px;border:1px dashed var(--line);display:flex;align-items:center;justify-content:center;color:var(--faint);font-size:13px;font-weight:600;background:var(--card-2)}
+.td-soon{display:flex;flex-direction:column;align-items:center;text-align:center;padding:36px 20px}
+.td-soon .soon-ic{width:56px;height:56px;border-radius:16px;display:flex;align-items:center;justify-content:center;
+  background:var(--purple-soft);color:var(--purple-val);margin-bottom:16px}
+.td-soon .soon-ic svg{width:28px;height:28px}
+.td-soon .soon-t{font-size:17px;font-weight:700;color:var(--ink)}
+.td-soon .soon-badge{margin-top:8px;font-size:11px;font-weight:800;letter-spacing:.5px;text-transform:uppercase;
+  padding:4px 12px;border-radius:999px;background:var(--purple-soft);color:var(--purple-val);border:1px solid rgba(168,130,255,.35)}
+.td-soon .soon-s{font-size:13.5px;color:var(--muted);line-height:1.6;margin-top:14px;max-width:300px}
 
 .j-detail-foot{padding:12px 20px;border-top:1px solid var(--line-soft);display:flex;align-items:center;justify-content:center;gap:8px;
   font-size:12.5px;color:var(--faint);font-weight:600}
@@ -407,8 +406,6 @@ td.pos{color:var(--green-val)}td.neg{color:var(--red-val)}
         <button class="td-tab active" data-dtab="metrics">Trade Metrics</button>
         <button class="td-tab" data-dtab="journal">Journal</button>
         <button class="td-tab" data-dtab="ai">AI Insights</button>
-        <button class="td-tab" data-dtab="tags">Trade Tags</button>
-        <button class="td-tab" data-dtab="charts">Charts<span class="pro">PRO</span></button>
       </div>
 
       <!-- Metrics pane -->
@@ -454,21 +451,12 @@ td.pos{color:var(--green-val)}td.neg{color:var(--red-val)}
 
       <!-- AI Insights pane -->
       <div class="td-pane" data-pane="ai">
-        <div class="td-ai">
-          <div class="ai-head"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2v4M12 18v4M4.9 4.9l2.8 2.8M16.3 16.3l2.8 2.8M2 12h4M18 12h4M4.9 19.1l2.8-2.8M16.3 7.7l2.8-2.8"/></svg>AI Analysis</div>
-          <span id="tdAiText"></span>
+        <div class="td-soon">
+          <div class="soon-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2v4M12 18v4M4.9 4.9l2.8 2.8M16.3 16.3l2.8 2.8M2 12h4M18 12h4M4.9 19.1l2.8-2.8M16.3 7.7l2.8-2.8"/></svg></div>
+          <div class="soon-t">AI Analysis</div>
+          <div class="soon-badge">Coming soon</div>
+          <div class="soon-s">Automated insights on your trade entries, exits and risk are on the way.</div>
         </div>
-      </div>
-
-      <!-- Trade Tags pane -->
-      <div class="td-pane" data-pane="tags">
-        <div class="td-section-title">Tag this trade</div>
-        <div class="td-tags" id="tdTags"></div>
-      </div>
-
-      <!-- Charts pane -->
-      <div class="td-pane" data-pane="charts">
-        <div class="td-chart-stub">Chart view available on Pro</div>
       </div>
     </div>
 
@@ -582,8 +570,6 @@ const TRADES = [
   { sym:'BTCUSD', symC:'amber', type:'Buy', openP:'29999.99080', closeP:'29999.98270', openT:'Jun 12 2026, 9:40 PM', closeT:'Jun 13 2026, 1:23 AM', lots:'0.10', pnl:-120.63, gross:-119.93, comm:-0.50, swap:-0.20, fee:0, pct:'-0.51%', stars:0 },
   { sym:'EURUSD', symC:'blue', type:'Sell', openP:'1.14880', closeP:'1.14380', openT:'Jun 11 2026, 6:52 AM', closeT:'Jun 11 2026, 9:15 AM', lots:'0.10', pnl:-24.21, gross:-23.51, comm:-0.50, swap:-0.20, fee:0, pct:'-0.10%', stars:0 },
 ];
-const TAGS = ['Breakout','Reversal','News','FOMO','A+ Setup','Scalp','Swing','Overtrade','Patience','Revenge'];
-const TRADE_TAGS = {}; // idx -> Set
 
 const fmt$ = v => { const s = v < 0 ? '-$' : '$'; return s + Math.abs(v).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }); };
 const upArrow = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6"><path d="m5 12 7-7 7 7M12 19V5"/></svg>';
@@ -702,22 +688,6 @@ function showDetail(idx) {
   starsEl.querySelectorAll('svg').forEach((svg, si) => {
     svg.addEventListener('click', () => { t.stars = (t.stars === si + 1) ? 0 : si + 1; showDetail(idx); renderTable(); });
   });
-
-  // AI insight text
-  const win = t.pnl >= 0;
-  document.getElementById('tdAiText').textContent = win
-    ? `Solid ${t.type.toLowerCase()} on ${t.sym}. The entry aligned with momentum and you captured ${t.pct} with disciplined risk. Consider scaling size on similar A+ setups.`
-    : `This ${t.type.toLowerCase()} on ${t.sym} closed ${t.pct}. The move went against the position early — review whether the entry was chasing price and tighten your stop placement next time.`;
-
-  // tags
-  if (!TRADE_TAGS[idx]) TRADE_TAGS[idx] = new Set();
-  const tagsEl = document.getElementById('tdTags');
-  tagsEl.innerHTML = TAGS.map(tag => `<button class="td-tag${TRADE_TAGS[idx].has(tag)?' on':''}" data-tag="${tag}">${tag}</button>`).join('');
-  tagsEl.querySelectorAll('.td-tag').forEach(b => b.addEventListener('click', () => {
-    const tag = b.dataset.tag;
-    if (TRADE_TAGS[idx].has(tag)) TRADE_TAGS[idx].delete(tag); else TRADE_TAGS[idx].add(tag);
-    b.classList.toggle('on');
-  }));
 
   // nav state
   document.getElementById('dPrev').disabled = idx <= 0;
