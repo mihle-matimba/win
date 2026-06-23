@@ -426,8 +426,8 @@ td.neg{color:var(--red-val)}
               </button>
               <div class="th-dots-menu" id="thDotsMenu">
                 <div class="dm-label">Rows per page</div>
-                <button data-pp="10">10<span class="ck"></span></button>
-                <button data-pp="25" class="sel">25<span class="ck">✓</span></button>
+                <button data-pp="10" class="sel">10<span class="ck">✓</span></button>
+                <button data-pp="25">25<span class="ck"></span></button>
                 <button data-pp="50">50<span class="ck"></span></button>
                 <button data-pp="100">100<span class="ck"></span></button>
               </div>
@@ -553,7 +553,7 @@ const SYMBOLS=[
 ];
 const thBody=document.getElementById('thBody'),thCards=document.getElementById('thCards'),
       thCount=document.getElementById('thCount'),thPag=document.getElementById('thPag');
-let thPage=0,thPerPage=25,thAllTrades=[];
+let thPage=0,thPerPage=10,thAllTrades=[];
 function genTrades(y,m){
   const data=monthData(y,m),trades=[];
   for(const d in data){
