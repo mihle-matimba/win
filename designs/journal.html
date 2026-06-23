@@ -105,36 +105,20 @@ a{color:inherit;text-decoration:none}
 .content{padding:clamp(16px,2.4vw,26px);width:100%;flex:1;display:flex;flex-direction:column;gap:16px}
 
 /* ===== Journal page ===== */
-/* tabs */
-.j-tabs{display:flex;gap:4px;border-bottom:1px solid var(--line-soft)}
-.j-tab{display:flex;align-items:center;gap:8px;padding:12px 20px;font-size:14px;font-weight:700;color:var(--muted);
-  border-bottom:2px solid transparent;margin-bottom:-1px;transition:all .15s}
-.j-tab svg{width:17px;height:17px}
-.j-tab:hover{color:var(--ink-2)}
-.j-tab.active{color:var(--accent);border-color:var(--accent)}
-
-/* controls row */
-.j-controls{display:flex;align-items:center;gap:12px;flex-wrap:wrap}
-.j-controls .grow{flex:1}
+/* filter button */
 .j-filter-btn{display:flex;align-items:center;gap:8px;padding:9px 16px;border-radius:11px;border:1px solid var(--line);
   background:var(--card);color:var(--ink-2);font-size:13.5px;font-weight:700;transition:border-color .15s,color .15s}
 .j-filter-btn:hover{border-color:var(--accent);color:#fff}
 .j-filter-btn svg{width:16px;height:16px}
 .j-filter-btn .badge{font-size:10px;font-weight:800;padding:1px 7px;border-radius:999px;background:var(--accent);color:#fff}
 
-/* main layout */
-.j-layout{display:flex;gap:16px;flex:1;min-height:0}
-.j-left{flex:1;min-width:0;display:flex;flex-direction:column}
-.j-right{width:430px;flex:0 0 430px;display:flex;flex-direction:column}
+/* main layout — full-width table */
+.j-layout{display:flex;flex:1;min-height:0}
 
 /* table card */
 .j-table-card{padding:0;flex:1;display:flex;flex-direction:column;overflow:hidden}
 .j-table-top{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:13px 18px;border-bottom:1px solid var(--line-soft)}
 .j-table-top .info{font-size:12.5px;color:var(--muted);font-weight:600}
-.j-table-top .search{display:flex;align-items:center;gap:8px;padding:7px 12px;border-radius:9px;border:1px solid var(--line);background:var(--card-2);min-width:200px}
-.j-table-top .search svg{width:15px;height:15px;color:var(--muted);flex:0 0 15px}
-.j-table-top .search input{background:none;border:none;outline:none;color:var(--ink);font-size:13px;font-family:inherit;width:100%}
-.j-table-top .search input::placeholder{color:var(--faint)}
 .j-scroll{overflow:auto;flex:1;scrollbar-width:thin}
 .j-scroll::-webkit-scrollbar{width:7px;height:7px}
 .j-scroll::-webkit-scrollbar-thumb{background:var(--line);border-radius:8px}
@@ -178,7 +162,11 @@ td.pos{color:var(--green-val)}td.neg{color:var(--red-val)}
 .pag-btn.active{background:var(--accent-soft);color:var(--accent);border-color:rgba(91,116,255,.4)}
 .pag-btn svg{width:15px;height:15px}
 
-/* ===== Trade Detail Panel ===== */
+/* ===== Trade Detail drawer (slides from right) ===== */
+.trade-drawer{position:fixed;top:0;right:0;height:100dvh;width:480px;max-width:94vw;z-index:130;
+  background:var(--card);border-left:1px solid var(--line);display:flex;flex-direction:column;
+  transform:translateX(100%);transition:transform .3s cubic-bezier(.3,.9,.3,1);box-shadow:-30px 0 80px -40px rgba(0,0,0,.9)}
+.trade-drawer.open{transform:translateX(0)}
 .j-detail{padding:0;display:flex;flex-direction:column;overflow:hidden;height:100%}
 .j-detail-head{display:flex;align-items:flex-start;gap:12px;padding:18px 20px;border-bottom:1px solid var(--line-soft)}
 .j-detail-head .htx{flex:1;min-width:0}
@@ -260,12 +248,6 @@ td.pos{color:var(--green-val)}td.neg{color:var(--red-val)}
 
 .td-chart-stub{height:200px;border-radius:12px;border:1px dashed var(--line);display:flex;align-items:center;justify-content:center;color:var(--faint);font-size:13px;font-weight:600;background:var(--card-2)}
 
-/* empty state */
-.td-empty{display:flex;flex-direction:column;align-items:center;justify-content:center;flex:1;text-align:center;padding:50px 20px}
-.td-empty svg{width:52px;height:52px;color:var(--faint);margin-bottom:16px}
-.td-empty .msg{font-size:15px;color:var(--muted);font-weight:600}
-.td-empty .hint{font-size:13px;color:var(--faint);margin-top:6px}
-
 .j-detail-foot{padding:12px 20px;border-top:1px solid var(--line-soft);display:flex;align-items:center;justify-content:center;gap:8px;
   font-size:12.5px;color:var(--faint);font-weight:600}
 .j-detail-foot kbd{display:inline-flex;align-items:center;justify-content:center;min-width:22px;height:22px;padding:0 6px;
@@ -311,6 +293,11 @@ td.pos{color:var(--green-val)}td.neg{color:var(--red-val)}
 .fd-sect h5{margin:0 0 11px;font-size:14px;font-weight:700;color:var(--ink)}
 .fd-input{width:100%;padding:10px 13px;border-radius:10px;border:1px solid var(--line);background:var(--card-2);color:var(--ink);font-family:inherit;font-size:13.5px;outline:none;transition:border-color .15s}
 .fd-input:focus{border-color:var(--accent)}
+.fd-search{display:flex;align-items:center;gap:9px;padding:0 13px;border-radius:10px;border:1px solid var(--line);background:var(--card-2);transition:border-color .15s}
+.fd-search:focus-within{border-color:var(--accent)}
+.fd-search svg{width:16px;height:16px;color:var(--muted);flex:0 0 16px}
+.fd-search .fd-input{border:none;background:none;padding:10px 0}
+.fd-search .fd-input:focus{border:none}
 .fd-input::placeholder{color:var(--faint)}
 .fd-checks{display:flex;flex-wrap:wrap;gap:9px}
 .fd-check{display:flex;align-items:center;gap:8px;padding:8px 14px;border-radius:10px;border:1px solid var(--line);background:var(--card-2);font-size:13px;font-weight:600;color:var(--ink-2);cursor:pointer;transition:all .12s}
@@ -337,26 +324,16 @@ td.pos{color:var(--green-val)}td.neg{color:var(--red-val)}
   .app.collapsed .nav-item span,.app.collapsed .nav-label,.app.collapsed .signout span,.app.collapsed .side-user .meta{display:revert}
   .app.collapsed .brand-logo{height:40px}
   .collapse-btn{display:none}.hamburger{display:flex}
-  .j-layout{flex-direction:column}
-  .j-right{width:100%;flex:none}
-  .j-right.empty{display:none}
   .j-scroll{display:none}
   .j-cards{display:block;padding:14px}
-  .j-controls .j-select{flex:1}
-  .j-tabs{overflow-x:auto;scrollbar-width:none}.j-tabs::-webkit-scrollbar{display:none}
 }
 @media (max-width:1024px) and (min-width:769px){
   .hamburger{display:none}
-  .j-right{width:370px;flex:0 0 370px}
-}
-@media (max-width:1240px) and (min-width:1025px){
-  .j-right{width:390px;flex:0 0 390px}
 }
 @media (max-width:640px){
   .acct-name{font-size:19px}.acct .r3{display:none}.acct-num{display:none}
-  .j-tab{padding:11px 14px;font-size:13px}
   .td-hero{flex-wrap:wrap;gap:10px}.td-sym{font-size:20px}.td-pnl .val{font-size:20px}
-  .filter-drawer{width:100vw;max-width:100vw}
+  .filter-drawer,.trade-drawer{width:100vw;max-width:100vw}
 }
 @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
 </style>
@@ -371,164 +348,133 @@ td.pos{color:var(--green-val)}td.neg{color:var(--red-val)}
     <header class="topbar"></header>
 
     <main class="content">
-      <!-- Tabs -->
-      <div class="j-tabs">
-        <button class="j-tab active" data-jtab="trades">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 3v18h18"/><path d="m7 14 4-4 3 3 5-6"/></svg>Trade History</button>
-        <button class="j-tab" data-jtab="daily">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>Daily Journal</button>
-        <button class="j-tab" data-jtab="library">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2Z"/></svg>Library</button>
-      </div>
-
-      <!-- Controls -->
-      <div class="j-controls">
-        <div class="grow"></div>
-        <button class="j-filter-btn" id="filterBtn">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 3H2l8 9.46V19l4 2v-8.54L22 3Z"/></svg>
-          Filters<span class="badge" id="filterBadge" style="display:none">0</span>
-        </button>
-      </div>
-
       <!-- Main layout -->
       <div class="j-layout">
-        <div class="j-left">
-          <div class="card j-table-card">
-            <div class="j-table-top">
-              <div class="info" id="jInfo"></div>
-              <div class="search">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
-                <input type="text" placeholder="Search trades..." id="jSearch">
-              </div>
-            </div>
-            <div class="j-scroll">
-              <table class="j-table">
-                <thead><tr>
-                  <th>Symbol</th><th>Type</th><th>Open Price</th><th>Close Price</th>
-                  <th>Open Time</th><th>Close Time</th><th>Volume</th><th>Net Profit</th><th>Rating</th><th>Insight</th>
-                </tr></thead>
-                <tbody id="jBody"></tbody>
-              </table>
-            </div>
-            <div class="j-cards" id="jCards"></div>
-            <div class="j-pag" id="jPag"></div>
+        <div class="card j-table-card">
+          <div class="j-table-top">
+            <div class="info" id="jInfo"></div>
+            <button class="j-filter-btn" id="filterBtn">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 3H2l8 9.46V19l4 2v-8.54L22 3Z"/></svg>
+              Filters<span class="badge" id="filterBadge" style="display:none">0</span>
+            </button>
           </div>
-        </div>
-
-        <!-- Detail panel -->
-        <div class="j-right empty" id="jRight">
-          <div class="card j-detail">
-            <!-- empty state -->
-            <div class="td-empty" id="tdEmpty">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2Z"/><path d="M9 7h6M9 11h6"/></svg>
-              <div class="msg">No trade selected</div>
-              <div class="hint">Select a trade from the table to view its journal</div>
-            </div>
-
-            <!-- content -->
-            <div id="tdContent" style="display:none;flex-direction:column;flex:1;min-height:0">
-              <div class="j-detail-head">
-                <div class="htx"><h3>Trade Journal</h3><div class="sub">Record and analyze your trade</div></div>
-                <button class="share-btn">Share Trade</button>
-                <button class="d-close" id="dClose" aria-label="Close"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6 6 18M6 6l12 12"/></svg></button>
-              </div>
-
-              <div class="j-detail-nav">
-                <button class="nv" id="dPrev" aria-label="Previous trade"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="m15 18-6-6 6-6"/></svg></button>
-                <button class="nv" id="dNext" aria-label="Next trade"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="m9 18 6-6-6-6"/></svg></button>
-                <span class="pos-ind" id="dPos"></span>
-              </div>
-
-              <div class="j-detail-body">
-                <div class="td-hero">
-                  <div>
-                    <div class="td-sym" id="tdSym"></div>
-                    <div class="td-prices" id="tdPrices"></div>
-                    <div class="td-volume" id="tdVol"></div>
-                  </div>
-                  <div class="td-pnl">
-                    <div class="val" id="tdPnlVal"></div>
-                    <div class="pct" id="tdPnlPct"></div>
-                  </div>
-                </div>
-
-                <div class="td-tabs">
-                  <button class="td-tab active" data-dtab="metrics">Trade Metrics</button>
-                  <button class="td-tab" data-dtab="journal">Journal</button>
-                  <button class="td-tab" data-dtab="ai">AI Insights</button>
-                  <button class="td-tab" data-dtab="tags">Trade Tags</button>
-                  <button class="td-tab" data-dtab="charts">Charts<span class="pro">PRO</span></button>
-                </div>
-
-                <!-- Metrics pane -->
-                <div class="td-pane active" data-pane="metrics">
-                  <div class="td-section">
-                    <div class="td-section-title">Trade Information</div>
-                    <div class="td-row"><span class="label">Order Type</span><span class="val" id="tdType"></span></div>
-                    <div class="td-row"><span class="label">Symbol</span><span class="val" id="tdSymRow"></span></div>
-                    <div class="td-row"><span class="label">Volume</span><span class="val" id="tdLots"></span></div>
-                    <div class="td-row"><span class="label">Open Time</span><span class="val" id="tdOpen"></span></div>
-                    <div class="td-row"><span class="label">Close Time</span><span class="val" id="tdClose"></span></div>
-                  </div>
-                  <div class="td-section">
-                    <div class="td-section-title">Price Summary</div>
-                    <div class="td-row"><span class="label">Open Price</span><span class="val" id="tdOpenP"></span></div>
-                    <div class="td-row"><span class="label">Close Price</span><span class="val" id="tdCloseP"></span></div>
-                  </div>
-                  <div class="td-section">
-                    <div class="td-section-title">Transaction Costs</div>
-                    <div class="td-row"><span class="label">Commission</span><span class="val" id="tdComm"></span></div>
-                    <div class="td-row"><span class="label">Swap</span><span class="val" id="tdSwap"></span></div>
-                    <div class="td-row"><span class="label">Fee</span><span class="val" id="tdFee"></span></div>
-                  </div>
-                  <div class="td-section">
-                    <div class="td-section-title">Trade Results</div>
-                    <div class="td-row"><span class="label">Gross Profit</span><span class="val" id="tdGross"></span></div>
-                    <div class="td-row"><span class="label">Net Profit</span><span class="val" id="tdNet"></span></div>
-                    <div class="td-row"><span class="label">Percent Gain</span><span class="val" id="tdPctGain"></span></div>
-                  </div>
-                  <div class="td-star-row">
-                    <span class="label">Rating</span>
-                    <div class="td-star-input" id="tdStars"></div>
-                  </div>
-                </div>
-
-                <!-- Journal pane -->
-                <div class="td-pane" data-pane="journal">
-                  <div class="td-notes">
-                    <textarea placeholder="Write your trade notes, what went well, what to improve..." id="tdNotes"></textarea>
-                    <button class="td-save">Save Notes</button>
-                  </div>
-                </div>
-
-                <!-- AI Insights pane -->
-                <div class="td-pane" data-pane="ai">
-                  <div class="td-ai">
-                    <div class="ai-head"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2v4M12 18v4M4.9 4.9l2.8 2.8M16.3 16.3l2.8 2.8M2 12h4M18 12h4M4.9 19.1l2.8-2.8M16.3 7.7l2.8-2.8"/></svg>AI Analysis</div>
-                    <span id="tdAiText"></span>
-                  </div>
-                </div>
-
-                <!-- Trade Tags pane -->
-                <div class="td-pane" data-pane="tags">
-                  <div class="td-section-title">Tag this trade</div>
-                  <div class="td-tags" id="tdTags"></div>
-                </div>
-
-                <!-- Charts pane -->
-                <div class="td-pane" data-pane="charts">
-                  <div class="td-chart-stub">Chart view available on Pro</div>
-                </div>
-              </div>
-
-              <div class="j-detail-foot">
-                <span>Press</span><kbd>&larr;</kbd><kbd>&rarr;</kbd><span>to navigate trades</span>
-              </div>
-            </div>
+          <div class="j-scroll">
+            <table class="j-table">
+              <thead><tr>
+                <th>Symbol</th><th>Type</th><th>Open Price</th><th>Close Price</th>
+                <th>Open Time</th><th>Close Time</th><th>Volume</th><th>Net Profit</th><th>Rating</th><th>Insight</th>
+              </tr></thead>
+              <tbody id="jBody"></tbody>
+            </table>
           </div>
+          <div class="j-cards" id="jCards"></div>
+          <div class="j-pag" id="jPag"></div>
         </div>
       </div>
     </main>
+  </div>
+</div>
+
+<!-- Trade detail drawer (slides from right) -->
+<div class="trade-drawer" id="tradeDrawer">
+  <div class="j-detail">
+    <div class="j-detail-head">
+      <div class="htx"><h3>Trade Journal</h3><div class="sub">Record and analyze your trade</div></div>
+      <button class="share-btn">Share Trade</button>
+      <button class="d-close" id="dClose" aria-label="Close"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6 6 18M6 6l12 12"/></svg></button>
+    </div>
+
+    <div class="j-detail-nav">
+      <button class="nv" id="dPrev" aria-label="Previous trade"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="m15 18-6-6 6-6"/></svg></button>
+      <button class="nv" id="dNext" aria-label="Next trade"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="m9 18 6-6-6-6"/></svg></button>
+      <span class="pos-ind" id="dPos"></span>
+    </div>
+
+    <div class="j-detail-body">
+      <div class="td-hero">
+        <div>
+          <div class="td-sym" id="tdSym"></div>
+          <div class="td-prices" id="tdPrices"></div>
+          <div class="td-volume" id="tdVol"></div>
+        </div>
+        <div class="td-pnl">
+          <div class="val" id="tdPnlVal"></div>
+          <div class="pct" id="tdPnlPct"></div>
+        </div>
+      </div>
+
+      <div class="td-tabs">
+        <button class="td-tab active" data-dtab="metrics">Trade Metrics</button>
+        <button class="td-tab" data-dtab="journal">Journal</button>
+        <button class="td-tab" data-dtab="ai">AI Insights</button>
+        <button class="td-tab" data-dtab="tags">Trade Tags</button>
+        <button class="td-tab" data-dtab="charts">Charts<span class="pro">PRO</span></button>
+      </div>
+
+      <!-- Metrics pane -->
+      <div class="td-pane active" data-pane="metrics">
+        <div class="td-section">
+          <div class="td-section-title">Trade Information</div>
+          <div class="td-row"><span class="label">Order Type</span><span class="val" id="tdType"></span></div>
+          <div class="td-row"><span class="label">Symbol</span><span class="val" id="tdSymRow"></span></div>
+          <div class="td-row"><span class="label">Volume</span><span class="val" id="tdLots"></span></div>
+          <div class="td-row"><span class="label">Open Time</span><span class="val" id="tdOpen"></span></div>
+          <div class="td-row"><span class="label">Close Time</span><span class="val" id="tdClose"></span></div>
+        </div>
+        <div class="td-section">
+          <div class="td-section-title">Price Summary</div>
+          <div class="td-row"><span class="label">Open Price</span><span class="val" id="tdOpenP"></span></div>
+          <div class="td-row"><span class="label">Close Price</span><span class="val" id="tdCloseP"></span></div>
+        </div>
+        <div class="td-section">
+          <div class="td-section-title">Transaction Costs</div>
+          <div class="td-row"><span class="label">Commission</span><span class="val" id="tdComm"></span></div>
+          <div class="td-row"><span class="label">Swap</span><span class="val" id="tdSwap"></span></div>
+          <div class="td-row"><span class="label">Fee</span><span class="val" id="tdFee"></span></div>
+        </div>
+        <div class="td-section">
+          <div class="td-section-title">Trade Results</div>
+          <div class="td-row"><span class="label">Gross Profit</span><span class="val" id="tdGross"></span></div>
+          <div class="td-row"><span class="label">Net Profit</span><span class="val" id="tdNet"></span></div>
+          <div class="td-row"><span class="label">Percent Gain</span><span class="val" id="tdPctGain"></span></div>
+        </div>
+        <div class="td-star-row">
+          <span class="label">Rating</span>
+          <div class="td-star-input" id="tdStars"></div>
+        </div>
+      </div>
+
+      <!-- Journal pane -->
+      <div class="td-pane" data-pane="journal">
+        <div class="td-notes">
+          <textarea placeholder="Write your trade notes, what went well, what to improve..." id="tdNotes"></textarea>
+          <button class="td-save">Save Notes</button>
+        </div>
+      </div>
+
+      <!-- AI Insights pane -->
+      <div class="td-pane" data-pane="ai">
+        <div class="td-ai">
+          <div class="ai-head"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2v4M12 18v4M4.9 4.9l2.8 2.8M16.3 16.3l2.8 2.8M2 12h4M18 12h4M4.9 19.1l2.8-2.8M16.3 7.7l2.8-2.8"/></svg>AI Analysis</div>
+          <span id="tdAiText"></span>
+        </div>
+      </div>
+
+      <!-- Trade Tags pane -->
+      <div class="td-pane" data-pane="tags">
+        <div class="td-section-title">Tag this trade</div>
+        <div class="td-tags" id="tdTags"></div>
+      </div>
+
+      <!-- Charts pane -->
+      <div class="td-pane" data-pane="charts">
+        <div class="td-chart-stub">Chart view available on Pro</div>
+      </div>
+    </div>
+
+    <div class="j-detail-foot">
+      <span>Press</span><kbd>&larr;</kbd><kbd>&rarr;</kbd><span>to navigate trades</span>
+    </div>
   </div>
 </div>
 
@@ -543,6 +489,13 @@ td.pos{color:var(--green-val)}td.neg{color:var(--red-val)}
     <button class="fd-tab">Journal Filters</button>
   </div>
   <div class="fd-body">
+    <div class="fd-sect">
+      <h5>Search</h5>
+      <div class="fd-search">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+        <input class="fd-input" placeholder="Search trades..." id="jSearch">
+      </div>
+    </div>
     <div class="fd-ai">
       <div class="ai-head"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2v4M12 18v4M4.9 4.9l2.8 2.8M16.3 16.3l2.8 2.8M2 12h4M18 12h4M4.9 19.1l2.8-2.8M16.3 7.7l2.8-2.8"/></svg>AI-Powered Filtering</div>
       <textarea placeholder="Describe the trades you want to see, e.g. 'winning XAUUSD buys longer than 1 hour'"></textarea>
@@ -641,7 +594,6 @@ const jBody = document.getElementById('jBody');
 const jCards = document.getElementById('jCards');
 const jInfo = document.getElementById('jInfo');
 const jPag = document.getElementById('jPag');
-const jRight = document.getElementById('jRight');
 let jPage = 0, jPerPage = 16, selectedIdx = -1, currentTrade = -1;
 
 function renderTable() {
@@ -712,16 +664,13 @@ jPag.addEventListener('click', e => {
 
 function selectTrade(idx) {
   selectedIdx = idx; currentTrade = idx;
-  jRight.classList.remove('empty');
   renderTable();
   showDetail(idx);
-  if (innerWidth <= 768) document.querySelector('.j-detail').scrollIntoView({ behavior: 'smooth' });
+  openTradeDrawer();
 }
 
 function showDetail(idx) {
   const t = TRADES[idx];
-  document.getElementById('tdEmpty').style.display = 'none';
-  document.getElementById('tdContent').style.display = 'flex';
 
   const typeIcon = t.type === 'Buy' ? upArrow : downArrow;
   document.getElementById('tdSym').innerHTML = t.sym + '<span class="type-tag ' + t.type.toLowerCase() + '" style="font-size:12px">' + typeIcon + t.type + '</span>';
@@ -789,19 +738,18 @@ addEventListener('keydown', e => {
   if (e.key === 'ArrowRight' && currentTrade < TRADES.length - 1) goToTrade(currentTrade + 1);
 });
 
+/* ---- Trade drawer (slides from right) ---- */
+const tradeDrawer = document.getElementById('tradeDrawer');
+const backdrop = document.getElementById('backdrop');
+function openTradeDrawer() { closeFilters(); tradeDrawer.classList.add('open'); backdrop.classList.add('show'); }
 function closeDetail() {
-  document.getElementById('tdContent').style.display = 'none';
-  document.getElementById('tdEmpty').style.display = 'flex';
-  jRight.classList.add('empty');
+  tradeDrawer.classList.remove('open');
+  if (!filterDrawer.classList.contains('open')) backdrop.classList.remove('show');
   selectedIdx = -1; currentTrade = -1;
   renderTable();
 }
 document.getElementById('dClose').addEventListener('click', closeDetail);
 
-// top tabs (visual)
-document.querySelectorAll('.j-tab').forEach(tab => tab.addEventListener('click', () => {
-  document.querySelectorAll('.j-tab').forEach(t => t.classList.remove('active')); tab.classList.add('active');
-}));
 // detail sub-tabs
 document.querySelectorAll('.td-tab').forEach(tab => tab.addEventListener('click', () => {
   document.querySelectorAll('.td-tab').forEach(t => t.classList.remove('active')); tab.classList.add('active');
@@ -811,13 +759,12 @@ document.querySelectorAll('.td-tab').forEach(tab => tab.addEventListener('click'
 
 /* ---- Filters drawer ---- */
 const filterDrawer = document.getElementById('filterDrawer');
-const backdrop = document.getElementById('backdrop');
-function openFilters() { filterDrawer.classList.add('open'); backdrop.classList.add('show'); }
-function closeFilters() { filterDrawer.classList.remove('open'); backdrop.classList.remove('show'); }
+function openFilters() { closeDetail(); filterDrawer.classList.add('open'); backdrop.classList.add('show'); }
+function closeFilters() { filterDrawer.classList.remove('open'); if (!tradeDrawer.classList.contains('open')) backdrop.classList.remove('show'); }
 document.getElementById('filterBtn').addEventListener('click', openFilters);
 document.getElementById('fdClose').addEventListener('click', closeFilters);
-backdrop.addEventListener('click', closeFilters);
-addEventListener('keydown', e => { if (e.key === 'Escape') closeFilters(); });
+backdrop.addEventListener('click', () => { closeFilters(); closeDetail(); });
+addEventListener('keydown', e => { if (e.key === 'Escape') { closeFilters(); closeDetail(); } });
 
 document.querySelectorAll('.fd-check').forEach(c => c.addEventListener('click', () => { c.classList.toggle('on'); updateFilterBadge(); }));
 document.querySelectorAll('.fd-tab').forEach(t => t.addEventListener('click', () => {
