@@ -21,9 +21,15 @@ const SIDEBAR_HTML = `
       <a class="nav-sub" data-page="calendar" href="calendar-view.html"><span class="dot"></span><span>Calendar</span></a>
       <a class="nav-sub" data-page="journal" href="journal.html"><span class="dot"></span><span>Journal</span></a>
     </div>
-    <div class="nav-label">Competitions</div>
-    <a class="nav-item" data-page="weekly-draw"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6m12 5h1.5a2.5 2.5 0 0 0 0-5H18M6 4h12v5a6 6 0 0 1-12 0V4Z"/><path d="M9 18h6M10 22h4M12 14v4"/></svg><span>Weekly Draw</span></a>
-    <a class="nav-item" data-page="tp-paradise"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="m9 12 2 2 4-4"/></svg><span>TP To Paradise</span></a>
+    <button class="nav-item nav-group-trigger" id="compTrigger" aria-expanded="true" data-group="competitions">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6m12 5h1.5a2.5 2.5 0 0 0 0-5H18M6 4h12v5a6 6 0 0 1-12 0V4Z"/><path d="M9 18h6M10 22h4M12 14v4"/></svg>
+      <span>Competitions</span>
+      <svg class="grp-chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="m6 9 6 6 6-6"/></svg>
+    </button>
+    <div class="nav-group" id="compGroup">
+      <a class="nav-sub" data-page="weekly-draw"><span class="dot"></span><span>Weekly Draw</span></a>
+      <a class="nav-sub" data-page="tp-paradise"><span class="dot"></span><span>TP To Paradise</span></a>
+    </div>
     <a class="nav-item" data-page="telegram"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m22 2-7 20-4-9-9-4 20-7Z"/></svg><span>Telegram Channels</span></a>
     <a class="nav-item" data-page="courses"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2Z"/></svg><span>Courses</span></a>
     <a class="nav-item" data-page="weekly-schedule"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg><span>Weekly Schedule</span></a>
@@ -56,8 +62,6 @@ const TOPBAR_HTML = `
   <div class="tb-spacer"></div>
   <button class="tb-btn" id="refresh" aria-label="Refresh"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12a9 9 0 0 1 9-9 9 9 0 0 1 6.7 3L21 8"/><path d="M21 3v5h-5M21 12a9 9 0 0 1-9 9 9 9 0 0 1-6.7-3L3 16"/><path d="M3 21v-5h5"/></svg></button>
   <img class="tb-avatar" alt="" src="https://i.pravatar.cc/80?img=12">`;
-
-const DASH_SUBS = ['performance','calendar','journal'];
 
 const ACCOUNTS = [
   { name:'Test Account', num:'#54845698', broker:'VT Markets (Pty) Ltd', synced:'Synced 1 hour ago' },
@@ -114,27 +118,31 @@ function initShell({ activePage = '' } = {}) {
   const logoFallback = document.getElementById('logoFallback');
   if (brandLogo) brandLogo.addEventListener('error', () => { brandLogo.style.display='none'; logoFallback.style.display='flex'; });
 
-  // highlight active page
-  const isDashSub = DASH_SUBS.includes(activePage);
-  const dashTrigger = document.getElementById('dashTrigger');
-  if (isDashSub && dashTrigger) dashTrigger.classList.add('active');
+  // find the group trigger that owns a given sub-item
+  const groupTriggerFor = el => {
+    const group = el.closest('.nav-group');
+    const tr = group && group.previousElementSibling;
+    return (tr && tr.classList.contains('nav-group-trigger')) ? tr : null;
+  };
 
+  // highlight active page (and its parent group trigger, if any)
   document.querySelectorAll('[data-page]').forEach(el => {
     if (el.dataset.page === activePage) {
       el.classList.add('active');
-      if (el.classList.contains('nav-item')) el.classList.add('active');
+      const tr = groupTriggerFor(el);
+      if (tr) tr.classList.add('active');
     }
   });
 
-  // dashboard group toggle
-  const dashGroup = document.getElementById('dashGroup');
-  if (dashTrigger && dashGroup) {
-    dashTrigger.addEventListener('click', () => {
-      const open = dashTrigger.getAttribute('aria-expanded') === 'true';
-      dashTrigger.setAttribute('aria-expanded', open ? 'false' : 'true');
-      dashGroup.classList.toggle('closed', open);
+  // expandable group toggles (Dashboard, Competitions, ...)
+  document.querySelectorAll('.nav-group-trigger').forEach(trigger => {
+    const group = trigger.nextElementSibling;
+    trigger.addEventListener('click', () => {
+      const open = trigger.getAttribute('aria-expanded') === 'true';
+      trigger.setAttribute('aria-expanded', open ? 'false' : 'true');
+      if (group && group.classList.contains('nav-group')) group.classList.toggle('closed', open);
     });
-  }
+  });
 
   // sidebar collapse / mobile drawer
   const app = document.getElementById('app');
@@ -147,15 +155,21 @@ function initShell({ activePage = '' } = {}) {
   if (hamburger)   hamburger.onclick   = () => { sb.classList.add('open'); bd.classList.add('show'); };
   if (bd) bd.onclick = closeDrawer;
 
-  document.querySelectorAll('.nav-item').forEach(n => n.addEventListener('click', () => {
-    document.querySelectorAll('.nav-item').forEach(x => x.classList.remove('active')); n.classList.add('active');
+  // regular nav items (not group triggers)
+  document.querySelectorAll('.nav-item:not(.nav-group-trigger)').forEach(n => n.addEventListener('click', () => {
+    document.querySelectorAll('.nav-item').forEach(x => x.classList.remove('active'));
     document.querySelectorAll('.nav-sub').forEach(x => x.classList.remove('active'));
-    if (innerWidth <= 1024 && n !== dashTrigger) closeDrawer();
+    n.classList.add('active');
+    if (innerWidth <= 1024) closeDrawer();
   }));
+  // sub items — also light up their group trigger
   document.querySelectorAll('.nav-sub').forEach(n => n.addEventListener('click', e => {
     e.stopPropagation();
-    document.querySelectorAll('.nav-sub').forEach(x => x.classList.remove('active')); n.classList.add('active');
-    document.querySelectorAll('.nav-item').forEach(x => x.classList.remove('active')); dashTrigger.classList.add('active');
+    document.querySelectorAll('.nav-sub').forEach(x => x.classList.remove('active'));
+    document.querySelectorAll('.nav-item').forEach(x => x.classList.remove('active'));
+    n.classList.add('active');
+    const tr = groupTriggerFor(n);
+    if (tr) tr.classList.add('active');
     if (innerWidth <= 1024) closeDrawer();
   }));
 
