@@ -123,20 +123,20 @@ a{color:inherit;text-decoration:none}
 .cal-scroll{overflow-x:auto;overflow-y:hidden;scrollbar-width:thin;flex:1;display:flex}
 .cal-grid{display:grid;container-type:inline-size;grid-template-columns:repeat(7,minmax(0,1fr)) minmax(58px,.82fr);
   grid-template-rows:auto;grid-auto-rows:1fr;gap:clamp(4px,1.1cqi,8px);min-width:330px;width:100%;flex:1}
-.dow{text-align:center;font-size:clamp(9px,1.85cqi,14px);font-weight:700;padding:2px 0 6px;white-space:nowrap;overflow:hidden}
+.dow{text-align:center;font-size:clamp(8px,1.5cqi,12px);font-weight:700;padding:2px 0 6px;white-space:nowrap;overflow:hidden}
 .dow.tot{color:var(--green-val)}
 .day{position:relative;border-radius:11px;border:1px solid var(--line-soft);background:var(--card-2);
   min-height:clamp(58px,13cqi,96px);padding:clamp(5px,1.2cqi,9px) clamp(5px,1.3cqi,10px);display:flex;flex-direction:column;overflow:hidden}
-.day .n{font-size:clamp(8px,1.45cqi,12px);font-weight:700;color:var(--muted);line-height:1}
+.day .n{font-size:clamp(7px,1.2cqi,10px);font-weight:700;color:var(--muted);line-height:1}
 .day .mid{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;min-width:0}
-.day .v{font-size:clamp(9px,2.5cqi,17px);font-weight:700;letter-spacing:-.4px;line-height:1.1;white-space:nowrap}
-.day .p{font-size:clamp(7px,1.7cqi,12px);font-weight:600;opacity:.78;margin-top:2px;white-space:nowrap}
+.day .v{font-size:clamp(8px,2cqi,13px);font-weight:700;letter-spacing:-.4px;line-height:1.1;white-space:nowrap}
+.day .p{font-size:clamp(6px,1.4cqi,10px);font-weight:600;opacity:.78;margin-top:2px;white-space:nowrap}
 .day.win{background:linear-gradient(180deg,var(--green-soft),rgba(53,215,155,.02));box-shadow:inset 0 2px 0 var(--green-line)}
 .day.loss{background:linear-gradient(180deg,var(--red-soft),rgba(255,107,129,.02));box-shadow:inset 0 2px 0 var(--red-line)}
 .day.win .v,.day.win .p{color:var(--green-val)}
 .day.loss .v,.day.loss .p{color:var(--red-val)}
 .day.flat{background:var(--card-2)}
-.day.flat .big{flex:1;display:flex;align-items:center;justify-content:center;font-size:clamp(11px,2.6cqi,18px);font-weight:700;color:var(--ink-2)}
+.day.flat .big{flex:1;display:flex;align-items:center;justify-content:center;font-size:clamp(9px,2cqi,14px);font-weight:700;color:var(--ink-2)}
 .day.today{background:var(--today);border-color:#3b465b}
 .day.out{background:#090d16;border-color:var(--line-soft)}
 .day.out .big{flex:1;display:flex;align-items:center;justify-content:center;font-size:clamp(11px,2.6cqi,18px);font-weight:700;color:var(--faint)}
@@ -146,8 +146,8 @@ a{color:inherit;text-decoration:none}
   min-height:clamp(58px,13cqi,96px);overflow:hidden;border-radius:11px;border:1.4px solid var(--line);background:var(--card-2)}
 .tot-cell.pos{border-color:var(--green-line);background:linear-gradient(180deg,var(--green-soft),rgba(53,215,155,.02))}
 .tot-cell.neg{border-color:var(--red-line);background:linear-gradient(180deg,var(--red-soft),rgba(255,107,129,.02))}
-.tot-cell .tv{font-size:clamp(9px,2.15cqi,16px);font-weight:700;letter-spacing:-.3px;white-space:nowrap}
-.tot-cell .tp{font-size:clamp(7px,1.7cqi,12px);font-weight:700;margin-top:2px;white-space:nowrap}
+.tot-cell .tv{font-size:clamp(8px,1.75cqi,12px);font-weight:700;letter-spacing:-.3px;white-space:nowrap}
+.tot-cell .tp{font-size:clamp(6px,1.4cqi,10px);font-weight:700;margin-top:2px;white-space:nowrap}
 .tot-cell.pos .tv,.tot-cell.pos .tp{color:var(--green-val)}
 .tot-cell.neg .tv,.tot-cell.neg .tp{color:var(--red-val)}
 .tot-cell.empty{color:var(--faint);font-size:clamp(11px,2.6cqi,18px);font-weight:700}
@@ -333,14 +333,14 @@ td.neg{color:var(--red-val)}
   .summary .k{font-size:10px}
   .summary .v{font-size:12px}
   .cal-grid{gap:clamp(6px,1.5cqi,10px);min-width:auto}
-  .dow{font-size:clamp(10px,2cqi,13px);padding:4px 0 8px}
+  .dow{font-size:clamp(8px,1.6cqi,11px);padding:4px 0 8px}
   .day{min-height:clamp(70px,14cqi,100px);padding:clamp(6px,1.4cqi,10px) clamp(6px,1.5cqi,11px)}
-  .day .n{font-size:clamp(9px,1.6cqi,13px)}
-  .day .v{font-size:clamp(11px,2.8cqi,18px)}
-  .day .p{font-size:clamp(8px,1.9cqi,13px);margin-top:3px}
+  .day .n{font-size:clamp(7px,1.3cqi,10px)}
+  .day .v{font-size:clamp(9px,2.1cqi,13px)}
+  .day .p{font-size:clamp(7px,1.5cqi,10px);margin-top:3px}
   .tot-cell{min-height:clamp(70px,14cqi,100px)}
-  .tot-cell .tv{font-size:clamp(10px,2.3cqi,16px)}
-  .tot-cell .tp{font-size:clamp(8px,1.9cqi,13px);margin-top:3px}
+  .tot-cell .tv{font-size:clamp(8px,1.8cqi,12px)}
+  .tot-cell .tp{font-size:clamp(7px,1.5cqi,10px);margin-top:3px}
 }
 @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
 </style>
