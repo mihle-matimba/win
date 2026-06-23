@@ -20,6 +20,7 @@ const SIDEBAR_HTML = `
       <a class="nav-sub" data-page="performance" href="calendar-view.html"><span class="dot"></span><span>Performance</span></a>
       <a class="nav-sub" data-page="calendar" href="calendar-view.html"><span class="dot"></span><span>Calendar</span></a>
       <a class="nav-sub" data-page="journal" href="journal.html"><span class="dot"></span><span>Journal</span></a>
+      <a class="nav-sub" data-page="tools"><span class="dot"></span><span>Tools</span></a>
     </div>
     <button class="nav-item nav-group-trigger" id="compTrigger" aria-expanded="true" data-group="competitions">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6m12 5h1.5a2.5 2.5 0 0 0 0-5H18M6 4h12v5a6 6 0 0 1-12 0V4Z"/><path d="M9 18h6M10 22h4M12 14v4"/></svg>
