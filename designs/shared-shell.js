@@ -28,8 +28,16 @@ const SIDEBAR_HTML = `
       <svg class="grp-chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="m6 9 6 6 6-6"/></svg>
     </button>
     <div class="nav-group" id="compGroup">
-      <a class="nav-sub" data-page="weekly-draw"><span class="dot"></span><span>Weekly Draw</span></a>
       <a class="nav-sub" data-page="tp-paradise"><span class="dot"></span><span>TP To Paradise</span></a>
+      <a class="nav-sub" data-page="weekly-draw"><span class="dot"></span><span>Weekly Draw</span></a>
+    </div>
+    <button class="nav-item nav-group-trigger" id="lbTrigger" aria-expanded="true" data-group="leaderboards">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 20V10M10 20V4M16 20v-7"/><path d="M3 20h14"/></svg>
+      <span>Leaderboards</span>
+      <svg class="grp-chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="m6 9 6 6 6-6"/></svg>
+    </button>
+    <div class="nav-group" id="lbGroup">
+      <div class="nav-empty">No leaderboards yet</div>
     </div>
     <a class="nav-item" data-page="telegram"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m22 2-7 20-4-9-9-4 20-7Z"/></svg><span>Telegram Channels</span></a>
     <a class="nav-item" data-page="courses"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2Z"/></svg><span>Courses</span></a>
@@ -70,6 +78,7 @@ const ACCOUNTS = [
 
 /* Component CSS injected once so both pages stay in sync */
 const SHELL_CSS = `
+.nav-empty{padding:9px 10px;margin:1px 0;font-size:13px;font-weight:500;color:var(--faint);font-style:italic;white-space:nowrap;overflow:hidden}
 .acct{position:relative}
 .acct-trigger{display:flex;align-items:center;gap:9px;cursor:pointer;text-align:left;padding:5px 8px;border-radius:11px;transition:background .15s}
 .acct-trigger:hover{background:rgba(255,255,255,.045)}
