@@ -53,7 +53,20 @@ const SIDEBAR_HTML = `
     <div class="nav-group" id="networkGroup">
       <a class="nav-sub" data-page="telegram"><span class="dot"></span><span>Telegram Groups</span></a>
     </div>
-    <a class="nav-item" data-page="courses"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2Z"/></svg><span>Courses</span></a>
+    <button class="nav-item nav-group-trigger" id="learnTrigger" aria-expanded="true" data-group="learn">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2Z"/></svg>
+      <span>Learn</span>
+      <svg class="grp-chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="m6 9 6 6 6-6"/></svg>
+    </button>
+    <div class="nav-group" id="learnGroup">
+      <button class="nav-sub nav-group-trigger nav-sub-trigger" id="coursesTrigger" aria-expanded="true" data-group="courses">
+        <span class="dot"></span><span>Courses</span>
+        <svg class="grp-chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="m6 9 6 6 6-6"/></svg>
+      </button>
+      <div class="nav-group nav-sub-group" id="coursesGroup">
+        <div class="nav-empty">No courses yet</div>
+      </div>
+    </div>
     <a class="nav-item" data-page="weekly-schedule"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg><span>Weekly Schedule</span></a>
     <a class="nav-item" data-page="economic-calendar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18M8 14h.01M12 14h.01M16 14h.01M8 18h.01M12 18h.01"/></svg><span>Economic Calendar</span></a>
   </nav>
@@ -91,6 +104,11 @@ const ACCOUNTS = [
 /* Component CSS injected once so both pages stay in sync */
 const SHELL_CSS = `
 .nav-empty{padding:9px 10px;margin:1px 0;font-size:13px;font-weight:500;color:var(--faint);font-style:italic;white-space:nowrap;overflow:hidden}
+.nav-sub-trigger{display:flex;align-items:center;gap:8px;width:100%;padding:7px 10px 7px 28px;border-radius:9px;cursor:pointer;font-size:13.5px;font-weight:500;color:var(--muted);transition:background .12s,color .12s;background:none;border:none;text-align:left}
+.nav-sub-trigger:hover{background:rgba(255,255,255,.04);color:var(--ink)}
+.nav-sub-trigger .grp-chev{margin-left:auto;flex:0 0 14px;transition:transform .2s ease}
+.nav-sub-trigger[aria-expanded="false"] .grp-chev{transform:rotate(-90deg)}
+.nav-sub-group{padding-left:10px}
 .acct{position:relative}
 .acct-trigger{display:flex;align-items:center;gap:9px;cursor:pointer;text-align:left;padding:5px 8px;border-radius:11px;transition:background .15s}
 .acct-trigger:hover{background:rgba(255,255,255,.045)}
@@ -157,7 +175,8 @@ function initShell({ activePage = '' } = {}) {
   // expandable group toggles (Dashboard, Competitions, ...)
   document.querySelectorAll('.nav-group-trigger').forEach(trigger => {
     const group = trigger.nextElementSibling;
-    trigger.addEventListener('click', () => {
+    trigger.addEventListener('click', e => {
+      e.stopPropagation();
       const open = trigger.getAttribute('aria-expanded') === 'true';
       trigger.setAttribute('aria-expanded', open ? 'false' : 'true');
       if (group && group.classList.contains('nav-group')) group.classList.toggle('closed', open);
