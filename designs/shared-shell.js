@@ -11,7 +11,7 @@ const SIDEBAR_HTML = `
     <div class="logo-fallback" id="logoFallback" style="display:none"><span>WI</span><span class="sl">/</span><span>N</span></div>
   </div>
   <nav class="nav">
-    <button class="nav-item nav-group-trigger" id="dashTrigger" aria-expanded="true" data-group="dashboard">
+    <button class="nav-item nav-group-trigger" id="dashTrigger" aria-expanded="false" data-group="dashboard">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="9" rx="1.5"/><rect x="14" y="3" width="7" height="5" rx="1.5"/><rect x="14" y="12" width="7" height="9" rx="1.5"/><rect x="3" y="16" width="7" height="5" rx="1.5"/></svg>
       <span>Dashboard</span>
       <svg class="grp-chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="m6 9 6 6 6-6"/></svg>
@@ -21,7 +21,7 @@ const SIDEBAR_HTML = `
       <a class="nav-sub" data-page="calendar" href="calendar-view.html"><span class="dot"></span><span>Calendar</span></a>
       <a class="nav-sub" data-page="journal" href="journal.html"><span class="dot"></span><span>Journal</span></a>
     </div>
-    <button class="nav-item nav-group-trigger" id="toolsTrigger" aria-expanded="true" data-group="trading-tools">
+    <button class="nav-item nav-group-trigger" id="toolsTrigger" aria-expanded="false" data-group="trading-tools">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76Z"/></svg>
       <span>Trading Tools</span>
       <svg class="grp-chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="m6 9 6 6 6-6"/></svg>
@@ -29,7 +29,7 @@ const SIDEBAR_HTML = `
     <div class="nav-group" id="toolsGroup">
       <a class="nav-sub" data-page="monte-carlo"><span class="dot"></span><span>Monte Carlo</span></a>
     </div>
-    <button class="nav-item nav-group-trigger" id="compTrigger" aria-expanded="true" data-group="competitions">
+    <button class="nav-item nav-group-trigger" id="compTrigger" aria-expanded="false" data-group="competitions">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6m12 5h1.5a2.5 2.5 0 0 0 0-5H18M6 4h12v5a6 6 0 0 1-12 0V4Z"/><path d="M9 18h6M10 22h4M12 14v4"/></svg>
       <span>Competitions</span>
       <svg class="grp-chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="m6 9 6 6 6-6"/></svg>
@@ -37,7 +37,7 @@ const SIDEBAR_HTML = `
     <div class="nav-group" id="compGroup">
       <div class="nav-empty">No competitions yet</div>
     </div>
-    <button class="nav-item nav-group-trigger" id="lbTrigger" aria-expanded="true" data-group="leaderboards">
+    <button class="nav-item nav-group-trigger" id="lbTrigger" aria-expanded="false" data-group="leaderboards">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 20V10M10 20V4M16 20v-7"/><path d="M3 20h14"/></svg>
       <span>Leaderboards</span>
       <svg class="grp-chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="m6 9 6 6 6-6"/></svg>
@@ -45,7 +45,7 @@ const SIDEBAR_HTML = `
     <div class="nav-group" id="lbGroup">
       <div class="nav-empty">No leaderboards yet</div>
     </div>
-    <button class="nav-item nav-group-trigger" id="networkTrigger" aria-expanded="true" data-group="network">
+    <button class="nav-item nav-group-trigger" id="networkTrigger" aria-expanded="false" data-group="network">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="5" r="2"/><circle cx="5" cy="19" r="2"/><circle cx="19" cy="19" r="2"/><path d="M12 7v4M8.5 17.5 12 11M15.5 17.5 12 11"/></svg>
       <span>Network</span>
       <svg class="grp-chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="m6 9 6 6 6-6"/></svg>
@@ -54,7 +54,7 @@ const SIDEBAR_HTML = `
       <a class="nav-sub" data-page="telegram"><span class="dot"></span><span>Telegram Groups</span></a>
       <a class="nav-sub" data-page="weekly-schedule"><span class="dot"></span><span>Weekly Schedule</span></a>
     </div>
-    <button class="nav-item nav-group-trigger" id="coursesTrigger" aria-expanded="true" data-group="courses">
+    <button class="nav-item nav-group-trigger" id="coursesTrigger" aria-expanded="false" data-group="courses">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2Z"/></svg>
       <span>Courses</span>
       <svg class="grp-chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="m6 9 6 6 6-6"/></svg>
@@ -158,12 +158,23 @@ function initShell({ activePage = '' } = {}) {
     return (tr && tr.classList.contains('nav-group-trigger')) ? tr : null;
   };
 
-  // highlight active page (and its parent group trigger, if any)
+  // all groups start closed — mark their nav-group as closed
+  document.querySelectorAll('.nav-group-trigger').forEach(trigger => {
+    const group = trigger.nextElementSibling;
+    if (group && group.classList.contains('nav-group')) group.classList.add('closed');
+  });
+
+  // highlight active page (and its parent group trigger, if any) + expand that group
   document.querySelectorAll('[data-page]').forEach(el => {
     if (el.dataset.page === activePage) {
       el.classList.add('active');
       const tr = groupTriggerFor(el);
-      if (tr) tr.classList.add('active');
+      if (tr) {
+        tr.classList.add('active');
+        tr.setAttribute('aria-expanded', 'true');
+        const group = tr.nextElementSibling;
+        if (group) group.classList.remove('closed');
+      }
     }
   });
 
