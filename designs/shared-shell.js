@@ -53,19 +53,13 @@ const SIDEBAR_HTML = `
     <div class="nav-group" id="networkGroup">
       <a class="nav-sub" data-page="telegram"><span class="dot"></span><span>Telegram Groups</span></a>
     </div>
-    <button class="nav-item nav-group-trigger" id="learnTrigger" aria-expanded="true" data-group="learn">
+    <button class="nav-item nav-group-trigger" id="coursesTrigger" aria-expanded="true" data-group="courses">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2Z"/></svg>
-      <span>Learn</span>
+      <span>Courses</span>
       <svg class="grp-chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="m6 9 6 6 6-6"/></svg>
     </button>
-    <div class="nav-group" id="learnGroup">
-      <button class="nav-sub nav-group-trigger nav-sub-trigger" id="coursesTrigger" aria-expanded="true" data-group="courses">
-        <span class="dot"></span><span>Courses</span>
-        <svg class="grp-chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="m6 9 6 6 6-6"/></svg>
-      </button>
-      <div class="nav-group nav-sub-group" id="coursesGroup">
-        <div class="nav-empty">No courses yet</div>
-      </div>
+    <div class="nav-group" id="coursesGroup">
+      <div class="nav-empty">No courses yet</div>
     </div>
     <a class="nav-item" data-page="weekly-schedule"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg><span>Weekly Schedule</span></a>
     <a class="nav-item" data-page="economic-calendar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18M8 14h.01M12 14h.01M16 14h.01M8 18h.01M12 18h.01"/></svg><span>Economic Calendar</span></a>
