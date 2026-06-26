@@ -20,7 +20,14 @@ const SIDEBAR_HTML = `
       <a class="nav-sub" data-page="performance" href="calendar-view.html"><span class="dot"></span><span>Performance</span></a>
       <a class="nav-sub" data-page="calendar" href="calendar-view.html"><span class="dot"></span><span>Calendar</span></a>
       <a class="nav-sub" data-page="journal" href="journal.html"><span class="dot"></span><span>Journal</span></a>
-      <a class="nav-sub" data-page="tools"><span class="dot"></span><span>Trading Tools</span></a>
+    </div>
+    <button class="nav-item nav-group-trigger" id="toolsTrigger" aria-expanded="true" data-group="trading-tools">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76Z"/></svg>
+      <span>Trading Tools</span>
+      <svg class="grp-chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="m6 9 6 6 6-6"/></svg>
+    </button>
+    <div class="nav-group" id="toolsGroup">
+      <a class="nav-sub" data-page="monte-carlo"><span class="dot"></span><span>Monte Carlo</span></a>
     </div>
     <button class="nav-item nav-group-trigger" id="compTrigger" aria-expanded="true" data-group="competitions">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6m12 5h1.5a2.5 2.5 0 0 0 0-5H18M6 4h12v5a6 6 0 0 1-12 0V4Z"/><path d="M9 18h6M10 22h4M12 14v4"/></svg>
@@ -28,8 +35,7 @@ const SIDEBAR_HTML = `
       <svg class="grp-chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="m6 9 6 6 6-6"/></svg>
     </button>
     <div class="nav-group" id="compGroup">
-      <a class="nav-sub" data-page="tp-paradise"><span class="dot"></span><span>TP To Paradise</span></a>
-      <a class="nav-sub" data-page="weekly-draw"><span class="dot"></span><span>Weekly Draw</span></a>
+      <div class="nav-empty">No competitions yet</div>
     </div>
     <button class="nav-item nav-group-trigger" id="lbTrigger" aria-expanded="true" data-group="leaderboards">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 20V10M10 20V4M16 20v-7"/><path d="M3 20h14"/></svg>
@@ -39,11 +45,17 @@ const SIDEBAR_HTML = `
     <div class="nav-group" id="lbGroup">
       <div class="nav-empty">No leaderboards yet</div>
     </div>
-    <a class="nav-item" data-page="telegram"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m22 2-7 20-4-9-9-4 20-7Z"/></svg><span>Telegram Channels</span></a>
+    <button class="nav-item nav-group-trigger" id="networkTrigger" aria-expanded="true" data-group="network">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="5" r="2"/><circle cx="5" cy="19" r="2"/><circle cx="19" cy="19" r="2"/><path d="M12 7v4M8.5 17.5 12 11M15.5 17.5 12 11"/></svg>
+      <span>Network</span>
+      <svg class="grp-chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="m6 9 6 6 6-6"/></svg>
+    </button>
+    <div class="nav-group" id="networkGroup">
+      <a class="nav-sub" data-page="telegram"><span class="dot"></span><span>Telegram Groups</span></a>
+    </div>
     <a class="nav-item" data-page="courses"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2Z"/></svg><span>Courses</span></a>
     <a class="nav-item" data-page="weekly-schedule"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg><span>Weekly Schedule</span></a>
     <a class="nav-item" data-page="economic-calendar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18M8 14h.01M12 14h.01M16 14h.01M8 18h.01M12 18h.01"/></svg><span>Economic Calendar</span></a>
-    <a class="nav-item" data-page="strategy-sim"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 3v9l6 3"/></svg><span>Strategy Simulator</span></a>
   </nav>
   <div class="side-foot">
     <div class="side-user">
