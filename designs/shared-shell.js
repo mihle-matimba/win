@@ -79,8 +79,8 @@ const TOPBAR_HTML = `
   <div class="acct" id="acctMenu">
     <button class="acct-trigger" id="acctTrigger" aria-expanded="false">
       <span class="acct-tx">
-        <span class="r2"><span class="acct-name" id="acctName">Test Account</span><span class="acct-num" id="acctNum">#54845698</span></span>
-        <span class="r3"><span class="mut" id="acctBroker">VT Markets (Pty) Ltd</span><span class="sep">&bull;</span><span class="mut">Synced 1 hour ago</span></span>
+        <span class="r2"><span class="acct-name" id="acctBroker">VT Markets (Pty) Ltd</span><span class="acct-num" id="acctNum">#54845698</span></span>
+        <span class="r3"><span class="mut" id="acctSynced">Synced 1 hour ago</span></span>
       </span>
       <svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="m6 9 6 6 6-6"/></svg>
     </button>
@@ -352,14 +352,12 @@ function initAccountMenu() {
 
   const manageIcon = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"/><circle cx="12" cy="12" r="3"/></svg>';
 
-  function displayName(a) { return a.nickname || a.name; }
-
   function renderOptions() {
     drop.innerHTML = '<div class="dm-label">Switch account</div>' + ACCOUNTS.map((a, i) => `
       <button class="acct-opt${i === selected ? ' sel' : ''}" data-i="${i}">
         <span class="ao-tx">
-          <span class="ao-name">${displayName(a)}<span class="ao-num">${a.num}</span></span>
-          <span class="ao-meta">${a.broker} &bull; ${a.synced}</span>
+          <span class="ao-name">${a.broker}<span class="ao-num">${a.num}</span></span>
+          <span class="ao-meta">${a.synced}</span>
         </span>
         ${checkIcon}
       </button>`).join('') +
@@ -367,10 +365,9 @@ function initAccountMenu() {
   }
   function applyAccount(i) {
     const a = ACCOUNTS[i];
-    document.getElementById('acctName').textContent = displayName(a);
-    document.getElementById('acctNum').textContent = a.num;
     document.getElementById('acctBroker').textContent = a.broker;
-    const synced = document.querySelector('#acctMenu .r3 .mut:last-child');
+    document.getElementById('acctNum').textContent = a.num;
+    const synced = document.getElementById('acctSynced');
     if (synced) synced.textContent = a.synced;
   }
   function open() { renderOptions(); menu.classList.add('open'); trigger.setAttribute('aria-expanded', 'true'); }
@@ -424,7 +421,7 @@ function initAccountMenu() {
             <div class="ma-acct" data-i="${i}">
               ${confirmRemoveIdx === i ? `
                 <div class="ma-confirm" style="width:100%">
-                  <p>Remove <strong>${displayName(a)}</strong> (${a.num})?</p>
+                  <p>Remove <strong>${a.broker}</strong> (${a.num})?</p>
                   <div class="ma-confirm-actions">
                     <button class="ma-confirm-btn cancel" data-cancel="${i}">Cancel</button>
                     <button class="ma-confirm-btn remove" data-remove="${i}">Remove</button>
