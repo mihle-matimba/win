@@ -91,9 +91,22 @@ const TOPBAR_HTML = `
   <img class="tb-avatar" alt="" src="https://i.pravatar.cc/80?img=12">`;
 
 const ACCOUNTS = [
-  { name:'Test Account', num:'#54845698', broker:'VT Markets (Pty) Ltd', synced:'Synced 1 hour ago' },
-  { name:'Main Live',    num:'#88213004', broker:'VT Markets (Pty) Ltd', synced:'Synced 5 min ago' },
-  { name:'Practice',     num:'#10029384', broker:'MetaQuotes Demo',      synced:'Synced just now' },
+  { name:'Test Account', nickname:'', num:'#54845698', broker:'VT Markets (Pty) Ltd', synced:'Synced 1 hour ago' },
+  { name:'Main Live',    nickname:'', num:'#88213004', broker:'VT Markets (Pty) Ltd', synced:'Synced 5 min ago' },
+  { name:'Practice',     nickname:'', num:'#10029384', broker:'MetaQuotes Demo',      synced:'Synced just now' },
+];
+
+const BROKERS = [
+  'VT Markets (Pty) Ltd',
+  'MetaQuotes Demo',
+  'IC Markets',
+  'Exness',
+  'XM Global',
+  'FXCM',
+  'Pepperstone',
+  'OANDA',
+  'IG Markets',
+  'FP Markets',
 ];
 
 /* Component CSS injected once so both pages stay in sync */
@@ -127,6 +140,111 @@ const SHELL_CSS = `
 /* collapse icon rotates 180 when sidebar is collapsed */
 .collapse-btn svg{transition:transform .25s ease}
 .app.collapsed .collapse-btn svg{transform:rotate(180deg)}
+
+/* Manage Accounts button in dropdown */
+.acct-manage-btn{display:flex;align-items:center;gap:8px;width:100%;padding:11px 12px;border-radius:10px;
+  font-size:13.5px;font-weight:600;color:var(--accent);cursor:pointer;transition:background .12s;
+  border-top:1px solid var(--line);margin-top:4px;background:none;border-left:none;border-right:none;border-bottom:none}
+.acct-manage-btn:hover{background:rgba(91,116,255,.08)}
+.acct-manage-btn svg{width:16px;height:16px;flex:0 0 16px}
+
+/* Manage Accounts Modal */
+.ma-overlay{position:fixed;inset:0;z-index:500;background:rgba(0,0,0,.65);backdrop-filter:blur(4px);
+  display:none;align-items:center;justify-content:center;opacity:0;transition:opacity .18s ease}
+.ma-overlay.show{display:flex;opacity:1}
+.ma-modal{background:var(--card);border:1px solid var(--line);border-radius:18px;width:100%;max-width:480px;
+  max-height:85vh;overflow:hidden;display:flex;flex-direction:column;
+  box-shadow:0 32px 64px -16px rgba(0,0,0,.85);transform:translateY(10px);transition:transform .18s ease}
+.ma-overlay.show .ma-modal{transform:translateY(0)}
+.ma-header{display:flex;align-items:center;justify-content:space-between;padding:20px 24px 16px;border-bottom:1px solid var(--line)}
+.ma-header h2{font-size:18px;font-weight:700;color:var(--ink);margin:0}
+.ma-close{width:32px;height:32px;border-radius:8px;display:flex;align-items:center;justify-content:center;
+  cursor:pointer;background:none;border:none;color:var(--muted);transition:background .12s,color .12s}
+.ma-close:hover{background:rgba(255,255,255,.06);color:var(--ink)}
+.ma-close svg{width:18px;height:18px}
+.ma-body{padding:16px 24px 20px;overflow-y:auto;flex:1}
+.ma-body::-webkit-scrollbar{width:5px}
+.ma-body::-webkit-scrollbar-thumb{background:var(--line);border-radius:4px}
+
+/* Account list in modal */
+.ma-acct{display:flex;align-items:center;gap:12px;padding:12px 14px;border-radius:12px;
+  border:1px solid var(--line);margin-bottom:10px;transition:background .12s}
+.ma-acct:hover{background:rgba(255,255,255,.025)}
+.ma-acct-info{flex:1;min-width:0}
+.ma-acct-name{font-size:14px;font-weight:700;color:var(--ink);display:flex;align-items:center;gap:8px}
+.ma-acct-nickname{font-size:12px;font-weight:500;color:var(--accent);margin-top:1px}
+.ma-acct-num{font-size:11px;font-weight:700;color:var(--muted);background:var(--card-2);border:1px solid var(--line);
+  border-radius:999px;padding:1px 8px}
+.ma-acct-meta{font-size:12px;color:var(--muted);margin-top:3px}
+.ma-acct-actions{display:flex;gap:6px;flex-shrink:0}
+.ma-acct-btn{width:32px;height:32px;border-radius:8px;display:flex;align-items:center;justify-content:center;
+  cursor:pointer;background:none;border:1px solid var(--line);color:var(--muted);transition:all .12s}
+.ma-acct-btn:hover{background:rgba(255,255,255,.06);color:var(--ink);border-color:var(--muted)}
+.ma-acct-btn.danger:hover{background:rgba(255,107,129,.1);color:var(--red-val);border-color:var(--red-val)}
+.ma-acct-btn svg{width:15px;height:15px}
+
+/* Add account button */
+.ma-add-btn{display:flex;align-items:center;justify-content:center;gap:8px;width:100%;padding:12px;
+  border-radius:12px;border:1px dashed var(--line);background:none;color:var(--accent);font-size:14px;
+  font-weight:600;cursor:pointer;transition:all .12s;margin-top:6px}
+.ma-add-btn:hover{background:rgba(91,116,255,.06);border-color:var(--accent)}
+.ma-add-btn svg{width:16px;height:16px}
+
+/* Support text */
+.ma-support{font-size:12px;color:var(--faint);text-align:center;padding:14px 24px;border-top:1px solid var(--line);
+  line-height:1.5}
+.ma-support a{color:var(--accent);text-decoration:none}
+.ma-support a:hover{text-decoration:underline}
+
+/* Steps flow */
+.ma-step{display:none}
+.ma-step.active{display:block}
+.ma-step-header{display:flex;align-items:center;gap:10px;margin-bottom:18px}
+.ma-back-btn{width:32px;height:32px;border-radius:8px;display:flex;align-items:center;justify-content:center;
+  cursor:pointer;background:none;border:1px solid var(--line);color:var(--muted);transition:all .12s}
+.ma-back-btn:hover{background:rgba(255,255,255,.06);color:var(--ink)}
+.ma-back-btn svg{width:16px;height:16px}
+.ma-step-title{font-size:15px;font-weight:700;color:var(--ink)}
+.ma-step-subtitle{font-size:12px;color:var(--muted);margin-top:-10px;margin-bottom:16px}
+.ma-steps-indicator{display:flex;gap:6px;margin-bottom:18px}
+.ma-step-dot{height:3px;flex:1;border-radius:2px;background:var(--line);transition:background .2s}
+.ma-step-dot.done{background:var(--accent)}
+
+/* Broker list */
+.ma-broker{display:flex;align-items:center;gap:10px;width:100%;padding:11px 14px;border-radius:10px;
+  border:1px solid var(--line);background:none;color:var(--ink);font-size:14px;font-weight:500;
+  cursor:pointer;transition:all .12s;margin-bottom:8px;text-align:left}
+.ma-broker:hover{background:rgba(91,116,255,.06);border-color:var(--accent)}
+.ma-broker.sel{background:var(--accent-soft);border-color:var(--accent)}
+.ma-broker-icon{width:32px;height:32px;border-radius:8px;background:var(--card-2);display:flex;align-items:center;
+  justify-content:center;font-size:14px;font-weight:700;color:var(--accent);flex-shrink:0}
+
+/* Form inputs */
+.ma-field{margin-bottom:14px}
+.ma-label{display:block;font-size:12px;font-weight:600;color:var(--muted);margin-bottom:6px;text-transform:uppercase;letter-spacing:.5px}
+.ma-input{width:100%;padding:11px 14px;border-radius:10px;border:1px solid var(--line);background:var(--card-2);
+  color:var(--ink);font-size:14px;font-weight:500;transition:border-color .15s;outline:none;box-sizing:border-box}
+.ma-input:focus{border-color:var(--accent)}
+.ma-input::placeholder{color:var(--faint)}
+.ma-submit-btn{display:flex;align-items:center;justify-content:center;gap:8px;width:100%;padding:12px;
+  border-radius:12px;border:none;background:var(--accent);color:#fff;font-size:14px;font-weight:700;
+  cursor:pointer;transition:opacity .12s;margin-top:6px}
+.ma-submit-btn:hover{opacity:.88}
+.ma-submit-btn:disabled{opacity:.4;cursor:not-allowed}
+.ma-submit-btn svg{width:16px;height:16px}
+
+/* Nickname edit inline */
+.ma-nickname-input{padding:4px 8px;border-radius:6px;border:1px solid var(--accent);background:var(--card-2);
+  color:var(--ink);font-size:12px;font-weight:500;outline:none;width:120px;box-sizing:border-box}
+
+/* Remove confirm */
+.ma-confirm{padding:16px;border-radius:12px;border:1px solid var(--red-val);background:rgba(255,107,129,.06);margin-bottom:10px}
+.ma-confirm p{font-size:14px;color:var(--ink);margin:0 0 12px}
+.ma-confirm-actions{display:flex;gap:8px}
+.ma-confirm-btn{flex:1;padding:10px;border-radius:10px;font-size:13px;font-weight:600;cursor:pointer;transition:opacity .12s}
+.ma-confirm-btn.cancel{background:var(--card-2);border:1px solid var(--line);color:var(--ink)}
+.ma-confirm-btn.remove{background:var(--red-val);border:none;color:#fff}
+.ma-confirm-btn:hover{opacity:.85}
 `;
 
 function injectCSS() {
@@ -232,19 +350,24 @@ function initAccountMenu() {
   if (!menu || !trigger || !drop) return;
   let selected = 0;
 
+  const manageIcon = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"/><circle cx="12" cy="12" r="3"/></svg>';
+
+  function displayName(a) { return a.nickname || a.name; }
+
   function renderOptions() {
     drop.innerHTML = '<div class="dm-label">Switch account</div>' + ACCOUNTS.map((a, i) => `
       <button class="acct-opt${i === selected ? ' sel' : ''}" data-i="${i}">
         <span class="ao-tx">
-          <span class="ao-name">${a.name}<span class="ao-num">${a.num}</span></span>
+          <span class="ao-name">${displayName(a)}<span class="ao-num">${a.num}</span></span>
           <span class="ao-meta">${a.broker} &bull; ${a.synced}</span>
         </span>
         ${checkIcon}
-      </button>`).join('');
+      </button>`).join('') +
+      `<button class="acct-manage-btn" id="manageAcctsBtn">${manageIcon}<span>Manage accounts</span></button>`;
   }
   function applyAccount(i) {
     const a = ACCOUNTS[i];
-    document.getElementById('acctName').textContent = a.name;
+    document.getElementById('acctName').textContent = displayName(a);
     document.getElementById('acctNum').textContent = a.num;
     document.getElementById('acctBroker').textContent = a.broker;
     const synced = document.querySelector('#acctMenu .r3 .mut:last-child');
@@ -255,11 +378,224 @@ function initAccountMenu() {
 
   trigger.addEventListener('click', e => { e.stopPropagation(); menu.classList.contains('open') ? close() : open(); });
   drop.addEventListener('click', e => {
+    if (e.target.closest('#manageAcctsBtn')) { close(); openManageModal(); return; }
     const opt = e.target.closest('.acct-opt'); if (!opt) return;
     selected = +opt.dataset.i; applyAccount(selected); close();
   });
   document.addEventListener('click', e => { if (!e.target.closest('#acctMenu')) close(); });
   addEventListener('keydown', e => { if (e.key === 'Escape') close(); });
+
+  // ── Manage Accounts Modal ──
+  const overlay = document.createElement('div');
+  overlay.className = 'ma-overlay';
+  overlay.id = 'manageAccountsModal';
+  document.body.appendChild(overlay);
+
+  let modalView = 'list'; // 'list' | 'add-step1' | 'add-step2'
+  let addBroker = '';
+  let confirmRemoveIdx = -1;
+  let editNicknameIdx = -1;
+
+  function openManageModal() { modalView = 'list'; addBroker = ''; confirmRemoveIdx = -1; editNicknameIdx = -1; renderModal(); overlay.classList.add('show'); }
+  function closeManageModal() { overlay.classList.remove('show'); }
+
+  const trashIcon = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>';
+  const editIcon = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 3a2.83 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/></svg>';
+  const plusIcon = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12h14"/></svg>';
+  const backArrow = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m15 18-6-6 6-6"/></svg>';
+  const closeX = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6 6 18M6 6l12 12"/></svg>';
+  const linkIcon = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>';
+
+  function renderModal() {
+    if (modalView === 'list') renderListView();
+    else if (modalView === 'add-step1') renderStep1();
+    else if (modalView === 'add-step2') renderStep2();
+  }
+
+  function renderListView() {
+    overlay.innerHTML = `
+      <div class="ma-modal">
+        <div class="ma-header">
+          <h2>Manage Accounts</h2>
+          <button class="ma-close" id="maClose">${closeX}</button>
+        </div>
+        <div class="ma-body">
+          ${ACCOUNTS.map((a, i) => `
+            <div class="ma-acct" data-i="${i}">
+              ${confirmRemoveIdx === i ? `
+                <div class="ma-confirm" style="width:100%">
+                  <p>Remove <strong>${displayName(a)}</strong> (${a.num})?</p>
+                  <div class="ma-confirm-actions">
+                    <button class="ma-confirm-btn cancel" data-cancel="${i}">Cancel</button>
+                    <button class="ma-confirm-btn remove" data-remove="${i}">Remove</button>
+                  </div>
+                </div>
+              ` : `
+                <div class="ma-acct-info">
+                  <div class="ma-acct-name">${a.name}<span class="ma-acct-num">${a.num}</span></div>
+                  ${editNicknameIdx === i ? `
+                    <input class="ma-nickname-input" id="nicknameInput" type="text" value="${a.nickname || ''}" placeholder="Enter nickname..." maxlength="30" autofocus>
+                  ` : `
+                    ${a.nickname ? `<div class="ma-acct-nickname">${a.nickname}</div>` : ''}
+                  `}
+                  <div class="ma-acct-meta">${a.broker} &bull; ${a.synced}</div>
+                </div>
+                <div class="ma-acct-actions">
+                  <button class="ma-acct-btn" title="${editNicknameIdx === i ? 'Save nickname' : 'Edit nickname'}" data-edit="${i}">${editIcon}</button>
+                  <button class="ma-acct-btn danger" title="Remove account" data-trash="${i}">${trashIcon}</button>
+                </div>
+              `}
+            </div>
+          `).join('')}
+          <button class="ma-add-btn" id="maAddBtn">${plusIcon}<span>Add Account</span></button>
+        </div>
+        <div class="ma-support">Having trouble? <a href="mailto:support@mdmtraders.com">Contact support</a> for help linking or managing your accounts.</div>
+      </div>`;
+    bindListEvents();
+  }
+
+  function renderStep1() {
+    overlay.innerHTML = `
+      <div class="ma-modal">
+        <div class="ma-header">
+          <h2>Add Account</h2>
+          <button class="ma-close" id="maClose">${closeX}</button>
+        </div>
+        <div class="ma-body">
+          <div class="ma-steps-indicator"><div class="ma-step-dot done"></div><div class="ma-step-dot"></div></div>
+          <div class="ma-step-header">
+            <button class="ma-back-btn" id="maBack">${backArrow}</button>
+            <div class="ma-step-title">Step 1: Choose your broker</div>
+          </div>
+          <div class="ma-step-subtitle">Select the broker your trading account is registered with.</div>
+          ${BROKERS.map(b => `
+            <button class="ma-broker${addBroker === b ? ' sel' : ''}" data-broker="${b}">
+              <span class="ma-broker-icon">${b.charAt(0)}</span>
+              <span>${b}</span>
+            </button>
+          `).join('')}
+        </div>
+        <div class="ma-support">Can't find your broker? <a href="mailto:support@mdmtraders.com">Contact support</a> and we'll help you get set up.</div>
+      </div>`;
+    bindStep1Events();
+  }
+
+  function renderStep2() {
+    overlay.innerHTML = `
+      <div class="ma-modal">
+        <div class="ma-header">
+          <h2>Add Account</h2>
+          <button class="ma-close" id="maClose">${closeX}</button>
+        </div>
+        <div class="ma-body">
+          <div class="ma-steps-indicator"><div class="ma-step-dot done"></div><div class="ma-step-dot done"></div></div>
+          <div class="ma-step-header">
+            <button class="ma-back-btn" id="maBack">${backArrow}</button>
+            <div class="ma-step-title">Step 2: Account details</div>
+          </div>
+          <div class="ma-step-subtitle">Enter your account number from <strong>${addBroker}</strong>.</div>
+          <div class="ma-field">
+            <label class="ma-label">Account Number</label>
+            <input class="ma-input" id="maAcctNum" type="text" placeholder="e.g. 54845698" maxlength="20">
+          </div>
+          <div class="ma-field">
+            <label class="ma-label">Nickname (optional)</label>
+            <input class="ma-input" id="maAcctNick" type="text" placeholder="e.g. My Main Account" maxlength="30">
+          </div>
+          <button class="ma-submit-btn" id="maSubmit" disabled>${linkIcon}<span>Link Account</span></button>
+        </div>
+        <div class="ma-support">Unable to see your account after linking? <a href="mailto:support@mdmtraders.com">Contact support</a> for assistance.</div>
+      </div>`;
+    bindStep2Events();
+  }
+
+  function bindListEvents() {
+    overlay.querySelector('#maClose').onclick = closeManageModal;
+    overlay.querySelector('#maAddBtn').onclick = () => { modalView = 'add-step1'; addBroker = ''; renderModal(); };
+    overlay.querySelectorAll('[data-trash]').forEach(btn => {
+      btn.onclick = () => { confirmRemoveIdx = +btn.dataset.trash; renderModal(); };
+    });
+    overlay.querySelectorAll('[data-cancel]').forEach(btn => {
+      btn.onclick = () => { confirmRemoveIdx = -1; renderModal(); };
+    });
+    overlay.querySelectorAll('[data-remove]').forEach(btn => {
+      btn.onclick = () => {
+        const idx = +btn.dataset.remove;
+        ACCOUNTS.splice(idx, 1);
+        confirmRemoveIdx = -1;
+        if (selected >= ACCOUNTS.length) selected = Math.max(0, ACCOUNTS.length - 1);
+        if (ACCOUNTS.length) applyAccount(selected);
+        renderModal();
+      };
+    });
+    overlay.querySelectorAll('[data-edit]').forEach(btn => {
+      btn.onclick = () => {
+        const idx = +btn.dataset.edit;
+        if (editNicknameIdx === idx) {
+          const input = overlay.querySelector('#nicknameInput');
+          if (input) ACCOUNTS[idx].nickname = input.value.trim();
+          editNicknameIdx = -1;
+          applyAccount(selected);
+        } else {
+          editNicknameIdx = idx;
+        }
+        renderModal();
+        const inp = overlay.querySelector('#nicknameInput');
+        if (inp) inp.focus();
+      };
+    });
+    const nicknameInput = overlay.querySelector('#nicknameInput');
+    if (nicknameInput) {
+      nicknameInput.addEventListener('keydown', e => {
+        if (e.key === 'Enter') {
+          ACCOUNTS[editNicknameIdx].nickname = nicknameInput.value.trim();
+          editNicknameIdx = -1;
+          applyAccount(selected);
+          renderModal();
+        }
+      });
+    }
+    overlay.onclick = e => { if (e.target === overlay) closeManageModal(); };
+  }
+
+  function bindStep1Events() {
+    overlay.querySelector('#maClose').onclick = closeManageModal;
+    overlay.querySelector('#maBack').onclick = () => { modalView = 'list'; renderModal(); };
+    overlay.querySelectorAll('[data-broker]').forEach(btn => {
+      btn.onclick = () => { addBroker = btn.dataset.broker; modalView = 'add-step2'; renderModal(); };
+    });
+    overlay.onclick = e => { if (e.target === overlay) closeManageModal(); };
+  }
+
+  function bindStep2Events() {
+    overlay.querySelector('#maClose').onclick = closeManageModal;
+    overlay.querySelector('#maBack').onclick = () => { modalView = 'add-step1'; renderModal(); };
+    const numInput = overlay.querySelector('#maAcctNum');
+    const nickInput = overlay.querySelector('#maAcctNick');
+    const submitBtn = overlay.querySelector('#maSubmit');
+    numInput.addEventListener('input', () => { submitBtn.disabled = !numInput.value.trim(); });
+    submitBtn.onclick = () => {
+      const num = numInput.value.trim();
+      if (!num) return;
+      const nick = nickInput.value.trim();
+      const newAcct = {
+        name: addBroker.split(' ')[0] + ' Account',
+        nickname: nick,
+        num: '#' + num.replace(/^#/, ''),
+        broker: addBroker,
+        synced: 'Synced just now'
+      };
+      ACCOUNTS.push(newAcct);
+      selected = ACCOUNTS.length - 1;
+      applyAccount(selected);
+      modalView = 'list';
+      renderModal();
+    };
+    overlay.onclick = e => { if (e.target === overlay) closeManageModal(); };
+    numInput.focus();
+  }
+
+  addEventListener('keydown', e => { if (e.key === 'Escape' && overlay.classList.contains('show')) closeManageModal(); });
 }
 
 return { initShell };
