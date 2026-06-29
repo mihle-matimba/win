@@ -104,8 +104,9 @@ const BROKERS_FALLBACK = [
   'FP Markets',
 ];
 
-let communityBrokers = null; // null = not loaded yet
-let networksLocked  = false;
+let communityBrokers    = null; // null = not loaded yet
+let networksLocked      = false;
+let communityLoadPromise = null;
 
 // ── Helper functions (defined before initShell to avoid hoisting issues) ──
 
@@ -175,6 +176,8 @@ function applyUserInfo() {
 async function loadLinkedAccounts() {
   const userObj = JSON.parse(localStorage.getItem('win_user') || 'null');
   if (!userObj?.id) return;
+  // Wait for community brokers before building broker name
+  if (communityLoadPromise) await communityLoadPromise;
   try {
     const res = await fetch(`/api/linked-accounts?user_id=${encodeURIComponent(userObj.id)}`);
     if (!res.ok) return;
@@ -255,7 +258,7 @@ function initShell({ activePage = '' } = {}) {
   if (topbar)  topbar.innerHTML  = TOPBAR_HTML;
 
   loadChannels();
-  loadCommunity();
+  communityLoadPromise = loadCommunity();
   applyUserInfo();
   initAccountMenu(activePage);
   loadLinkedAccounts();
