@@ -23,46 +23,23 @@
       <div class="j-layout">
         <div class="card j-table-card">
           <div class="j-table-top">
-            <div style="display:flex;align-items:center;gap:0">
-              <button class="j-tab active" data-tab="trades">Trades</button>
-              <button class="j-tab" data-tab="balance">Balance Operations</button>
-            </div>
-            <div style="display:flex;align-items:center;gap:10px">
-              <div class="info" id="jInfo"></div>
-              <button class="j-filter-btn" id="filterBtn">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 3H2l8 9.46V19l4 2v-8.54L22 3Z"/></svg>
-                Filters<span class="badge" id="filterBadge" style="display:none">0</span>
-              </button>
-            </div>
+            <div class="info" id="jInfo"></div>
+            <button class="j-filter-btn" id="filterBtn">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 3H2l8 9.46V19l4 2v-8.54L22 3Z"/></svg>
+              Filters<span class="badge" id="filterBadge" style="display:none">0</span>
+            </button>
           </div>
-
-          <!-- Trades tab -->
-          <div id="tradesPanel">
-            <div class="j-scroll">
-              <table class="j-table">
-                <thead><tr>
-                  <th>Symbol</th><th>Type</th><th>Open Price</th><th>Close Price</th>
-                  <th>Open Time</th><th>Close Time</th><th>Volume</th><th>Net Profit</th><th>Rating</th><th>Insight</th>
-                </tr></thead>
-                <tbody id="jBody"></tbody>
-              </table>
-            </div>
-            <div class="j-cards" id="jCards"></div>
-            <div class="j-pag" id="jPag"></div>
+          <div class="j-scroll">
+            <table class="j-table">
+              <thead><tr>
+                <th>Symbol</th><th>Type</th><th>Open Price</th><th>Close Price</th>
+                <th>Open Time</th><th>Close Time</th><th>Volume</th><th>Net Profit</th><th>Rating</th><th>Insight</th>
+              </tr></thead>
+              <tbody id="jBody"></tbody>
+            </table>
           </div>
-
-          <!-- Balance Operations tab -->
-          <div id="balancePanel" style="display:none">
-            <div class="j-scroll">
-              <table class="j-table">
-                <thead><tr>
-                  <th>Type</th><th>Date / Time</th><th>Amount</th><th>Commission</th><th>Note</th>
-                </tr></thead>
-                <tbody id="bBody"></tbody>
-              </table>
-            </div>
-            <div class="j-pag" id="bPag"></div>
-          </div>
+          <div class="j-cards" id="jCards"></div>
+          <div class="j-pag" id="jPag"></div>
 
         </div>
       </div>
@@ -240,23 +217,6 @@
 .j-empty{padding:60px 24px;text-align:center;color:var(--faint);font-size:13px;font-weight:500}
 .j-empty svg{width:28px;height:28px;margin-bottom:10px;opacity:.35;display:block;margin-inline:auto}
 
-/* ── Tab selector ── */
-.j-tab{
-  background:none;border:none;padding:12px 18px;font-size:13px;font-weight:600;
-  color:var(--muted);cursor:pointer;border-bottom:2px solid transparent;
-  transition:color .15s,border-color .15s;white-space:nowrap;
-}
-.j-tab:hover{color:var(--ink-2)}
-.j-tab.active{color:var(--ink);border-bottom-color:var(--accent)}
-
-/* ── Balance ops type badge ── */
-.bal-op-badge{
-  display:inline-flex;align-items:center;gap:5px;font-size:12px;font-weight:700;
-  padding:3px 9px;border-radius:6px;text-transform:capitalize;
-}
-.bal-op-badge.deposit{background:var(--green-soft);color:var(--green-val)}
-.bal-op-badge.withdrawal{background:var(--red-soft);color:var(--red-val)}
-.bal-op-badge.balance,.bal-op-badge.credit{background:var(--accent-soft);color:var(--accent)}
 </style>
 <script src="shared-shell.js"></script>
 <script>
@@ -288,11 +248,6 @@ let TRADES = [];
 let jTotal = 0, jPage = 0, jPerPage = 16;
 let selectedIdx = -1, currentTrade = -1;
 let activeAccountId = null;
-let activeTab = 'trades'; // 'trades' | 'balance'
-
-/* balance ops state */
-let BAL_OPS = [];
-let bTotal = 0, bPage = 0;
 
 /* ── map DB row → trade object ── */
 function mapRow(r, localIdx) {
@@ -323,23 +278,11 @@ function mapRow(r, localIdx) {
 
 /* ── show skeleton rows ── */
 function showSkeleton() {
-  if (activeTab === 'trades') {
-    jBody.innerHTML = '';
-    jCards.innerHTML = '';
-    jInfo.textContent = '';
-    jPag.innerHTML = '';
-    for (let i = 0; i < jPerPage; i++) jBody.appendChild(skelRow());
-  } else {
-    const bBody = document.getElementById('bBody');
-    bBody.innerHTML = '';
-    document.getElementById('bPag').innerHTML = '';
-    for (let i = 0; i < jPerPage; i++) {
-      const tr = document.createElement('tr');
-      tr.className = 'j-skel-row';
-      tr.innerHTML = [50,70,40,35,60].map(w=>`<td><div class="j-skel-cell" style="width:${w}%"></div></td>`).join('');
-      bBody.appendChild(tr);
-    }
-  }
+  jBody.innerHTML = '';
+  jCards.innerHTML = '';
+  jInfo.textContent = '';
+  jPag.innerHTML = '';
+  for (let i = 0; i < jPerPage; i++) jBody.appendChild(skelRow());
 }
 
 /* ── render table with loaded data ── */
@@ -416,74 +359,21 @@ function renderTable() {
   jPag.innerHTML = `<span class="pag-info">${jPerPage} per page</span><div class="pag-btns">${btns}</div>`;
 }
 
-/* ── balance ops render ── */
-function renderBalanceOps() {
-  const bBody = document.getElementById('bBody');
-  const bPag  = document.getElementById('bPag');
-  bBody.innerHTML = '';
-
-  if (!BAL_OPS.length) {
-    const empty = document.createElement('tr');
-    empty.innerHTML = `<td colspan="5"><div class="j-empty"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M9 17H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v5"/><path d="m19 14-5 5-2-2"/></svg>No balance operations</div></td>`;
-    bBody.appendChild(empty);
-    bPag.innerHTML = '';
-    return;
-  }
-
-  BAL_OPS.forEach(r => {
-    const amt    = parseFloat(r.profit) || 0;
-    const comm   = parseFloat(r.commission) || 0;
-    const typeLC = (r.type || 'balance').toLowerCase();
-    const pos    = amt >= 0;
-    const tr = document.createElement('tr');
-    tr.innerHTML = `
-      <td><span class="bal-op-badge ${typeLC}">${r.type || 'Balance'}</span></td>
-      <td>${fmtDate(r.open_time)}</td>
-      <td class="${pos?'pos':'neg'}" style="font-weight:700">${fmt$(amt)}</td>
-      <td style="color:var(--muted)">${comm ? fmt$(comm) : '—'}</td>
-      <td style="color:var(--faint);font-size:12px">${r.symbol || ''}</td>`;
-    bBody.appendChild(tr);
-  });
-
-  /* pagination */
-  const totalPages = Math.max(1, Math.ceil(bTotal / jPerPage));
-  const start = bPage * jPerPage;
-  jInfo.textContent = `${start + 1}–${start + BAL_OPS.length} of ${bTotal}`;
-  let btns = `<button class="pag-btn" data-bp="prev"${bPage===0?' disabled':''}><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="m15 18-6-6 6-6"/></svg></button>`;
-  for (let i = 0; i < totalPages; i++) {
-    if (totalPages > 7 && i > 1 && i < totalPages - 2 && Math.abs(i - bPage) > 1) { if (!btns.endsWith('…</span>')) btns += '<span style="color:var(--faint);padding:0 4px">…</span>'; continue; }
-    btns += `<button class="pag-btn${i===bPage?' active':''}" data-bp="${i}">${i+1}</button>`;
-  }
-  btns += `<button class="pag-btn" data-bp="next"${bPage>=totalPages-1?' disabled':''}><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="m9 18 6-6-6-6"/></svg></button>`;
-  bPag.innerHTML = `<span class="pag-info">${jPerPage} per page</span><div class="pag-btns">${btns}</div>`;
-}
-
 /* ── fetch from API ── */
 async function loadPage(accountId, page) {
-  if (!accountId) {
-    if (activeTab === 'trades') { TRADES=[]; jTotal=0; renderTable(); }
-    else { BAL_OPS=[]; bTotal=0; renderBalanceOps(); }
-    return;
-  }
+  if (!accountId) { TRADES=[]; jTotal=0; renderTable(); return; }
   showSkeleton();
   try {
-    const params = new URLSearchParams({ account_id: accountId, page, per_page: jPerPage, tab: activeTab });
+    const params = new URLSearchParams({ account_id: accountId, page, per_page: jPerPage, tab: 'trades' });
     const res  = await fetch(`/api/transactions?${params}`);
     const json = await res.json();
-    if (activeTab === 'trades') {
-      jTotal = json.total || 0;
-      TRADES = (json.transactions || []).map((r, i) => mapRow(r, page * jPerPage + i));
-      renderTable();
-    } else {
-      bTotal  = json.total || 0;
-      BAL_OPS = json.transactions || [];
-      renderBalanceOps();
-    }
+    jTotal = json.total || 0;
+    TRADES = (json.transactions || []).map((r, i) => mapRow(r, page * jPerPage + i));
   } catch(e) {
     console.error('Journal load error:', e);
-    if (activeTab === 'trades') { TRADES=[]; jTotal=0; renderTable(); }
-    else { BAL_OPS=[]; bTotal=0; renderBalanceOps(); }
+    TRADES=[]; jTotal=0;
   }
+  renderTable();
 }
 
 /* ── resolve broker_clients.id from selected account index ── */
@@ -634,30 +524,6 @@ document.getElementById('fdClear').addEventListener('click', () => {
   updateFilterBadge();
 });
 document.getElementById('fdApply').addEventListener('click', () => { closeFilters(); jPage=0; loadPage(activeAccountId, 0); });
-
-/* ── Tab switching ── */
-document.querySelectorAll('.j-tab').forEach(btn => {
-  btn.addEventListener('click', () => {
-    if (btn.dataset.tab === activeTab) return;
-    document.querySelectorAll('.j-tab').forEach(b => b.classList.remove('active'));
-    btn.classList.add('active');
-    activeTab = btn.dataset.tab;
-    const isBalance = activeTab === 'balance';
-    document.getElementById('tradesPanel').style.display  = isBalance ? 'none' : '';
-    document.getElementById('balancePanel').style.display = isBalance ? '' : 'none';
-    document.getElementById('filterBtn').style.display    = isBalance ? 'none' : '';
-    bPage = 0; jPage = 0;
-    loadPage(activeAccountId, 0);
-  });
-});
-
-/* ── Balance ops pagination ── */
-document.getElementById('bPag').addEventListener('click', e => {
-  const b = e.target.closest('[data-bp]'); if (!b || b.disabled) return;
-  const v = b.dataset.bp;
-  if (v === 'prev') bPage--; else if (v === 'next') bPage++; else bPage = +v;
-  loadPage(activeAccountId, bPage);
-});
 
 showSkeleton();
 init();
