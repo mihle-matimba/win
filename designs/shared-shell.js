@@ -95,7 +95,8 @@ const ACCOUNTS = [
   { name:'Practice',     nickname:'', num:'#10029384', broker:'MetaQuotes Demo',      synced:'Synced just now' },
 ];
 
-const BROKERS = [
+/* Fallback broker list — overridden by community.allowed_brokers once loaded */
+const BROKERS_FALLBACK = [
   'VT Markets (Pty) Ltd',
   'MetaQuotes Demo',
   'IC Markets',
@@ -108,6 +109,33 @@ const BROKERS = [
   'FP Markets',
 ];
 
+let communityBrokers = null; // null = not loaded yet
+
+async function loadCommunity() {
+  try {
+    const userObj = JSON.parse(localStorage.getItem('win_user') || 'null');
+    const communityId = userObj?.user_metadata?.community_id;
+
+    const param = communityId
+      ? `id=${encodeURIComponent(communityId)}`
+      : `domain=${encodeURIComponent(location.hostname)}`;
+
+    const res = await fetch(`/api/community?${param}`);
+    if (!res.ok) throw new Error();
+    const { community } = await res.json();
+    communityBrokers = Array.isArray(community?.allowed_brokers) && community.allowed_brokers.length
+      ? community.allowed_brokers
+      : BROKERS_FALLBACK;
+  } catch {
+    communityBrokers = BROKERS_FALLBACK;
+  }
+  // If the add-account modal is already open on step 1, refresh the broker list
+  const modal = document.getElementById('manageAccountsModal');
+  if (modal && modal.classList.contains('show') && modal.querySelector('.ma-loading')) {
+    modal.dispatchEvent(new CustomEvent('community-loaded'));
+  }
+}
+
 function initShell({ activePage = '' } = {}) {
   const sidebar = document.getElementById('sidebar');
   const topbar  = document.querySelector('.topbar');
@@ -115,6 +143,7 @@ function initShell({ activePage = '' } = {}) {
   if (topbar)  topbar.innerHTML  = TOPBAR_HTML;
 
   loadChannels();
+  loadCommunity();
   initAccountMenu();
 
   // logo fallback
@@ -318,12 +347,17 @@ function initAccountMenu() {
             <div class="ma-step-title">Step 1: Choose your broker</div>
           </div>
           <div class="ma-step-subtitle">Select the broker your trading account is registered with.</div>
-          ${BROKERS.map(b => `
-            <button class="ma-broker${addBroker === b ? ' sel' : ''}" data-broker="${b}">
-              <span class="ma-broker-icon">${b.charAt(0)}</span>
-              <span>${b}</span>
-            </button>
-          `).join('')}
+          ${communityBrokers === null
+            ? `<div class="ma-loading">Loading brokers…</div>`
+            : (communityBrokers.length === 0
+                ? `<div class="ma-loading">No brokers configured for your community.</div>`
+                : communityBrokers.map(b => `
+                    <button class="ma-broker${addBroker === b ? ' sel' : ''}" data-broker="${b}">
+                      <span class="ma-broker-icon">${b.charAt(0)}</span>
+                      <span>${b}</span>
+                    </button>`).join('')
+              )
+          }
         </div>
         <div class="ma-support">Can't find your broker? <a href="mailto:support@mdmtraders.com">Contact support</a> and we'll help you get set up.</div>
       </div>`;
@@ -415,6 +449,8 @@ function initAccountMenu() {
       btn.onclick = () => { addBroker = btn.dataset.broker; modalView = 'add-step2'; renderModal(); };
     });
     overlay.onclick = e => { if (e.target === overlay) closeManageModal(); };
+    // Re-render if community data arrives while modal is open
+    overlay.addEventListener('community-loaded', () => renderModal(), { once: true });
   }
 
   function bindStep2Events() {
