@@ -13,8 +13,10 @@
 <style>
 /* ── Layout ── */
 .mc-wrap{display:flex;flex-direction:column;gap:18px;width:100%}
-.mc-cols{display:grid;grid-template-columns:360px 1fr;gap:18px;align-items:start}
-@media(max-width:1000px){.mc-cols{grid-template-columns:1fr}}
+/* 2-col grid for param fields inside the panel */
+.mc-fields-grid{display:grid;grid-template-columns:1fr 1fr;gap:0 24px}
+.mc-fields-grid .mc-field-full{grid-column:1/-1}
+@media(max-width:640px){.mc-fields-grid{grid-template-columns:1fr}}
 
 /* ── Params panel ── */
 .mc-panel{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);padding:24px}
@@ -39,7 +41,7 @@
 .mc-toggle-btn.active{background:var(--accent);color:#fff}
 
 /* ── Run button ── */
-.mc-run-btn{width:100%;margin-top:22px;padding:14px;border:none;border-radius:12px;background:linear-gradient(90deg,#7c5cfc,#ff6bab);color:#fff;font-size:15px;font-weight:700;font-family:Inter,sans-serif;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:10px;transition:opacity .15s,transform .1s}
+.mc-run-btn{width:100%;margin-top:8px;padding:14px;border:none;border-radius:12px;background:linear-gradient(90deg,#7c5cfc,#ff6bab);color:#fff;font-size:15px;font-weight:700;font-family:Inter,sans-serif;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:10px;transition:opacity .15s,transform .1s}
 .mc-run-btn:hover{opacity:.9}
 .mc-run-btn:active{transform:scale(.98)}
 .mc-run-btn:disabled{opacity:.5;cursor:not-allowed}
@@ -147,100 +149,105 @@
 
       <div class="mc-wrap">
 
-        <div class="mc-cols">
-
-          <!-- ── Parameters panel ── -->
+          <!-- ── Parameters panel (full width, fields in 2-col grid) ── -->
           <div class="mc-panel">
             <div class="mc-panel-title">Strategy Parameters</div>
 
-            <!-- Starting Capital -->
-            <div class="mc-field">
-              <div class="mc-label">Starting Capital <span class="tip" title="Your initial account size">?</span></div>
-              <input class="mc-input" type="number" id="pCapital" value="25000" min="100">
-            </div>
+            <div class="mc-fields-grid">
 
-            <!-- Win Rate -->
-            <div class="mc-field">
-              <div class="mc-label">Win Rate (%) <span class="tip" title="% of trades that are profitable">?</span></div>
-              <input class="mc-input" type="number" id="pWinRate" value="55" min="1" max="99" step="0.5">
-              <div class="mc-chips">
-                <div class="mc-chip" data-field="pWinRate" data-val="40">40%</div>
-                <div class="mc-chip" data-field="pWinRate" data-val="50">50%</div>
-                <div class="mc-chip active" data-field="pWinRate" data-val="55">55%</div>
-                <div class="mc-chip" data-field="pWinRate" data-val="60">60%</div>
+              <!-- Starting Capital -->
+              <div class="mc-field">
+                <div class="mc-label">Starting Capital <span class="tip" title="Your initial account size">?</span></div>
+                <input class="mc-input" type="number" id="pCapital" value="25000" min="100">
               </div>
-            </div>
 
-            <!-- Risk per Trade -->
-            <div class="mc-field">
-              <div class="mc-label">Risk per Trade (%) <span class="tip" title="% of account risked per trade">?</span></div>
-              <input class="mc-input" type="number" id="pRisk" value="1" min="0.1" max="100" step="0.1">
-              <div class="mc-chips">
-                <div class="mc-chip" data-field="pRisk" data-val="0.5">0.5%</div>
-                <div class="mc-chip active" data-field="pRisk" data-val="1">1%</div>
-                <div class="mc-chip" data-field="pRisk" data-val="2">2%</div>
-                <div class="mc-chip" data-field="pRisk" data-val="3">3%</div>
+              <!-- Win Rate -->
+              <div class="mc-field">
+                <div class="mc-label">Win Rate (%) <span class="tip" title="% of trades that are profitable">?</span></div>
+                <input class="mc-input" type="number" id="pWinRate" value="55" min="1" max="99" step="0.5">
+                <div class="mc-chips">
+                  <div class="mc-chip" data-field="pWinRate" data-val="40">40%</div>
+                  <div class="mc-chip" data-field="pWinRate" data-val="50">50%</div>
+                  <div class="mc-chip active" data-field="pWinRate" data-val="55">55%</div>
+                  <div class="mc-chip" data-field="pWinRate" data-val="60">60%</div>
+                </div>
               </div>
-            </div>
 
-            <!-- Position Sizing -->
-            <div class="mc-field">
-              <div class="mc-label">Position Sizing <span class="tip" title="Compounding recalculates risk on current balance; Fixed Dollar uses starting capital">?</span></div>
-              <div class="mc-toggle">
-                <button class="mc-toggle-btn active" id="btnCompound" data-mode="compound">Compounding</button>
-                <button class="mc-toggle-btn" id="btnFixed" data-mode="fixed">Fixed Dollar</button>
+              <!-- Risk per Trade -->
+              <div class="mc-field">
+                <div class="mc-label">Risk per Trade (%) <span class="tip" title="% of account risked per trade">?</span></div>
+                <input class="mc-input" type="number" id="pRisk" value="1" min="0.1" max="100" step="0.1">
+                <div class="mc-chips">
+                  <div class="mc-chip" data-field="pRisk" data-val="0.5">0.5%</div>
+                  <div class="mc-chip active" data-field="pRisk" data-val="1">1%</div>
+                  <div class="mc-chip" data-field="pRisk" data-val="2">2%</div>
+                  <div class="mc-chip" data-field="pRisk" data-val="3">3%</div>
+                </div>
               </div>
-            </div>
 
-            <!-- R:R Ratio -->
-            <div class="mc-field">
-              <div class="mc-label">Reward : Risk Ratio <span class="tip" title="Profit target relative to stop loss (e.g. 1.5 means 1.5R per winner)">?</span></div>
-              <input class="mc-input" type="number" id="pRRR" value="1.5" min="0.1" step="0.1">
-              <div class="mc-chips">
-                <div class="mc-chip" data-field="pRRR" data-val="1">1:1</div>
-                <div class="mc-chip active" data-field="pRRR" data-val="1.5">1.5:1</div>
-                <div class="mc-chip" data-field="pRRR" data-val="2">2:1</div>
-                <div class="mc-chip" data-field="pRRR" data-val="3">3:1</div>
+              <!-- Position Sizing -->
+              <div class="mc-field">
+                <div class="mc-label">Position Sizing <span class="tip" title="Compounding recalculates risk on current balance; Fixed Dollar uses starting capital">?</span></div>
+                <div class="mc-toggle">
+                  <button class="mc-toggle-btn active" id="btnCompound" data-mode="compound">Compounding</button>
+                  <button class="mc-toggle-btn" id="btnFixed" data-mode="fixed">Fixed Dollar</button>
+                </div>
               </div>
-            </div>
 
-            <!-- Number of Trades -->
-            <div class="mc-field">
-              <div class="mc-label">Number of Trades <span class="tip" title="Trades simulated per run">?</span></div>
-              <input class="mc-input" type="number" id="pTrades" value="200" min="10" max="2000">
-            </div>
-
-            <!-- Ruin Threshold -->
-            <div class="mc-field">
-              <div class="mc-label">Ruin Threshold (%) <span class="tip" title="Max drawdown that counts as account ruin">?</span></div>
-              <div class="mc-chips">
-                <div class="mc-chip" data-field="pRuin" data-val="30">30%</div>
-                <div class="mc-chip active" data-field="pRuin" data-val="50">50%</div>
-                <div class="mc-chip" data-field="pRuin" data-val="70">70%</div>
+              <!-- R:R Ratio -->
+              <div class="mc-field">
+                <div class="mc-label">Reward : Risk Ratio <span class="tip" title="Profit target relative to stop loss (e.g. 1.5 means 1.5R per winner)">?</span></div>
+                <input class="mc-input" type="number" id="pRRR" value="1.5" min="0.1" step="0.1">
+                <div class="mc-chips">
+                  <div class="mc-chip" data-field="pRRR" data-val="1">1:1</div>
+                  <div class="mc-chip active" data-field="pRRR" data-val="1.5">1.5:1</div>
+                  <div class="mc-chip" data-field="pRRR" data-val="2">2:1</div>
+                  <div class="mc-chip" data-field="pRRR" data-val="3">3:1</div>
+                </div>
               </div>
-              <input class="mc-input" type="number" id="pRuin" value="50" min="5" max="99" style="margin-top:8px">
-            </div>
 
-            <!-- Simulations -->
-            <div class="mc-field">
-              <div class="mc-label">Simulations <span class="tip" title="Number of Monte Carlo paths (more = more accurate, slower)">?</span></div>
-              <input class="mc-input" type="number" id="pSims" value="1000" min="100" max="5000" step="100">
-            </div>
+              <!-- Number of Trades -->
+              <div class="mc-field">
+                <div class="mc-label">Number of Trades <span class="tip" title="Trades simulated per run">?</span></div>
+                <input class="mc-input" type="number" id="pTrades" value="200" min="10" max="2000">
+              </div>
 
-            <button class="mc-run-btn" id="runBtn">
-              <div class="spinner"></div>
-              <span class="run-label"><i class="fa-solid fa-play" style="font-size:12px"></i> &nbsp;Run Simulation</span>
-            </button>
+              <!-- Ruin Threshold -->
+              <div class="mc-field">
+                <div class="mc-label">Ruin Threshold (%) <span class="tip" title="Max drawdown that counts as account ruin">?</span></div>
+                <div class="mc-chips">
+                  <div class="mc-chip" data-field="pRuin" data-val="30">30%</div>
+                  <div class="mc-chip active" data-field="pRuin" data-val="50">50%</div>
+                  <div class="mc-chip" data-field="pRuin" data-val="70">70%</div>
+                </div>
+                <input class="mc-input" type="number" id="pRuin" value="50" min="5" max="99" style="margin-top:8px">
+              </div>
+
+              <!-- Simulations -->
+              <div class="mc-field">
+                <div class="mc-label">Simulations <span class="tip" title="Number of Monte Carlo paths (more = more accurate, slower)">?</span></div>
+                <input class="mc-input" type="number" id="pSims" value="1000" min="100" max="5000" step="100">
+              </div>
+
+              <!-- Run button — spans both columns -->
+              <div class="mc-field-full">
+                <button class="mc-run-btn" id="runBtn">
+                  <div class="spinner"></div>
+                  <span class="run-label"><i class="fa-solid fa-play" style="font-size:12px"></i> &nbsp;Run Simulation</span>
+                </button>
+              </div>
+
+            </div><!-- /mc-fields-grid -->
           </div>
 
-          <!-- ── Results panel ── -->
-          <div id="resultsCol">
+          <!-- ── Below: placeholder swaps to results ── -->
+          <div id="resultsArea">
 
             <!-- Placeholder before first run -->
             <div class="mc-placeholder" id="mcPlaceholder">
               <i class="fa-solid fa-dice-d20"></i>
               <div class="mc-placeholder-title">Ready to Simulate</div>
-              <div class="mc-placeholder-sub">Set your strategy parameters on the left and click Run Simulation to see your probability outcomes.</div>
+              <div class="mc-placeholder-sub">Set your strategy parameters above and click Run Simulation to see your probability outcomes.</div>
             </div>
 
             <!-- Real results (hidden until run) -->
@@ -348,8 +355,7 @@
               </div>
 
             </div><!-- /mcResults -->
-          </div><!-- /resultsCol -->
-        </div><!-- /mc-cols -->
+          </div><!-- /resultsArea -->
       </div><!-- /mc-wrap -->
 
     </main>
