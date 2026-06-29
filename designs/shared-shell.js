@@ -781,39 +781,6 @@ function initAccountMenu(activePage) {
     loadChannels();
   }
 
-  const PAGE_LOCK_SELECTORS = {
-    calendar: ['.cal', '.th-card'],
-    journal:  ['.j-layout'],
-    courses:  ['#gridView']
-  };
-
-  const lockSvg = '<svg class="lock-icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>';
-
-  function applyPageLocks(page) {
-    const sels = PAGE_LOCK_SELECTORS[page] || [];
-    sels.forEach(sel => {
-      const el = document.querySelector(sel);
-      if (!el || el.classList.contains('has-lock')) return;
-      el.classList.add('has-lock');
-      const overlay = document.createElement('div');
-      overlay.className = 'card-lock';
-      overlay.innerHTML = lockSvg + '<button class="lock-unlock-btn">Unlock</button>';
-      el.appendChild(overlay);
-      overlay.querySelector('.lock-unlock-btn').onclick = () => showAccountGate();
-    });
-  }
-
-  function removePageLocks() {
-    document.querySelectorAll('.has-lock').forEach(el => {
-      el.classList.remove('has-lock');
-      const lk = el.querySelector('.card-lock');
-      if (lk) lk.remove();
-    });
-    networksLocked = false;
-    // Re-render channels to restore stripped href/target/rel attrs and remove lock icons
-    loadChannels();
-  }
-
   function showAccountGate() {
     if (document.getElementById('accountGate')) return;
 
