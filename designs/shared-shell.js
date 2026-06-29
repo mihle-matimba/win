@@ -52,8 +52,7 @@ const SIDEBAR_HTML = `
       <svg class="grp-chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="m6 9 6 6 6-6"/></svg>
     </button>
     <div class="nav-group" id="networkGroup">
-      <a class="nav-sub" data-page="telegram"><span class="dot"></span><span>Telegram Groups</span></a>
-      <a class="nav-sub" data-page="weekly-schedule"><span class="dot"></span><span>Weekly Schedule</span></a>
+      <div class="nav-empty" id="networkLoading">Loading...</div>
     </div>
     <button class="nav-item nav-group-trigger" id="coursesTrigger" aria-expanded="false" data-group="courses">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2Z"/></svg>
@@ -115,6 +114,7 @@ function initShell({ activePage = '' } = {}) {
   if (sidebar) sidebar.innerHTML = SIDEBAR_HTML;
   if (topbar)  topbar.innerHTML  = TOPBAR_HTML;
 
+  loadChannels();
   initAccountMenu();
 
   // logo fallback
@@ -448,5 +448,27 @@ function initAccountMenu() {
   addEventListener('keydown', e => { if (e.key === 'Escape' && overlay.classList.contains('show')) closeManageModal(); });
 }
 
-return { initShell };
+// Load channels from API and populate the Network dropdown
+async function loadChannels() {
+  try {
+    const res = await fetch('/api/channels');
+    if (!res.ok) throw new Error();
+    const { channels } = await res.json();
+    const group = document.getElementById('networkGroup');
+    if (!group) return;
+    if (!channels || !channels.length) {
+      group.innerHTML = '<div class="nav-empty">No channels yet</div>';
+      return;
+    }
+    group.innerHTML = channels.map(ch => `
+      <a class="nav-sub" href="${ch.url}" target="_blank" rel="noopener">
+        <span class="dot"></span><span>${ch.name}</span>
+      </a>`).join('');
+  } catch {
+    const group = document.getElementById('networkGroup');
+    if (group) group.innerHTML = '<div class="nav-empty">No channels yet</div>';
+  }
+}
+
+return { initShell, loadChannels };
 })();
