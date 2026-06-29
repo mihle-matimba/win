@@ -209,55 +209,104 @@
   </div>
 </div>
 
+<style>
+@keyframes j-shimmer{0%{background-position:200% 0}100%{background-position:-200% 0}}
+.j-skel-row td{padding:10px 14px}
+.j-skel-cell{height:13px;border-radius:5px;background:linear-gradient(90deg,var(--card-2) 25%,rgba(255,255,255,.05) 50%,var(--card-2) 75%);background-size:200% 100%;animation:j-shimmer 1.6s infinite}
+.j-empty{padding:60px 24px;text-align:center;color:var(--faint);font-size:13px;font-weight:500}
+.j-empty svg{width:28px;height:28px;margin-bottom:10px;opacity:.35;display:block;margin-inline:auto}
+</style>
 <script src="shared-shell.js"></script>
 <script>
 WIN.initShell({ activePage: 'journal' });
 
-/* ---- Trade Data ---- */
-const TRADES = [
-  { sym:'USDJPY', symC:'blue', type:'Sell', openP:'109.99880', closeP:'110.00660', openT:'Jun 22 2026, 12:33 AM', closeT:'Jun 22 2026, 2:14 AM', lots:'0.10', pnl:35.26, gross:35.96, comm:-0.50, swap:-0.20, fee:0, pct:'0.15%', stars:0 },
-  { sym:'XAUUSD', symC:'amber', type:'Buy', openP:'1800.00660', closeP:'1799.99970', openT:'Jun 21 2026, 9:28 PM', closeT:'Jun 21 2026, 11:01 PM', lots:'0.10', pnl:-115.04, gross:-114.34, comm:-0.50, swap:-0.20, fee:0, pct:'-0.49%', stars:0 },
-  { sym:'USDJPY', symC:'blue', type:'Sell', openP:'109.99490', closeP:'109.98900', openT:'Jun 21 2026, 6:59 AM', closeT:'Jun 21 2026, 10:46 AM', lots:'0.10', pnl:-141.62, gross:-140.92, comm:-0.50, swap:-0.20, fee:0, pct:'-0.60%', stars:0 },
-  { sym:'EURUSD', symC:'blue', type:'Sell', openP:'1.14470', closeP:'1.14790', openT:'Jun 20 2026, 3:09 PM', closeT:'Jun 20 2026, 3:27 PM', lots:'0.10', pnl:55.09, gross:55.79, comm:-0.50, swap:-0.20, fee:0, pct:'0.24%', stars:0 },
-  { sym:'XAUUSD', symC:'amber', type:'Buy', openP:'1799.99640', closeP:'1800.00640', openT:'Jun 20 2026, 6:28 AM', closeT:'Jun 20 2026, 9:14 AM', lots:'0.10', pnl:40.30, gross:41.00, comm:-0.50, swap:-0.20, fee:0, pct:'0.17%', stars:0 },
-  { sym:'EURUSD', symC:'blue', type:'Sell', openP:'1.15540', closeP:'1.14810', openT:'Jun 20 2026, 1:44 AM', closeT:'Jun 20 2026, 2:18 AM', lots:'0.10', pnl:-75.66, gross:-74.96, comm:-0.50, swap:-0.20, fee:0, pct:'-0.33%', stars:0 },
-  { sym:'USDJPY', symC:'blue', type:'Sell', openP:'110.00480', closeP:'110.00680', openT:'Jun 19 2026, 5:17 PM', closeT:'Jun 19 2026, 8:50 PM', lots:'0.10', pnl:100.02, gross:100.72, comm:-0.50, swap:-0.20, fee:0, pct:'0.43%', stars:0 },
-  { sym:'XAUUSD', symC:'amber', type:'Sell', openP:'1799.99330', closeP:'1799.99490', openT:'Jun 18 2026, 10:41 PM', closeT:'Jun 19 2026, 1:54 AM', lots:'0.10', pnl:80.02, gross:80.72, comm:-0.50, swap:-0.20, fee:0, pct:'0.34%', stars:0 },
-  { sym:'EURUSD', symC:'blue', type:'Buy', openP:'1.15490', closeP:'1.15970', openT:'Jun 18 2026, 5:00 AM', closeT:'Jun 18 2026, 5:49 AM', lots:'0.10', pnl:187.00, gross:187.70, comm:-0.50, swap:-0.20, fee:0, pct:'0.80%', stars:0 },
-  { sym:'BTCUSD', symC:'amber', type:'Buy', openP:'30000.00110', closeP:'30000.00350', openT:'Jun 17 2026, 1:11 PM', closeT:'Jun 17 2026, 2:19 PM', lots:'0.10', pnl:288.31, gross:289.01, comm:-0.50, swap:-0.20, fee:0, pct:'1.24%', stars:0 },
-  { sym:'GBPUSD', symC:'blue', type:'Sell', openP:'1.29190', closeP:'1.28670', openT:'Jun 16 2026, 1:34 AM', closeT:'Jun 16 2026, 4:44 AM', lots:'0.10', pnl:-79.22, gross:-78.52, comm:-0.50, swap:-0.20, fee:0, pct:'-0.34%', stars:0 },
-  { sym:'EURUSD', symC:'blue', type:'Sell', openP:'1.15570', closeP:'1.16460', openT:'Jun 15 2026, 4:24 PM', closeT:'Jun 15 2026, 7:41 PM', lots:'0.10', pnl:97.84, gross:98.54, comm:-0.50, swap:-0.20, fee:0, pct:'0.42%', stars:0 },
-  { sym:'BTCUSD', symC:'amber', type:'Buy', openP:'30000.00070', closeP:'29999.99180', openT:'Jun 14 2026, 7:03 PM', closeT:'Jun 14 2026, 7:17 PM', lots:'0.10', pnl:-200.32, gross:-199.62, comm:-0.50, swap:-0.20, fee:0, pct:'-0.86%', stars:0 },
-  { sym:'GBPUSD', symC:'blue', type:'Buy', openP:'1.30750', closeP:'1.29920', openT:'Jun 13 2026, 7:26 AM', closeT:'Jun 13 2026, 8:17 AM', lots:'0.10', pnl:-121.44, gross:-120.74, comm:-0.50, swap:-0.20, fee:0, pct:'-0.52%', stars:0 },
-  { sym:'BTCUSD', symC:'amber', type:'Buy', openP:'29999.99080', closeP:'29999.98270', openT:'Jun 12 2026, 9:40 PM', closeT:'Jun 13 2026, 1:23 AM', lots:'0.10', pnl:-120.63, gross:-119.93, comm:-0.50, swap:-0.20, fee:0, pct:'-0.51%', stars:0 },
-  { sym:'EURUSD', symC:'blue', type:'Sell', openP:'1.14880', closeP:'1.14380', openT:'Jun 11 2026, 6:52 AM', closeT:'Jun 11 2026, 9:15 AM', lots:'0.10', pnl:-24.21, gross:-23.51, comm:-0.50, swap:-0.20, fee:0, pct:'-0.10%', stars:0 },
-];
-
-const fmt$ = v => { const s = v < 0 ? '-$' : '$'; return s + Math.abs(v).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }); };
+/* ── helpers ── */
+const fmt$ = v => { const s = v < 0 ? '-$' : '$'; return s + Math.abs(v).toLocaleString('en-US', { minimumFractionDigits:2, maximumFractionDigits:2 }); };
+const fmtDate = iso => { if (!iso) return '—'; const d = new Date(iso); return d.toLocaleString('en-US', { month:'short', day:'numeric', year:'numeric', hour:'numeric', minute:'2-digit' }); };
+const fmtPrice = v => v != null ? parseFloat(v).toString() : '—';
+const symColor = s => /XAU|BTC|ETH|LTC|SOL|XRP|DOGE/i.test(s||'') ? 'amber' : 'blue';
 const upArrow = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6"><path d="m5 12 7-7 7 7M12 19V5"/></svg>';
 const downArrow = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6"><path d="M19 12l-7 7-7-7M12 5v14"/></svg>';
 const starSVG = on => `<svg viewBox="0 0 24 24" fill="${on?'currentColor':'none'}" stroke="currentColor" stroke-width="2" class="${on?'on':'off'}"><path d="m12 2 3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2Z"/></svg>`;
+const skelRow = () => {
+  const tr = document.createElement('tr');
+  tr.className = 'j-skel-row';
+  const ws = [60,40,70,70,80,80,35,50,60,30];
+  tr.innerHTML = ws.map(w=>`<td><div class="j-skel-cell" style="width:${w}%"></div></td>`).join('');
+  return tr;
+};
 
 const jBody = document.getElementById('jBody');
 const jCards = document.getElementById('jCards');
-const jInfo = document.getElementById('jInfo');
-const jPag = document.getElementById('jPag');
-let jPage = 0, jPerPage = 16, selectedIdx = -1, currentTrade = -1;
+const jInfo  = document.getElementById('jInfo');
+const jPag   = document.getElementById('jPag');
 
-function renderTable() {
-  const trades = TRADES;
-  const totalPages = Math.max(1, Math.ceil(trades.length / jPerPage));
-  if (jPage >= totalPages) jPage = totalPages - 1;
-  const start = jPage * jPerPage, end = Math.min(start + jPerPage, trades.length);
-  const slice = trades.slice(start, end);
-  jInfo.textContent = `${start + 1} to ${end} of ${trades.length} · Page ${jPage + 1} of ${totalPages}`;
+/* ── state ── */
+let TRADES = [];
+let jTotal = 0, jPage = 0, jPerPage = 16;
+let selectedIdx = -1, currentTrade = -1;
+let activeAccountId = null;
 
+/* ── map DB row → trade object ── */
+function mapRow(r, localIdx) {
+  const comm  = parseFloat(r.commission)     || 0;
+  const deduct= parseFloat(r.comm_deduction) || 0;
+  const reb   = parseFloat(r.rebates)        || 0;
+  const gross = parseFloat(r.profit)         || 0;
+  const net   = gross + comm + deduct + reb;
+  return {
+    _id: r.order_id,
+    _localIdx: localIdx,
+    sym:   r.symbol || '—',
+    symC:  symColor(r.symbol),
+    type:  r.type   || '—',
+    openP: fmtPrice(r.open_price),
+    closeP:fmtPrice(r.close_price),
+    openT: fmtDate(r.open_time),
+    closeT:fmtDate(r.close_time),
+    lots:  r.volume != null ? parseFloat(r.volume).toFixed(2) : '—',
+    pnl:   net,
+    gross: gross,
+    comm:  comm,
+    swap:  deduct,
+    fee:   reb,
+    stars: 0,
+  };
+}
+
+/* ── show skeleton rows ── */
+function showSkeleton() {
   jBody.innerHTML = '';
   jCards.innerHTML = '';
-  slice.forEach((t, i) => {
+  jInfo.textContent = '';
+  jPag.innerHTML = '';
+  for (let i = 0; i < jPerPage; i++) jBody.appendChild(skelRow());
+}
+
+/* ── render table with loaded data ── */
+function renderTable() {
+  jBody.innerHTML = '';
+  jCards.innerHTML = '';
+
+  if (!TRADES.length) {
+    const empty = document.createElement('tr');
+    empty.innerHTML = `<td colspan="10"><div class="j-empty"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M9 17H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v5"/><path d="m19 14-5 5-2-2"/></svg>No trades found</div></td>`;
+    jBody.appendChild(empty);
+    jInfo.textContent = '0 trades';
+    jPag.innerHTML = '';
+    return;
+  }
+
+  const totalPages = Math.max(1, Math.ceil(jTotal / jPerPage));
+  const start = jPage * jPerPage;
+  const end   = start + TRADES.length;
+  jInfo.textContent = `${start + 1}–${end} of ${jTotal} · Page ${jPage + 1} of ${totalPages}`;
+
+  TRADES.forEach((t, i) => {
     const gi = start + i;
     const pos = t.pnl >= 0;
-    const typeIcon = t.type === 'Buy' ? upArrow : downArrow;
+    const typeIcon = /buy/i.test(t.type) ? upArrow : downArrow;
+
     const tr = document.createElement('tr');
     if (gi === selectedIdx) tr.classList.add('selected');
     tr.innerHTML = `
@@ -283,52 +332,101 @@ function renderTable() {
         <div class="jc-row"><span class="label">Open</span><span class="val">${t.openP}</span></div>
         <div class="jc-row"><span class="label">Close</span><span class="val">${t.closeP}</span></div>
         <div class="jc-row"><span class="label">Volume</span><span class="val">${t.lots}</span></div>
-        <div class="jc-row"><span class="label">% Gain</span><span class="val ${pos?'pos':'neg'}">${t.pct}</span></div>
         <div class="jc-row"><span class="label">Opened</span><span class="val">${t.openT.split(',')[0]}</span></div>
         <div class="jc-row"><span class="label">Closed</span><span class="val">${t.closeT.split(',')[0]}</span></div>
+        <div class="jc-row"><span class="label">P&L</span><span class="val ${pos?'pos':'neg'}">${fmt$(t.pnl)}</span></div>
       </div>
       <div class="jc-stars"><div class="stars">${[1,2,3,4,5].map(s=>starSVG(s<=t.stars)).join('')}</div></div>`;
     card.addEventListener('click', () => selectTrade(gi));
     jCards.appendChild(card);
   });
 
-  // pagination
+  /* pagination */
+  const totalPages2 = Math.max(1, Math.ceil(jTotal / jPerPage));
   let btns = '';
-  btns += '<button class="pag-btn" data-p="prev"' + (jPage === 0 ? ' disabled' : '') + '><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="m15 18-6-6 6-6"/></svg></button>';
-  for (let i = 0; i < totalPages; i++) {
-    if (totalPages > 7 && i > 1 && i < totalPages - 2 && Math.abs(i - jPage) > 1) { if (!btns.endsWith('…</span>')) btns += '<span style="color:var(--faint);padding:0 4px">…</span>'; continue; }
+  btns += `<button class="pag-btn" data-p="prev"${jPage===0?' disabled':''}>` +
+    `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="m15 18-6-6 6-6"/></svg></button>`;
+  for (let i = 0; i < totalPages2; i++) {
+    if (totalPages2 > 7 && i > 1 && i < totalPages2 - 2 && Math.abs(i - jPage) > 1) {
+      if (!btns.endsWith('…</span>')) btns += '<span style="color:var(--faint);padding:0 4px">…</span>'; continue;
+    }
     btns += `<button class="pag-btn${i===jPage?' active':''}" data-p="${i}">${i+1}</button>`;
   }
-  btns += '<button class="pag-btn" data-p="next"' + (jPage >= totalPages - 1 ? ' disabled' : '') + '><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="m9 18 6-6-6-6"/></svg></button>';
-  jPag.innerHTML = '<span class="pag-info">' + jPerPage + ' per page</span><div class="pag-btns">' + btns + '</div>';
+  btns += `<button class="pag-btn" data-p="next"${jPage>=totalPages2-1?' disabled':''}>` +
+    `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="m9 18 6-6-6-6"/></svg></button>`;
+  jPag.innerHTML = `<span class="pag-info">${jPerPage} per page</span><div class="pag-btns">${btns}</div>`;
 }
+
+/* ── fetch from API ── */
+async function loadPage(accountId, page) {
+  if (!accountId) { TRADES=[]; jTotal=0; renderTable(); return; }
+  showSkeleton();
+  try {
+    const params = new URLSearchParams({ account_id: accountId, page, per_page: jPerPage });
+    const res  = await fetch(`/api/transactions?${params}`);
+    const json = await res.json();
+    jTotal = json.total || 0;
+    TRADES = (json.transactions || []).map((r, i) => mapRow(r, page * jPerPage + i));
+  } catch(e) {
+    console.error('Journal load error:', e);
+    TRADES = []; jTotal = 0;
+  }
+  renderTable();
+}
+
+/* ── account switch: listen for WIN shell account change events ── */
+function getAccountId() {
+  return localStorage.getItem('win_selected_account');
+}
+
+function init() {
+  activeAccountId = getAccountId();
+  loadPage(activeAccountId, 0);
+}
+
+/* Re-load when the shell switches account (storage event from same or other tab) */
+window.addEventListener('storage', e => {
+  if (e.key === 'win_selected_account') {
+    activeAccountId = e.newValue;
+    jPage = 0; selectedIdx = -1; currentTrade = -1;
+    loadPage(activeAccountId, 0);
+  }
+});
+
+/* Also poll for in-page account switches (shell updates localStorage directly) */
+let _lastAccount = getAccountId();
+setInterval(() => {
+  const cur = getAccountId();
+  if (cur !== _lastAccount) { _lastAccount = cur; activeAccountId = cur; jPage = 0; selectedIdx=-1; currentTrade=-1; loadPage(cur, 0); }
+}, 500);
 
 jPag.addEventListener('click', e => {
   const b = e.target.closest('[data-p]'); if (!b || b.disabled) return;
   const v = b.dataset.p;
   if (v === 'prev') jPage--; else if (v === 'next') jPage++; else jPage = +v;
-  renderTable();
+  loadPage(activeAccountId, jPage);
 });
 
-function selectTrade(idx) {
-  selectedIdx = idx; currentTrade = idx;
+function selectTrade(gi) {
+  selectedIdx = gi; currentTrade = gi;
   renderTable();
-  showDetail(idx);
+  showDetail(gi);
   openTradeDrawer();
 }
 
-function showDetail(idx) {
-  const t = TRADES[idx];
+function showDetail(gi) {
+  const localIdx = gi - jPage * jPerPage;
+  const t = TRADES[localIdx];
+  if (!t) return;
+  const typeIcon = /buy/i.test(t.type) ? upArrow : downArrow;
 
-  const typeIcon = t.type === 'Buy' ? upArrow : downArrow;
-  document.getElementById('tdSym').innerHTML = t.sym + '<span class="type-tag ' + t.type.toLowerCase() + '" style="font-size:12px">' + typeIcon + t.type + '</span>';
-  document.getElementById('tdPrices').innerHTML = t.openP + '<span>&rarr;</span>' + t.closeP;
+  document.getElementById('tdSym').innerHTML = t.sym + `<span class="type-tag ${t.type.toLowerCase()}" style="font-size:12px">${typeIcon}${t.type}</span>`;
+  document.getElementById('tdPrices').innerHTML = `${t.openP}<span>&rarr;</span>${t.closeP}`;
   document.getElementById('tdVol').textContent = 'Volume: ' + t.lots;
 
   const pnlEl = document.getElementById('tdPnlVal');
   pnlEl.textContent = fmt$(t.pnl); pnlEl.className = 'val ' + (t.pnl >= 0 ? 'pos' : 'neg');
-  const pctEl = document.getElementById('tdPnlPct');
-  pctEl.textContent = t.pct; pctEl.className = 'pct ' + (t.pnl >= 0 ? 'pos' : 'neg');
+  document.getElementById('tdPnlPct').textContent = '';
 
   document.getElementById('tdType').textContent = t.type;
   document.getElementById('tdSymRow').textContent = t.sym;
@@ -342,56 +440,53 @@ function showDetail(idx) {
   document.getElementById('tdFee').textContent = fmt$(t.fee);
   document.getElementById('tdGross').textContent = fmt$(t.gross);
   const netEl = document.getElementById('tdNet'); netEl.textContent = fmt$(t.pnl); netEl.className = 'val ' + (t.pnl >= 0 ? 'pos' : 'neg');
-  const pctGain = document.getElementById('tdPctGain'); pctGain.textContent = t.pct; pctGain.className = 'val ' + (t.pnl >= 0 ? 'pos' : 'neg');
+  document.getElementById('tdPctGain').textContent = '';
 
-  // stars
   const starsEl = document.getElementById('tdStars');
   starsEl.innerHTML = [1,2,3,4,5].map(s => starSVG(s <= t.stars)).join('');
   starsEl.querySelectorAll('svg').forEach((svg, si) => {
-    svg.addEventListener('click', () => { t.stars = (t.stars === si + 1) ? 0 : si + 1; showDetail(idx); renderTable(); });
+    svg.addEventListener('click', () => { t.stars = (t.stars===si+1)?0:si+1; showDetail(gi); renderTable(); });
   });
 
-  // nav state
-  document.getElementById('dPrev').disabled = idx <= 0;
-  document.getElementById('dNext').disabled = idx >= TRADES.length - 1;
-  document.getElementById('dPos').textContent = `Trade ${idx + 1} of ${TRADES.length}`;
+  const totalOnPage = TRADES.length;
+  const isFirst = gi === 0;
+  const isLast  = gi === jTotal - 1;
+  document.getElementById('dPrev').disabled = isFirst;
+  document.getElementById('dNext').disabled = isLast;
+  document.getElementById('dPos').textContent = `Trade ${gi + 1} of ${jTotal}`;
 }
 
 document.getElementById('dPrev').addEventListener('click', () => { if (currentTrade > 0) goToTrade(currentTrade - 1); });
-document.getElementById('dNext').addEventListener('click', () => { if (currentTrade < TRADES.length - 1) goToTrade(currentTrade + 1); });
-function goToTrade(idx) {
-  jPage = Math.floor(idx / jPerPage);
-  selectTrade(idx);
+document.getElementById('dNext').addEventListener('click', () => { if (currentTrade < jTotal - 1) goToTrade(currentTrade + 1); });
+async function goToTrade(gi) {
+  const newPage = Math.floor(gi / jPerPage);
+  if (newPage !== jPage) { jPage = newPage; await loadPage(activeAccountId, jPage); }
+  selectTrade(gi);
 }
 addEventListener('keydown', e => {
   if (currentTrade < 0) return;
   if (e.target.tagName === 'TEXTAREA' || e.target.tagName === 'INPUT') return;
-  if (e.key === 'ArrowLeft' && currentTrade > 0) goToTrade(currentTrade - 1);
-  if (e.key === 'ArrowRight' && currentTrade < TRADES.length - 1) goToTrade(currentTrade + 1);
+  if (e.key === 'ArrowLeft'  && currentTrade > 0)          goToTrade(currentTrade - 1);
+  if (e.key === 'ArrowRight' && currentTrade < jTotal - 1) goToTrade(currentTrade + 1);
 });
 
-/* ---- Trade drawer (slides from right) ---- */
-const tradeDrawer = document.getElementById('tradeDrawer');
-const backdrop = document.getElementById('backdrop');
+/* ── drawers ── */
+const tradeDrawer  = document.getElementById('tradeDrawer');
+const filterDrawer = document.getElementById('filterDrawer');
+const backdrop     = document.getElementById('backdrop');
 function openTradeDrawer() { closeFilters(); tradeDrawer.classList.add('open'); backdrop.classList.add('show'); }
 function closeDetail() {
   tradeDrawer.classList.remove('open');
   if (!filterDrawer.classList.contains('open')) backdrop.classList.remove('show');
-  selectedIdx = -1; currentTrade = -1;
-  renderTable();
+  selectedIdx = -1; currentTrade = -1; renderTable();
 }
 document.getElementById('dClose').addEventListener('click', closeDetail);
-
-// detail sub-tabs
 document.querySelectorAll('.td-tab').forEach(tab => tab.addEventListener('click', () => {
   document.querySelectorAll('.td-tab').forEach(t => t.classList.remove('active')); tab.classList.add('active');
-  const pane = tab.dataset.dtab;
-  document.querySelectorAll('.td-pane').forEach(p => p.classList.toggle('active', p.dataset.pane === pane));
+  document.querySelectorAll('.td-pane').forEach(p => p.classList.toggle('active', p.dataset.pane === tab.dataset.dtab));
 }));
 
-/* ---- Filters drawer ---- */
-const filterDrawer = document.getElementById('filterDrawer');
-function openFilters() { closeDetail(); filterDrawer.classList.add('open'); backdrop.classList.add('show'); }
+function openFilters()  { closeDetail(); filterDrawer.classList.add('open'); backdrop.classList.add('show'); }
 function closeFilters() { filterDrawer.classList.remove('open'); if (!tradeDrawer.classList.contains('open')) backdrop.classList.remove('show'); }
 document.getElementById('filterBtn').addEventListener('click', openFilters);
 document.getElementById('fdClose').addEventListener('click', closeFilters);
@@ -412,9 +507,9 @@ document.getElementById('fdClear').addEventListener('click', () => {
   filterDrawer.querySelectorAll('.fd-input, textarea').forEach(i => i.value = '');
   updateFilterBadge();
 });
-document.getElementById('fdApply').addEventListener('click', closeFilters);
+document.getElementById('fdApply').addEventListener('click', () => { closeFilters(); jPage=0; loadPage(activeAccountId, 0); });
 
-renderTable();
+init();
 </script>
 </body>
 </html>
