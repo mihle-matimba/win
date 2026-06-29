@@ -374,30 +374,44 @@ async function loadPage(accountId, page) {
   renderTable();
 }
 
-/* ── account switch: listen for WIN shell account change events ── */
-function getAccountId() {
-  return localStorage.getItem('win_selected_account');
+/* ── resolve broker_clients.id from selected account index ── */
+let _resolvedAccounts = []; // broker_clients.id per index
+
+async function resolveAccountId() {
+  const raw = localStorage.getItem('win_user');
+  if (!raw) return null;
+  const user = JSON.parse(raw);
+  try {
+    const res  = await fetch(`/api/linked-accounts?user_id=${encodeURIComponent(user.id)}`);
+    const json = await res.json();
+    const rows = json.accounts || json.broker_clients || [];
+    _resolvedAccounts = rows.map(r => {
+      /* linked-accounts returns { id, broker_clients: { id, ... } } */
+      if (r.broker_clients && r.broker_clients.id) return r.broker_clients.id;
+      /* fallback: the row itself may be a broker_clients record */
+      return r.id;
+    });
+  } catch { _resolvedAccounts = []; }
+  const idx = +(localStorage.getItem('win_selected_account') || 0);
+  return _resolvedAccounts[idx] ?? _resolvedAccounts[0] ?? null;
 }
 
-function init() {
-  activeAccountId = getAccountId();
+async function init() {
+  activeAccountId = await resolveAccountId();
   loadPage(activeAccountId, 0);
 }
 
-/* Re-load when the shell switches account (storage event from same or other tab) */
-window.addEventListener('storage', e => {
-  if (e.key === 'win_selected_account') {
-    activeAccountId = e.newValue;
+/* Re-load on account index change */
+let _lastIdx = localStorage.getItem('win_selected_account');
+setInterval(async () => {
+  const cur = localStorage.getItem('win_selected_account');
+  if (cur !== _lastIdx) {
+    _lastIdx = cur;
+    const idx = +(cur || 0);
+    activeAccountId = _resolvedAccounts[idx] ?? _resolvedAccounts[0] ?? null;
     jPage = 0; selectedIdx = -1; currentTrade = -1;
     loadPage(activeAccountId, 0);
   }
-});
-
-/* Also poll for in-page account switches (shell updates localStorage directly) */
-let _lastAccount = getAccountId();
-setInterval(() => {
-  const cur = getAccountId();
-  if (cur !== _lastAccount) { _lastAccount = cur; activeAccountId = cur; jPage = 0; selectedIdx=-1; currentTrade=-1; loadPage(cur, 0); }
 }, 500);
 
 jPag.addEventListener('click', e => {
@@ -509,6 +523,7 @@ document.getElementById('fdClear').addEventListener('click', () => {
 });
 document.getElementById('fdApply').addEventListener('click', () => { closeFilters(); jPage=0; loadPage(activeAccountId, 0); });
 
+showSkeleton();
 init();
 </script>
 </body>
