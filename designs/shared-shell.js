@@ -28,6 +28,7 @@ const SIDEBAR_HTML = `
     </button>
     <div class="nav-group" id="toolsGroup">
       <a class="nav-sub" data-page="monte-carlo"><span class="dot"></span><span>Monte Carlo</span></a>
+      <a class="nav-sub" data-page="economic-calendar" href="economic-calendar.html"><span class="dot"></span><span>Economic Calendar</span></a>
     </div>
     <button class="nav-item nav-group-trigger" id="compTrigger" aria-expanded="false" data-group="competitions">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6m12 5h1.5a2.5 2.5 0 0 0 0-5H18M6 4h12v5a6 6 0 0 1-12 0V4Z"/><path d="M9 18h6M10 22h4M12 14v4"/></svg>
@@ -51,8 +52,7 @@ const SIDEBAR_HTML = `
       <svg class="grp-chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="m6 9 6 6 6-6"/></svg>
     </button>
     <div class="nav-group" id="networkGroup">
-      <a class="nav-sub" data-page="telegram"><span class="dot"></span><span>Telegram Groups</span></a>
-      <a class="nav-sub" data-page="weekly-schedule"><span class="dot"></span><span>Weekly Schedule</span></a>
+      <div class="nav-empty" id="networkLoading">Loading...</div>
     </div>
     <button class="nav-item nav-group-trigger" id="coursesTrigger" aria-expanded="false" data-group="courses">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2Z"/></svg>
@@ -62,13 +62,11 @@ const SIDEBAR_HTML = `
     <div class="nav-group" id="coursesGroup">
       <a class="nav-sub" data-page="courses" href="courses.html"><span class="dot"></span><span>All Courses</span></a>
     </div>
-
-    <a class="nav-item" data-page="economic-calendar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18M8 14h.01M12 14h.01M16 14h.01M8 18h.01M12 18h.01"/></svg><span>Economic Calendar</span></a>
   </nav>
   <div class="side-foot">
     <div class="side-user">
-      <img class="side-avatar" alt="" src="https://i.pravatar.cc/80?img=12">
-      <div class="meta"><div class="nm">Yuveshnee</div><div class="em">support@mdmtraders.com</div></div>
+      <div class="side-avatar-wrap" id="sideAvatarWrap"></div>
+      <div class="meta"><div class="nm" id="sideUserName"></div><div class="em" id="sideUserEmail"></div></div>
     </div>
     <a class="signout"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9"/></svg><span>Sign Out</span></a>
   </div>`;
@@ -79,8 +77,8 @@ const TOPBAR_HTML = `
   <div class="acct" id="acctMenu">
     <button class="acct-trigger" id="acctTrigger" aria-expanded="false">
       <span class="acct-tx">
-        <span class="r2"><span class="acct-name" id="acctBroker">VT Markets (Pty) Ltd</span><span class="acct-num" id="acctNum">#54845698</span></span>
-        <span class="r3"><span class="mut" id="acctSynced">Synced 1 hour ago</span></span>
+        <span class="r2"><span class="acct-name" id="acctBroker">No accounts</span><span class="acct-num" id="acctNum"></span></span>
+        <span class="r3"><span class="mut" id="acctSynced"></span></span>
       </span>
       <svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="m6 9 6 6 6-6"/></svg>
     </button>
@@ -88,15 +86,12 @@ const TOPBAR_HTML = `
   </div>
   <div class="tb-spacer"></div>
   <button class="tb-btn" id="refresh" aria-label="Refresh"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12a9 9 0 0 1 9-9 9 9 0 0 1 6.7 3L21 8"/><path d="M21 3v5h-5M21 12a9 9 0 0 1-9 9 9 9 0 0 1-6.7-3L3 16"/><path d="M3 21v-5h5"/></svg></button>
-  <img class="tb-avatar" alt="" src="https://i.pravatar.cc/80?img=12">`;
+  <div class="tb-avatar-wrap" id="tbAvatarWrap"></div>`;
 
-const ACCOUNTS = [
-  { name:'Test Account', nickname:'', num:'#54845698', broker:'VT Markets (Pty) Ltd', synced:'Synced 1 hour ago' },
-  { name:'Main Live',    nickname:'', num:'#88213004', broker:'VT Markets (Pty) Ltd', synced:'Synced 5 min ago' },
-  { name:'Practice',     nickname:'', num:'#10029384', broker:'MetaQuotes Demo',      synced:'Synced just now' },
-];
+const ACCOUNTS = [];
 
-const BROKERS = [
+/* Fallback broker list — overridden by community.allowed_brokers once loaded */
+const BROKERS_FALLBACK = [
   'VT Markets (Pty) Ltd',
   'MetaQuotes Demo',
   'IC Markets',
@@ -108,6 +103,86 @@ const BROKERS = [
   'IG Markets',
   'FP Markets',
 ];
+
+let communityBrokers = null; // null = not loaded yet
+
+// ── Helper functions (defined before initShell to avoid hoisting issues) ──
+
+async function loadCommunity() {
+  try {
+    const userObj = JSON.parse(localStorage.getItem('win_user') || 'null');
+    const communityId = userObj?.user_metadata?.community_id;
+    const param = communityId
+      ? `id=${encodeURIComponent(communityId)}`
+      : `domain=${encodeURIComponent(location.hostname)}`;
+    const res = await fetch(`/api/community?${param}`);
+    if (!res.ok) throw new Error();
+    const { community } = await res.json();
+    communityBrokers = Array.isArray(community?.allowed_brokers) && community.allowed_brokers.length
+      ? community.allowed_brokers
+      : BROKERS_FALLBACK;
+    if (community?.logo_url) {
+      const brandLogo = document.getElementById('brandLogo');
+      if (brandLogo) { brandLogo.src = community.logo_url; brandLogo.style.display = ''; }
+      const logoFallback = document.getElementById('logoFallback');
+      if (logoFallback) logoFallback.style.display = 'none';
+    }
+  } catch {
+    communityBrokers = BROKERS_FALLBACK;
+  }
+  const modal = document.getElementById('manageAccountsModal');
+  if (modal && modal.classList.contains('show') && modal.querySelector('.ma-loading')) {
+    modal.dispatchEvent(new CustomEvent('community-loaded'));
+  }
+}
+
+function applyUserInfo() {
+  const userObj = JSON.parse(localStorage.getItem('win_user') || 'null');
+  const email    = userObj?.email || '';
+  const name     = userObj?.user_metadata?.full_name || '';
+  const avatar   = userObj?.user_metadata?.avatar_url || '';
+  const firstName = (name || email).split(/[\s@]/)[0] || '?';
+  const initial  = firstName.charAt(0).toUpperCase();
+  const avatarWrap = document.getElementById('sideAvatarWrap');
+  if (avatarWrap) {
+    avatarWrap.innerHTML = avatar
+      ? `<img class="side-avatar" alt="${firstName}" src="${avatar}">`
+      : `<div class="side-avatar-init">${initial}</div>`;
+  }
+  const sideEmail = document.getElementById('sideUserEmail');
+  if (sideEmail) sideEmail.textContent = email;
+  const sideName = document.getElementById('sideUserName');
+  if (sideName) sideName.textContent = firstName;
+  const tbWrap = document.getElementById('tbAvatarWrap');
+  if (tbWrap) {
+    tbWrap.innerHTML = avatar
+      ? `<img class="tb-avatar" alt="${firstName}" src="${avatar}">`
+      : `<div class="tb-avatar-init">${initial}</div>`;
+  }
+}
+
+async function loadChannels() {
+  try {
+    const res = await fetch('/api/channels');
+    if (!res.ok) throw new Error();
+    const { channels } = await res.json();
+    const group = document.getElementById('networkGroup');
+    if (!group) return;
+    if (!channels || !channels.length) {
+      group.innerHTML = '<div class="nav-empty">No channels yet</div>';
+      return;
+    }
+    group.innerHTML = channels.map(ch => `
+      <a class="nav-sub" href="${ch.url}" target="_blank" rel="noopener">
+        <span class="dot"></span><span>${ch.name}</span>
+      </a>`).join('');
+  } catch {
+    const group = document.getElementById('networkGroup');
+    if (group) group.innerHTML = '<div class="nav-empty">No channels yet</div>';
+  }
+}
+
+// ── Shell init ──
 
 function initShell({ activePage = '' } = {}) {
   const sidebar = document.getElementById('sidebar');
@@ -206,26 +281,38 @@ function initAccountMenu(activePage) {
   if (!menu || !trigger || !drop) return;
   let selected = 0;
 
-  const manageIcon = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"/><circle cx="12" cy="12" r="3"/></svg>';
+  const manageIcon = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"/><circle cx="12" cy="12" r="3"/></svg>';
 
   function renderOptions() {
-    drop.innerHTML = '<div class="dm-label">Switch account</div>' + ACCOUNTS.map((a, i) => `
-      <button class="acct-opt${i === selected ? ' sel' : ''}" data-i="${i}">
-        <span class="ao-tx">
-          <span class="ao-name">${a.broker}<span class="ao-num">${a.num}</span></span>
-          <span class="ao-meta">${a.synced}</span>
-        </span>
-        ${checkIcon}
-      </button>`).join('') +
+    const accountRows = ACCOUNTS.length
+      ? '<div class="dm-label">Switch account</div>' + ACCOUNTS.map((a, i) => `
+          <button class="acct-opt${i === selected ? ' sel' : ''}" data-i="${i}">
+            <span class="ao-tx">
+              <span class="ao-name">${a.broker}<span class="ao-num">${a.num}</span></span>
+              <span class="ao-meta">${a.synced}</span>
+            </span>
+            ${checkIcon}
+          </button>`).join('')
+      : '<div class="dm-no-accounts">No connected accounts</div>';
+    drop.innerHTML = accountRows +
       `<button class="acct-manage-btn" id="manageAcctsBtn">${manageIcon}<span>Manage accounts</span></button>`;
   }
+
   function applyAccount(i) {
+    if (!ACCOUNTS.length) {
+      document.getElementById('acctBroker').textContent = 'No accounts';
+      document.getElementById('acctNum').textContent = '';
+      const synced = document.getElementById('acctSynced');
+      if (synced) synced.textContent = '';
+      return;
+    }
     const a = ACCOUNTS[i];
     document.getElementById('acctBroker').textContent = a.broker;
     document.getElementById('acctNum').textContent = a.num;
     const synced = document.getElementById('acctSynced');
     if (synced) synced.textContent = a.synced;
   }
+
   function open() { renderOptions(); menu.classList.add('open'); trigger.setAttribute('aria-expanded', 'true'); }
   function close() { menu.classList.remove('open'); trigger.setAttribute('aria-expanded', 'false'); }
 
@@ -324,12 +411,25 @@ function initAccountMenu(activePage) {
             <div class="ma-step-title">Step 1: Choose your broker</div>
           </div>
           <div class="ma-step-subtitle">Select the broker your trading account is registered with.</div>
-          ${BROKERS.map(b => `
-            <button class="ma-broker${addBroker === b ? ' sel' : ''}" data-broker="${b}">
-              <span class="ma-broker-icon">${b.charAt(0)}</span>
-              <span>${b}</span>
-            </button>
-          `).join('')}
+          ${communityBrokers === null
+            ? `<div class="ma-loading">Loading brokers…</div>`
+            : (communityBrokers.length === 0
+                ? `<div class="ma-loading">No brokers configured for your community.</div>`
+                : communityBrokers.map(b => {
+                    const bName = typeof b === 'string' ? b : b.name;
+                    const bLogo = typeof b === 'string' ? null : b.logo_url;
+                    return `
+                    <button class="ma-broker${addBroker === bName ? ' sel' : ''}" data-broker="${bName}">
+                      <span class="ma-broker-icon">
+                        ${bLogo
+                          ? `<img src="${bLogo}" alt="${bName}" class="ma-broker-logo">`
+                          : bName.charAt(0)}
+                      </span>
+                      <span>${bName}</span>
+                    </button>`;
+                  }).join('')
+              )
+          }
         </div>
         <div class="ma-support">Can't find your broker? <a href="mailto:support@mdmtraders.com">Contact support</a> and we'll help you get set up.</div>
       </div>`;
@@ -379,7 +479,7 @@ function initAccountMenu(activePage) {
             <label class="ma-label">Account Number</label>
             <div style="display:flex;gap:8px">
               <input class="ma-input" id="maAcctNum" type="text" placeholder="e.g. 1009016" maxlength="20" autocomplete="off" style="flex:1" value="${searchAcctNum}">
-              <button class="ma-lookup-btn" id="maLookup" disabled>Search</button>
+              <button class="ma-lookup-btn" id="maLookup" ${searchAcctNum ? '' : 'disabled'}>Search</button>
             </div>
             <div id="maLookupMsg" class="ma-link-msg" style="margin-top:8px"></div>
           </div>
@@ -453,6 +553,7 @@ function initAccountMenu(activePage) {
       };
     });
     overlay.onclick = e => { if (e.target === overlay) closeManageModal(); };
+    overlay.addEventListener('community-loaded', () => renderModal(), { once: true });
   }
 
   function bindStep2Events() {
@@ -485,7 +586,7 @@ function initAccountMenu(activePage) {
           lookupBtn.disabled = false;
         } else {
           foundAccount = json.account;
-          renderStep2(); // re-render to show preview panel
+          renderStep2();
         }
       } catch {
         lookupMsg.textContent = 'Network error. Please try again.';
@@ -588,80 +689,6 @@ function initAccountMenu(activePage) {
   }
 
   checkAccountGate(activePage);
-}
-
-async function loadCommunity() {
-  try {
-    const userObj = JSON.parse(localStorage.getItem('win_user') || 'null');
-    const communityId = userObj?.user_metadata?.community_id;
-    const param = communityId
-      ? `id=${encodeURIComponent(communityId)}`
-      : `domain=${encodeURIComponent(location.hostname)}`;
-    const res = await fetch(`/api/community?${param}`);
-    if (!res.ok) throw new Error();
-    const { community } = await res.json();
-    communityBrokers = Array.isArray(community?.allowed_brokers) && community.allowed_brokers.length
-      ? community.allowed_brokers
-      : BROKERS_FALLBACK;
-    if (community?.logo_url) {
-      const brandLogo = document.getElementById('brandLogo');
-      if (brandLogo) { brandLogo.src = community.logo_url; brandLogo.style.display = ''; }
-      const logoFallback = document.getElementById('logoFallback');
-      if (logoFallback) logoFallback.style.display = 'none';
-    }
-  } catch {
-    communityBrokers = BROKERS_FALLBACK;
-  }
-  const modal = document.getElementById('manageAccountsModal');
-  if (modal && modal.classList.contains('show') && modal.querySelector('.ma-loading')) {
-    modal.dispatchEvent(new CustomEvent('community-loaded'));
-  }
-}
-
-function applyUserInfo() {
-  const userObj = JSON.parse(localStorage.getItem('win_user') || 'null');
-  const email    = userObj?.email || '';
-  const name     = userObj?.user_metadata?.full_name || '';
-  const avatar   = userObj?.user_metadata?.avatar_url || '';
-  const firstName = (name || email).split(/[\s@]/)[0] || '?';
-  const initial  = firstName.charAt(0).toUpperCase();
-  const avatarWrap = document.getElementById('sideAvatarWrap');
-  if (avatarWrap) {
-    avatarWrap.innerHTML = avatar
-      ? `<img class="side-avatar" alt="${firstName}" src="${avatar}">`
-      : `<div class="side-avatar-init">${initial}</div>`;
-  }
-  const sideEmail = document.getElementById('sideUserEmail');
-  if (sideEmail) sideEmail.textContent = email;
-  const sideName = document.getElementById('sideUserName');
-  if (sideName) sideName.textContent = firstName;
-  const tbWrap = document.getElementById('tbAvatarWrap');
-  if (tbWrap) {
-    tbWrap.innerHTML = avatar
-      ? `<img class="tb-avatar" alt="${firstName}" src="${avatar}">`
-      : `<div class="tb-avatar-init">${initial}</div>`;
-  }
-}
-
-async function loadChannels() {
-  try {
-    const res = await fetch('/api/channels');
-    if (!res.ok) throw new Error();
-    const { channels } = await res.json();
-    const group = document.getElementById('networkGroup');
-    if (!group) return;
-    if (!channels || !channels.length) {
-      group.innerHTML = '<div class="nav-empty">No channels yet</div>';
-      return;
-    }
-    group.innerHTML = channels.map(ch => `
-      <a class="nav-sub" href="${ch.url}" target="_blank" rel="noopener">
-        <span class="dot"></span><span>${ch.name}</span>
-      </a>`).join('');
-  } catch {
-    const group = document.getElementById('networkGroup');
-    if (group) group.innerHTML = '<div class="nav-empty">No channels yet</div>';
-  }
 }
 
 return { initShell, loadChannels };
