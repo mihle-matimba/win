@@ -115,7 +115,10 @@ function initShell({ activePage = '' } = {}) {
   if (sidebar) sidebar.innerHTML = SIDEBAR_HTML;
   if (topbar)  topbar.innerHTML  = TOPBAR_HTML;
 
-  initAccountMenu();
+  loadChannels();
+  loadCommunity();
+  applyUserInfo();
+  initAccountMenu(activePage);
 
   // logo fallback
   const brandLogo = document.getElementById('brandLogo');
@@ -196,7 +199,7 @@ function initShell({ activePage = '' } = {}) {
 
 const checkIcon = '<svg class="ao-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6"><path d="m5 12 5 5L20 7"/></svg>';
 
-function initAccountMenu() {
+function initAccountMenu(activePage) {
   const menu = document.getElementById('acctMenu');
   const trigger = document.getElementById('acctTrigger');
   const drop = document.getElementById('acctDrop');
@@ -243,10 +246,13 @@ function initAccountMenu() {
 
   let modalView = 'list'; // 'list' | 'add-step1' | 'add-step2'
   let addBroker = '';
+  let addBrokerObj = null; // full broker object {name, logo_url, signup_url}
+  let foundAccount = null; // broker_clients record after lookup
+  let searchAcctNum = ''; // preserves typed account number across re-renders
   let confirmRemoveIdx = -1;
   let editNicknameIdx = -1;
 
-  function openManageModal() { modalView = 'list'; addBroker = ''; confirmRemoveIdx = -1; editNicknameIdx = -1; renderModal(); overlay.classList.add('show'); }
+  function openManageModal() { modalView = 'list'; addBroker = ''; addBrokerObj = null; foundAccount = null; searchAcctNum = ''; confirmRemoveIdx = -1; editNicknameIdx = -1; renderModal(); overlay.classList.add('show'); }
   function closeManageModal() { overlay.classList.remove('show'); }
 
   const trashIcon = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>';
@@ -331,6 +337,19 @@ function initAccountMenu() {
   }
 
   function renderStep2() {
+    const signupUrl  = addBrokerObj?.signup_url || null;
+    const externalIcon = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:13px;height:13px;flex-shrink:0"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>';
+
+    const accountPreview = foundAccount ? `
+      <div class="ma-acct-preview">
+        <div class="ma-ap-row"><span class="ma-ap-label">Name</span><span class="ma-ap-val">${foundAccount.name || '—'}</span></div>
+        <div class="ma-ap-row"><span class="ma-ap-label">Email</span><span class="ma-ap-val">${foundAccount.email || '—'}</span></div>
+        <div class="ma-ap-row"><span class="ma-ap-label">Balance</span><span class="ma-ap-val ma-ap-balance">${foundAccount.account_currency || ''} ${Number(foundAccount.balance || 0).toLocaleString(undefined, {minimumFractionDigits:2, maximumFractionDigits:2})}</span></div>
+      </div>
+      <div id="maLinkMsg" class="ma-link-msg"></div>
+      <button class="ma-submit-btn" id="maConfirm">${linkIcon}<span>Connect this account</span></button>
+    ` : '';
+
     overlay.innerHTML = `
       <div class="ma-modal">
         <div class="ma-header">
@@ -341,18 +360,30 @@ function initAccountMenu() {
           <div class="ma-steps-indicator"><div class="ma-step-dot done"></div><div class="ma-step-dot done"></div></div>
           <div class="ma-step-header">
             <button class="ma-back-btn" id="maBack">${backArrow}</button>
-            <div class="ma-step-title">Step 2: Account details</div>
+            <div class="ma-step-title">Step 2: Link your account</div>
           </div>
-          <div class="ma-step-subtitle">Enter your account number from <strong>${addBroker}</strong>.</div>
+
+          ${signupUrl ? `
+          <div class="ma-create-box">
+            <p class="ma-create-text">Don't have a <strong>${addBroker}</strong> account yet?</p>
+            <a class="ma-create-btn" href="${signupUrl}" target="_blank" rel="noopener">
+              <span>Create an account with ${addBroker}</span>
+              ${externalIcon}
+            </a>
+          </div>
+          <div class="ma-or-divider"><span>Already have an account?</span></div>
+          ` : ''}
+
+          <p class="ma-step-subtitle">If your account is verified, enter your account number below.</p>
           <div class="ma-field">
             <label class="ma-label">Account Number</label>
-            <input class="ma-input" id="maAcctNum" type="text" placeholder="e.g. 54845698" maxlength="20">
+            <div style="display:flex;gap:8px">
+              <input class="ma-input" id="maAcctNum" type="text" placeholder="e.g. 1009016" maxlength="20" autocomplete="off" style="flex:1" value="${searchAcctNum}">
+              <button class="ma-lookup-btn" id="maLookup" disabled>Search</button>
+            </div>
+            <div id="maLookupMsg" class="ma-link-msg" style="margin-top:8px"></div>
           </div>
-          <div class="ma-field">
-            <label class="ma-label">Nickname (optional)</label>
-            <input class="ma-input" id="maAcctNick" type="text" placeholder="e.g. My Main Account" maxlength="30">
-          </div>
-          <button class="ma-submit-btn" id="maSubmit" disabled>${linkIcon}<span>Link Account</span></button>
+          ${accountPreview}
         </div>
         <div class="ma-support">Unable to see your account after linking? <a href="mailto:support@mdmtraders.com">Contact support</a> for assistance.</div>
       </div>`;
@@ -412,40 +443,151 @@ function initAccountMenu() {
     overlay.querySelector('#maClose').onclick = closeManageModal;
     overlay.querySelector('#maBack').onclick = () => { modalView = 'list'; renderModal(); };
     overlay.querySelectorAll('[data-broker]').forEach(btn => {
-      btn.onclick = () => { addBroker = btn.dataset.broker; modalView = 'add-step2'; renderModal(); };
+      btn.onclick = () => {
+        addBroker = btn.dataset.broker;
+        addBrokerObj = communityBrokers
+          ? communityBrokers.find(b => (typeof b === 'string' ? b : b.name) === addBroker) || null
+          : null;
+        modalView = 'add-step2';
+        renderModal();
+      };
     });
     overlay.onclick = e => { if (e.target === overlay) closeManageModal(); };
   }
 
   function bindStep2Events() {
     overlay.querySelector('#maClose').onclick = closeManageModal;
-    overlay.querySelector('#maBack').onclick = () => { modalView = 'add-step1'; renderModal(); };
-    const numInput = overlay.querySelector('#maAcctNum');
-    const nickInput = overlay.querySelector('#maAcctNick');
-    const submitBtn = overlay.querySelector('#maSubmit');
-    numInput.addEventListener('input', () => { submitBtn.disabled = !numInput.value.trim(); });
-    submitBtn.onclick = () => {
+    overlay.querySelector('#maBack').onclick = () => { modalView = 'add-step1'; foundAccount = null; searchAcctNum = ''; renderModal(); };
+
+    const numInput  = overlay.querySelector('#maAcctNum');
+    const lookupBtn = overlay.querySelector('#maLookup');
+    const lookupMsg = overlay.querySelector('#maLookupMsg');
+
+    numInput.addEventListener('input', () => {
+      searchAcctNum = numInput.value;
+      lookupBtn.disabled = !numInput.value.trim();
+    });
+
+    lookupBtn.onclick = async () => {
       const num = numInput.value.trim();
       if (!num) return;
-      const nick = nickInput.value.trim();
-      const newAcct = {
-        name: addBroker.split(' ')[0] + ' Account',
-        nickname: nick,
-        num: '#' + num.replace(/^#/, ''),
-        broker: addBroker,
-        synced: 'Synced just now'
-      };
-      ACCOUNTS.push(newAcct);
-      selected = ACCOUNTS.length - 1;
-      applyAccount(selected);
-      modalView = 'list';
-      renderModal();
+      searchAcctNum = num;
+      lookupMsg.textContent = 'Searching…';
+      lookupMsg.style.color = 'var(--muted)';
+      lookupBtn.disabled = true;
+      foundAccount = null;
+      try {
+        const res  = await fetch(`/api/link-account?account_id=${encodeURIComponent(num)}`);
+        const json = await res.json();
+        if (!res.ok) {
+          lookupMsg.textContent = json.error || 'Account not found.';
+          lookupMsg.style.color = 'var(--red-val)';
+          lookupBtn.disabled = false;
+        } else {
+          foundAccount = json.account;
+          renderStep2(); // re-render to show preview panel
+        }
+      } catch {
+        lookupMsg.textContent = 'Network error. Please try again.';
+        lookupMsg.style.color = 'var(--red-val)';
+        lookupBtn.disabled = false;
+      }
     };
+
+    const confirmBtn = overlay.querySelector('#maConfirm');
+    if (confirmBtn) {
+      const linkMsg = overlay.querySelector('#maLinkMsg');
+      confirmBtn.onclick = async () => {
+        const userObj = JSON.parse(localStorage.getItem('win_user') || 'null');
+        const userId = userObj?.id;
+        if (!userId || !foundAccount) return;
+        confirmBtn.disabled = true;
+        if (linkMsg) { linkMsg.textContent = 'Linking…'; linkMsg.style.color = 'var(--muted)'; }
+        try {
+          const res  = await fetch('/api/link-account', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ user_id: userId, account_id: foundAccount.id })
+          });
+          const json = await res.json();
+          if (!res.ok) {
+            if (linkMsg) { linkMsg.textContent = json.error || 'Failed to link account.'; linkMsg.style.color = 'var(--red-val)'; }
+            confirmBtn.disabled = false;
+          } else {
+            ACCOUNTS.push({
+              name: foundAccount.name || addBroker + ' Account',
+              nickname: '',
+              num: '#' + foundAccount.id,
+              broker: addBroker,
+              synced: 'Just linked'
+            });
+            selected = ACCOUNTS.length - 1;
+            applyAccount(selected);
+            const gate = document.getElementById('accountGate');
+            if (gate) gate.remove();
+            foundAccount = null;
+            searchAcctNum = '';
+            modalView = 'list';
+            renderModal();
+          }
+        } catch {
+          if (linkMsg) { linkMsg.textContent = 'Network error. Please try again.'; linkMsg.style.color = 'var(--red-val)'; }
+          confirmBtn.disabled = false;
+        }
+      };
+    }
+
     overlay.onclick = e => { if (e.target === overlay) closeManageModal(); };
     numInput.focus();
   }
 
   addEventListener('keydown', e => { if (e.key === 'Escape' && overlay.classList.contains('show')) closeManageModal(); });
+
+  // ── Account gate (lock pages until a trading account is linked) ──
+  const GATED_PAGES = ['calendar', 'journal', 'courses'];
+
+  function showAccountGate() {
+    if (document.getElementById('accountGate')) return;
+    const gate = document.createElement('div');
+    gate.id = 'accountGate';
+    gate.className = 'account-gate';
+    gate.innerHTML = `
+      <div class="gate-card">
+        <div class="gate-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+            <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10Z"/>
+          </svg>
+        </div>
+        <h2 class="gate-title">Link a trading account</h2>
+        <p class="gate-desc">Connect your broker account to unlock this page — track performance, review your trades, and access all your tools.</p>
+        <button class="gate-btn" id="gateAddBtn">Add Account</button>
+      </div>`;
+    document.body.appendChild(gate);
+    document.getElementById('gateAddBtn').onclick = () => {
+      modalView = 'add-step1';
+      addBroker = '';
+      addBrokerObj = null;
+      foundAccount = null;
+      searchAcctNum = '';
+      renderModal();
+      overlay.classList.add('show');
+    };
+  }
+
+  async function checkAccountGate(page) {
+    if (!GATED_PAGES.includes(page)) return;
+    const userObj = JSON.parse(localStorage.getItem('win_user') || 'null');
+    if (!userObj?.id) return;
+    try {
+      const res = await fetch(`/api/linked-accounts?user_id=${encodeURIComponent(userObj.id)}`);
+      if (!res.ok) return;
+      const { accounts } = await res.json();
+      if (accounts && accounts.length > 0) return;
+    } catch { return; }
+    showAccountGate();
+  }
+
+  checkAccountGate(activePage);
 }
 
 return { initShell };
