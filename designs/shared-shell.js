@@ -768,7 +768,8 @@ function initAccountMenu(activePage) {
       if (lk) lk.remove();
     });
     networksLocked = false;
-    document.querySelectorAll('.nav-sub-locked').forEach(a => a.classList.remove('nav-sub-locked'));
+    // Re-render channels to restore stripped href/target/rel attrs and remove lock icons
+    loadChannels();
   }
 
   function showAccountGate() {
@@ -853,20 +854,25 @@ function initAccountMenu(activePage) {
   }
 
   async function checkAccountGate(page) {
-    if (!GATED_PAGES.includes(page)) return;
     const userObj = JSON.parse(localStorage.getItem('win_user') || 'null');
     if (!userObj?.id) return;
+    let hasAccounts = false;
     try {
       const res = await fetch(`/api/linked-accounts?user_id=${encodeURIComponent(userObj.id)}`);
       if (!res.ok) return;
       const { accounts } = await res.json();
-      if (accounts && accounts.length > 0) return;
+      hasAccounts = !!(accounts && accounts.length > 0);
     } catch { return; }
+    if (hasAccounts) return; // all unlocked
     if (communityLoadPromise) await communityLoadPromise;
+    // Lock network channels on every page when no account
     networksLocked = true;
     lockNetworkChannels();
-    applyPageLocks(page);
-    showAccountGate();
+    // Lock page content + show gate only on gated pages
+    if (GATED_PAGES.includes(page)) {
+      applyPageLocks(page);
+      showAccountGate();
+    }
   }
 
   checkAccountGate(activePage);
