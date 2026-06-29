@@ -28,7 +28,6 @@ const SIDEBAR_HTML = `
     </button>
     <div class="nav-group" id="toolsGroup">
       <a class="nav-sub" data-page="monte-carlo"><span class="dot"></span><span>Monte Carlo</span></a>
-      <a class="nav-sub" data-page="economic-calendar" href="economic-calendar.html"><span class="dot"></span><span>Economic Calendar</span></a>
     </div>
     <button class="nav-item nav-group-trigger" id="compTrigger" aria-expanded="false" data-group="competitions">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6m12 5h1.5a2.5 2.5 0 0 0 0-5H18M6 4h12v5a6 6 0 0 1-12 0V4Z"/><path d="M9 18h6M10 22h4M12 14v4"/></svg>
@@ -52,7 +51,8 @@ const SIDEBAR_HTML = `
       <svg class="grp-chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="m6 9 6 6 6-6"/></svg>
     </button>
     <div class="nav-group" id="networkGroup">
-      <div class="nav-empty" id="networkLoading">Loading...</div>
+      <a class="nav-sub" data-page="telegram"><span class="dot"></span><span>Telegram Groups</span></a>
+      <a class="nav-sub" data-page="weekly-schedule"><span class="dot"></span><span>Weekly Schedule</span></a>
     </div>
     <button class="nav-item nav-group-trigger" id="coursesTrigger" aria-expanded="false" data-group="courses">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2Z"/></svg>
@@ -63,11 +63,12 @@ const SIDEBAR_HTML = `
       <a class="nav-sub" data-page="courses" href="courses.html"><span class="dot"></span><span>All Courses</span></a>
     </div>
 
+    <a class="nav-item" data-page="economic-calendar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18M8 14h.01M12 14h.01M16 14h.01M8 18h.01M12 18h.01"/></svg><span>Economic Calendar</span></a>
   </nav>
   <div class="side-foot">
     <div class="side-user">
-      <div class="side-avatar-wrap" id="sideAvatarWrap"></div>
-      <div class="meta"><div class="nm" id="sideUserName"></div><div class="em" id="sideUserEmail"></div></div>
+      <img class="side-avatar" alt="" src="https://i.pravatar.cc/80?img=12">
+      <div class="meta"><div class="nm">Yuveshnee</div><div class="em">support@mdmtraders.com</div></div>
     </div>
     <a class="signout"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9"/></svg><span>Sign Out</span></a>
   </div>`;
@@ -78,8 +79,8 @@ const TOPBAR_HTML = `
   <div class="acct" id="acctMenu">
     <button class="acct-trigger" id="acctTrigger" aria-expanded="false">
       <span class="acct-tx">
-        <span class="r2"><span class="acct-name" id="acctBroker">No accounts</span><span class="acct-num" id="acctNum"></span></span>
-        <span class="r3"><span class="mut" id="acctSynced"></span></span>
+        <span class="r2"><span class="acct-name" id="acctBroker">VT Markets (Pty) Ltd</span><span class="acct-num" id="acctNum">#54845698</span></span>
+        <span class="r3"><span class="mut" id="acctSynced">Synced 1 hour ago</span></span>
       </span>
       <svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="m6 9 6 6 6-6"/></svg>
     </button>
@@ -87,12 +88,15 @@ const TOPBAR_HTML = `
   </div>
   <div class="tb-spacer"></div>
   <button class="tb-btn" id="refresh" aria-label="Refresh"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12a9 9 0 0 1 9-9 9 9 0 0 1 6.7 3L21 8"/><path d="M21 3v5h-5M21 12a9 9 0 0 1-9 9 9 9 0 0 1-6.7-3L3 16"/><path d="M3 21v-5h5"/></svg></button>
-  <div class="tb-avatar-wrap" id="tbAvatarWrap"></div>`;
+  <img class="tb-avatar" alt="" src="https://i.pravatar.cc/80?img=12">`;
 
-const ACCOUNTS = [];
+const ACCOUNTS = [
+  { name:'Test Account', nickname:'', num:'#54845698', broker:'VT Markets (Pty) Ltd', synced:'Synced 1 hour ago' },
+  { name:'Main Live',    nickname:'', num:'#88213004', broker:'VT Markets (Pty) Ltd', synced:'Synced 5 min ago' },
+  { name:'Practice',     nickname:'', num:'#10029384', broker:'MetaQuotes Demo',      synced:'Synced just now' },
+];
 
-/* Fallback broker list — overridden by community.allowed_brokers once loaded */
-const BROKERS_FALLBACK = [
+const BROKERS = [
   'VT Markets (Pty) Ltd',
   'MetaQuotes Demo',
   'IC Markets',
@@ -105,71 +109,6 @@ const BROKERS_FALLBACK = [
   'FP Markets',
 ];
 
-let communityBrokers = null; // null = not loaded yet
-
-async function loadCommunity() {
-  try {
-    const userObj = JSON.parse(localStorage.getItem('win_user') || 'null');
-    const communityId = userObj?.user_metadata?.community_id;
-
-    const param = communityId
-      ? `id=${encodeURIComponent(communityId)}`
-      : `domain=${encodeURIComponent(location.hostname)}`;
-
-    const res = await fetch(`/api/community?${param}`);
-    if (!res.ok) throw new Error();
-    const { community } = await res.json();
-
-    communityBrokers = Array.isArray(community?.allowed_brokers) && community.allowed_brokers.length
-      ? community.allowed_brokers
-      : BROKERS_FALLBACK;
-
-    // Update community logo in sidebar
-    if (community?.logo_url) {
-      const brandLogo = document.getElementById('brandLogo');
-      if (brandLogo) { brandLogo.src = community.logo_url; brandLogo.style.display = ''; }
-      const logoFallback = document.getElementById('logoFallback');
-      if (logoFallback) logoFallback.style.display = 'none';
-    }
-  } catch {
-    communityBrokers = BROKERS_FALLBACK;
-  }
-  // If the add-account modal is already open on step 1, refresh the broker list
-  const modal = document.getElementById('manageAccountsModal');
-  if (modal && modal.classList.contains('show') && modal.querySelector('.ma-loading')) {
-    modal.dispatchEvent(new CustomEvent('community-loaded'));
-  }
-}
-
-function applyUserInfo() {
-  const userObj = JSON.parse(localStorage.getItem('win_user') || 'null');
-  const email    = userObj?.email || '';
-  const name     = userObj?.user_metadata?.full_name || '';
-  const avatar   = userObj?.user_metadata?.avatar_url || '';
-  const firstName = (name || email).split(/[\s@]/)[0] || '?';
-  const initial  = firstName.charAt(0).toUpperCase();
-
-  // ── Sidebar avatar + name + email ──
-  const avatarWrap = document.getElementById('sideAvatarWrap');
-  if (avatarWrap) {
-    avatarWrap.innerHTML = avatar
-      ? `<img class="side-avatar" alt="${firstName}" src="${avatar}">`
-      : `<div class="side-avatar-init">${initial}</div>`;
-  }
-  const sideEmail = document.getElementById('sideUserEmail');
-  if (sideEmail) sideEmail.textContent = email;
-  const sideName = document.getElementById('sideUserName');
-  if (sideName) sideName.textContent = firstName;
-
-  // ── Topbar avatar ──
-  const tbWrap = document.getElementById('tbAvatarWrap');
-  if (tbWrap) {
-    tbWrap.innerHTML = avatar
-      ? `<img class="tb-avatar" alt="${firstName}" src="${avatar}">`
-      : `<div class="tb-avatar-init">${initial}</div>`;
-  }
-}
-
 function initShell({ activePage = '' } = {}) {
   const sidebar = document.getElementById('sidebar');
   const topbar  = document.querySelector('.topbar');
@@ -179,7 +118,7 @@ function initShell({ activePage = '' } = {}) {
   loadChannels();
   loadCommunity();
   applyUserInfo();
-  initAccountMenu();
+  initAccountMenu(activePage);
 
   // logo fallback
   const brandLogo = document.getElementById('brandLogo');
@@ -260,7 +199,7 @@ function initShell({ activePage = '' } = {}) {
 
 const checkIcon = '<svg class="ao-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6"><path d="m5 12 5 5L20 7"/></svg>';
 
-function initAccountMenu() {
+function initAccountMenu(activePage) {
   const menu = document.getElementById('acctMenu');
   const trigger = document.getElementById('acctTrigger');
   const drop = document.getElementById('acctDrop');
@@ -270,27 +209,17 @@ function initAccountMenu() {
   const manageIcon = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"/><circle cx="12" cy="12" r="3"/></svg>';
 
   function renderOptions() {
-    const accountRows = ACCOUNTS.length
-      ? '<div class="dm-label">Switch account</div>' + ACCOUNTS.map((a, i) => `
-          <button class="acct-opt${i === selected ? ' sel' : ''}" data-i="${i}">
-            <span class="ao-tx">
-              <span class="ao-name">${a.broker}<span class="ao-num">${a.num}</span></span>
-              <span class="ao-meta">${a.synced}</span>
-            </span>
-            ${checkIcon}
-          </button>`).join('')
-      : '<div class="dm-no-accounts">No connected accounts</div>';
-    drop.innerHTML = accountRows +
+    drop.innerHTML = '<div class="dm-label">Switch account</div>' + ACCOUNTS.map((a, i) => `
+      <button class="acct-opt${i === selected ? ' sel' : ''}" data-i="${i}">
+        <span class="ao-tx">
+          <span class="ao-name">${a.broker}<span class="ao-num">${a.num}</span></span>
+          <span class="ao-meta">${a.synced}</span>
+        </span>
+        ${checkIcon}
+      </button>`).join('') +
       `<button class="acct-manage-btn" id="manageAcctsBtn">${manageIcon}<span>Manage accounts</span></button>`;
   }
   function applyAccount(i) {
-    if (!ACCOUNTS.length) {
-      document.getElementById('acctBroker').textContent = 'No accounts';
-      document.getElementById('acctNum').textContent = '';
-      const synced = document.getElementById('acctSynced');
-      if (synced) synced.textContent = '';
-      return;
-    }
     const a = ACCOUNTS[i];
     document.getElementById('acctBroker').textContent = a.broker;
     document.getElementById('acctNum').textContent = a.num;
@@ -317,10 +246,13 @@ function initAccountMenu() {
 
   let modalView = 'list'; // 'list' | 'add-step1' | 'add-step2'
   let addBroker = '';
+  let addBrokerObj = null; // full broker object {name, logo_url, signup_url}
+  let foundAccount = null; // broker_clients record after lookup
+  let searchAcctNum = ''; // preserves typed account number across re-renders
   let confirmRemoveIdx = -1;
   let editNicknameIdx = -1;
 
-  function openManageModal() { modalView = 'list'; addBroker = ''; confirmRemoveIdx = -1; editNicknameIdx = -1; renderModal(); overlay.classList.add('show'); }
+  function openManageModal() { modalView = 'list'; addBroker = ''; addBrokerObj = null; foundAccount = null; searchAcctNum = ''; confirmRemoveIdx = -1; editNicknameIdx = -1; renderModal(); overlay.classList.add('show'); }
   function closeManageModal() { overlay.classList.remove('show'); }
 
   const trashIcon = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>';
@@ -392,25 +324,12 @@ function initAccountMenu() {
             <div class="ma-step-title">Step 1: Choose your broker</div>
           </div>
           <div class="ma-step-subtitle">Select the broker your trading account is registered with.</div>
-          ${communityBrokers === null
-            ? `<div class="ma-loading">Loading brokers…</div>`
-            : (communityBrokers.length === 0
-                ? `<div class="ma-loading">No brokers configured for your community.</div>`
-                : communityBrokers.map(b => {
-                    const bName = typeof b === 'string' ? b : b.name;
-                    const bLogo = typeof b === 'string' ? null : b.logo_url;
-                    return `
-                    <button class="ma-broker${addBroker === bName ? ' sel' : ''}" data-broker="${bName}">
-                      <span class="ma-broker-icon">
-                        ${bLogo
-                          ? `<img src="${bLogo}" alt="${bName}" class="ma-broker-logo">`
-                          : bName.charAt(0)}
-                      </span>
-                      <span>${bName}</span>
-                    </button>`;
-                  }).join('')
-              )
-          }
+          ${BROKERS.map(b => `
+            <button class="ma-broker${addBroker === b ? ' sel' : ''}" data-broker="${b}">
+              <span class="ma-broker-icon">${b.charAt(0)}</span>
+              <span>${b}</span>
+            </button>
+          `).join('')}
         </div>
         <div class="ma-support">Can't find your broker? <a href="mailto:support@mdmtraders.com">Contact support</a> and we'll help you get set up.</div>
       </div>`;
@@ -418,6 +337,19 @@ function initAccountMenu() {
   }
 
   function renderStep2() {
+    const signupUrl  = addBrokerObj?.signup_url || null;
+    const externalIcon = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:13px;height:13px;flex-shrink:0"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>';
+
+    const accountPreview = foundAccount ? `
+      <div class="ma-acct-preview">
+        <div class="ma-ap-row"><span class="ma-ap-label">Name</span><span class="ma-ap-val">${foundAccount.name || '—'}</span></div>
+        <div class="ma-ap-row"><span class="ma-ap-label">Email</span><span class="ma-ap-val">${foundAccount.email || '—'}</span></div>
+        <div class="ma-ap-row"><span class="ma-ap-label">Balance</span><span class="ma-ap-val ma-ap-balance">${foundAccount.account_currency || ''} ${Number(foundAccount.balance || 0).toLocaleString(undefined, {minimumFractionDigits:2, maximumFractionDigits:2})}</span></div>
+      </div>
+      <div id="maLinkMsg" class="ma-link-msg"></div>
+      <button class="ma-submit-btn" id="maConfirm">${linkIcon}<span>Connect this account</span></button>
+    ` : '';
+
     overlay.innerHTML = `
       <div class="ma-modal">
         <div class="ma-header">
@@ -428,18 +360,30 @@ function initAccountMenu() {
           <div class="ma-steps-indicator"><div class="ma-step-dot done"></div><div class="ma-step-dot done"></div></div>
           <div class="ma-step-header">
             <button class="ma-back-btn" id="maBack">${backArrow}</button>
-            <div class="ma-step-title">Step 2: Account details</div>
+            <div class="ma-step-title">Step 2: Link your account</div>
           </div>
-          <div class="ma-step-subtitle">Enter your account number from <strong>${addBroker}</strong>.</div>
+
+          ${signupUrl ? `
+          <div class="ma-create-box">
+            <p class="ma-create-text">Don't have a <strong>${addBroker}</strong> account yet?</p>
+            <a class="ma-create-btn" href="${signupUrl}" target="_blank" rel="noopener">
+              <span>Create an account with ${addBroker}</span>
+              ${externalIcon}
+            </a>
+          </div>
+          <div class="ma-or-divider"><span>Already have an account?</span></div>
+          ` : ''}
+
+          <p class="ma-step-subtitle">If your account is verified, enter your account number below.</p>
           <div class="ma-field">
             <label class="ma-label">Account Number</label>
-            <input class="ma-input" id="maAcctNum" type="text" placeholder="e.g. 54845698" maxlength="20">
+            <div style="display:flex;gap:8px">
+              <input class="ma-input" id="maAcctNum" type="text" placeholder="e.g. 1009016" maxlength="20" autocomplete="off" style="flex:1" value="${searchAcctNum}">
+              <button class="ma-lookup-btn" id="maLookup" disabled>Search</button>
+            </div>
+            <div id="maLookupMsg" class="ma-link-msg" style="margin-top:8px"></div>
           </div>
-          <div class="ma-field">
-            <label class="ma-label">Nickname (optional)</label>
-            <input class="ma-input" id="maAcctNick" type="text" placeholder="e.g. My Main Account" maxlength="30">
-          </div>
-          <button class="ma-submit-btn" id="maSubmit" disabled>${linkIcon}<span>Link Account</span></button>
+          ${accountPreview}
         </div>
         <div class="ma-support">Unable to see your account after linking? <a href="mailto:support@mdmtraders.com">Contact support</a> for assistance.</div>
       </div>`;
@@ -499,65 +443,152 @@ function initAccountMenu() {
     overlay.querySelector('#maClose').onclick = closeManageModal;
     overlay.querySelector('#maBack').onclick = () => { modalView = 'list'; renderModal(); };
     overlay.querySelectorAll('[data-broker]').forEach(btn => {
-      btn.onclick = () => { addBroker = btn.dataset.broker; modalView = 'add-step2'; renderModal(); };
+      btn.onclick = () => {
+        addBroker = btn.dataset.broker;
+        addBrokerObj = communityBrokers
+          ? communityBrokers.find(b => (typeof b === 'string' ? b : b.name) === addBroker) || null
+          : null;
+        modalView = 'add-step2';
+        renderModal();
+      };
     });
     overlay.onclick = e => { if (e.target === overlay) closeManageModal(); };
-    // Re-render if community data arrives while modal is open
-    overlay.addEventListener('community-loaded', () => renderModal(), { once: true });
   }
 
   function bindStep2Events() {
     overlay.querySelector('#maClose').onclick = closeManageModal;
-    overlay.querySelector('#maBack').onclick = () => { modalView = 'add-step1'; renderModal(); };
-    const numInput = overlay.querySelector('#maAcctNum');
-    const nickInput = overlay.querySelector('#maAcctNick');
-    const submitBtn = overlay.querySelector('#maSubmit');
-    numInput.addEventListener('input', () => { submitBtn.disabled = !numInput.value.trim(); });
-    submitBtn.onclick = () => {
+    overlay.querySelector('#maBack').onclick = () => { modalView = 'add-step1'; foundAccount = null; searchAcctNum = ''; renderModal(); };
+
+    const numInput  = overlay.querySelector('#maAcctNum');
+    const lookupBtn = overlay.querySelector('#maLookup');
+    const lookupMsg = overlay.querySelector('#maLookupMsg');
+
+    numInput.addEventListener('input', () => {
+      searchAcctNum = numInput.value;
+      lookupBtn.disabled = !numInput.value.trim();
+    });
+
+    lookupBtn.onclick = async () => {
       const num = numInput.value.trim();
       if (!num) return;
-      const nick = nickInput.value.trim();
-      const newAcct = {
-        name: addBroker.split(' ')[0] + ' Account',
-        nickname: nick,
-        num: '#' + num.replace(/^#/, ''),
-        broker: addBroker,
-        synced: 'Synced just now'
-      };
-      ACCOUNTS.push(newAcct);
-      selected = ACCOUNTS.length - 1;
-      applyAccount(selected);
-      modalView = 'list';
-      renderModal();
+      searchAcctNum = num;
+      lookupMsg.textContent = 'Searching…';
+      lookupMsg.style.color = 'var(--muted)';
+      lookupBtn.disabled = true;
+      foundAccount = null;
+      try {
+        const res  = await fetch(`/api/link-account?account_id=${encodeURIComponent(num)}`);
+        const json = await res.json();
+        if (!res.ok) {
+          lookupMsg.textContent = json.error || 'Account not found.';
+          lookupMsg.style.color = 'var(--red-val)';
+          lookupBtn.disabled = false;
+        } else {
+          foundAccount = json.account;
+          renderStep2(); // re-render to show preview panel
+        }
+      } catch {
+        lookupMsg.textContent = 'Network error. Please try again.';
+        lookupMsg.style.color = 'var(--red-val)';
+        lookupBtn.disabled = false;
+      }
     };
+
+    const confirmBtn = overlay.querySelector('#maConfirm');
+    if (confirmBtn) {
+      const linkMsg = overlay.querySelector('#maLinkMsg');
+      confirmBtn.onclick = async () => {
+        const userObj = JSON.parse(localStorage.getItem('win_user') || 'null');
+        const userId = userObj?.id;
+        if (!userId || !foundAccount) return;
+        confirmBtn.disabled = true;
+        if (linkMsg) { linkMsg.textContent = 'Linking…'; linkMsg.style.color = 'var(--muted)'; }
+        try {
+          const res  = await fetch('/api/link-account', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ user_id: userId, account_id: foundAccount.id })
+          });
+          const json = await res.json();
+          if (!res.ok) {
+            if (linkMsg) { linkMsg.textContent = json.error || 'Failed to link account.'; linkMsg.style.color = 'var(--red-val)'; }
+            confirmBtn.disabled = false;
+          } else {
+            ACCOUNTS.push({
+              name: foundAccount.name || addBroker + ' Account',
+              nickname: '',
+              num: '#' + foundAccount.id,
+              broker: addBroker,
+              synced: 'Just linked'
+            });
+            selected = ACCOUNTS.length - 1;
+            applyAccount(selected);
+            const gate = document.getElementById('accountGate');
+            if (gate) gate.remove();
+            foundAccount = null;
+            searchAcctNum = '';
+            modalView = 'list';
+            renderModal();
+          }
+        } catch {
+          if (linkMsg) { linkMsg.textContent = 'Network error. Please try again.'; linkMsg.style.color = 'var(--red-val)'; }
+          confirmBtn.disabled = false;
+        }
+      };
+    }
+
     overlay.onclick = e => { if (e.target === overlay) closeManageModal(); };
     numInput.focus();
   }
 
   addEventListener('keydown', e => { if (e.key === 'Escape' && overlay.classList.contains('show')) closeManageModal(); });
-}
 
-// Load channels from API and populate the Network dropdown
-async function loadChannels() {
-  try {
-    const res = await fetch('/api/channels');
-    if (!res.ok) throw new Error();
-    const { channels } = await res.json();
-    const group = document.getElementById('networkGroup');
-    if (!group) return;
-    if (!channels || !channels.length) {
-      group.innerHTML = '<div class="nav-empty">No channels yet</div>';
-      return;
-    }
-    group.innerHTML = channels.map(ch => `
-      <a class="nav-sub" href="${ch.url}" target="_blank" rel="noopener">
-        <span class="dot"></span><span>${ch.name}</span>
-      </a>`).join('');
-  } catch {
-    const group = document.getElementById('networkGroup');
-    if (group) group.innerHTML = '<div class="nav-empty">No channels yet</div>';
+  // ── Account gate (lock pages until a trading account is linked) ──
+  const GATED_PAGES = ['calendar', 'journal', 'courses'];
+
+  function showAccountGate() {
+    if (document.getElementById('accountGate')) return;
+    const gate = document.createElement('div');
+    gate.id = 'accountGate';
+    gate.className = 'account-gate';
+    gate.innerHTML = `
+      <div class="gate-card">
+        <div class="gate-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+            <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10Z"/>
+          </svg>
+        </div>
+        <h2 class="gate-title">Link a trading account</h2>
+        <p class="gate-desc">Connect your broker account to unlock this page — track performance, review your trades, and access all your tools.</p>
+        <button class="gate-btn" id="gateAddBtn">Add Account</button>
+      </div>`;
+    document.body.appendChild(gate);
+    document.getElementById('gateAddBtn').onclick = () => {
+      modalView = 'add-step1';
+      addBroker = '';
+      addBrokerObj = null;
+      foundAccount = null;
+      searchAcctNum = '';
+      renderModal();
+      overlay.classList.add('show');
+    };
   }
+
+  async function checkAccountGate(page) {
+    if (!GATED_PAGES.includes(page)) return;
+    const userObj = JSON.parse(localStorage.getItem('win_user') || 'null');
+    if (!userObj?.id) return;
+    try {
+      const res = await fetch(`/api/linked-accounts?user_id=${encodeURIComponent(userObj.id)}`);
+      if (!res.ok) return;
+      const { accounts } = await res.json();
+      if (accounts && accounts.length > 0) return;
+    } catch { return; }
+    showAccountGate();
+  }
+
+  checkAccountGate(activePage);
 }
 
-return { initShell, loadChannels };
+return { initShell };
 })();

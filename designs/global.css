@@ -75,10 +75,7 @@ a{color:inherit;text-decoration:none}
 .app.collapsed .nav-group,.app.collapsed .nav-group-trigger .grp-chev{display:none}
 .side-foot{border-top:1px solid var(--line-soft);padding:14px 16px;white-space:nowrap;overflow:hidden}
 .side-user{display:flex;align-items:center;gap:11px}
-.side-avatar-wrap{flex:0 0 38px}
 .side-avatar{width:38px;height:38px;border-radius:50%;flex:0 0 38px;object-fit:cover;background:#1a2233;border:1px solid var(--line)}
-.side-avatar-init{width:38px;height:38px;border-radius:50%;flex:0 0 38px;display:flex;align-items:center;justify-content:center;
-  background:var(--accent-soft);border:1px solid rgba(91,116,255,.3);font-size:15px;font-weight:700;color:var(--accent)}
 .side-user .nm{font-size:13.5px;font-weight:600}.side-user .em{font-size:11px;color:var(--muted)}
 .signout{display:flex;align-items:center;gap:11px;color:var(--red-val);font-size:13.5px;font-weight:600;padding:14px 6px 4px;white-space:nowrap}
 .signout svg{width:18px;height:18px;flex:0 0 18px}
@@ -115,11 +112,7 @@ a{color:inherit;text-decoration:none}
   display:flex;align-items:center;justify-content:center;color:var(--ink-2);flex:0 0 auto}
 .tb-btn:hover{background:var(--card-2)}.tb-btn svg{width:18px;height:18px}
 .tb-btn.spin svg{animation:spin .6s linear}@keyframes spin{to{transform:rotate(360deg)}}
-.tb-avatar-wrap{flex:0 0 42px}
 .tb-avatar{width:42px;height:42px;border-radius:50%;border:1px solid var(--line);object-fit:cover;flex:0 0 42px}
-.tb-avatar-init{width:42px;height:42px;border-radius:50%;border:1px solid rgba(91,116,255,.3);
-  display:flex;align-items:center;justify-content:center;
-  background:var(--accent-soft);font-size:16px;font-weight:700;color:var(--accent);flex:0 0 42px}
 .content{padding:clamp(16px,2.4vw,26px);width:100%;flex:1;display:flex;flex-direction:column;gap:18px}
 
 /* ── Account switcher dropdown ── */
@@ -133,7 +126,6 @@ a{color:inherit;text-decoration:none}
   display:none;opacity:0;transform:translateY(-6px);transition:opacity .16s ease,transform .16s ease}
 .acct.open .acct-drop{display:block;opacity:1;transform:translateY(0)}
 .acct-drop .dm-label{font-size:10px;font-weight:700;letter-spacing:.8px;color:var(--faint);text-transform:uppercase;padding:8px 10px 6px}
-.dm-no-accounts{font-size:13px;color:var(--faint);padding:12px 12px 8px;text-align:center}
 .acct-opt{display:flex;align-items:center;gap:11px;width:100%;padding:10px 12px;border-radius:10px;text-align:left;transition:background .12s}
 .acct-opt:hover{background:rgba(255,255,255,.045)}
 .acct-opt.sel{background:var(--accent-soft)}
@@ -207,14 +199,22 @@ a{color:inherit;text-decoration:none}
 .ma-step-dot{height:3px;flex:1;border-radius:2px;background:var(--line);transition:background .2s}
 .ma-step-dot.done{background:var(--accent)}
 .ma-loading{font-size:13px;color:var(--muted);text-align:center;padding:24px 0}
+.ma-create-box{background:var(--card-2);border:1px solid var(--line);border-radius:12px;padding:16px;margin-bottom:4px}
+.ma-create-text{font-size:13px;color:var(--muted);margin:0 0 10px}
+.ma-create-text strong{color:var(--ink)}
+.ma-create-btn{display:flex;align-items:center;justify-content:space-between;gap:8px;width:100%;padding:10px 14px;
+  border-radius:10px;background:var(--accent-soft);border:1px solid rgba(91,116,255,.3);
+  color:var(--accent);font-size:13px;font-weight:600;cursor:pointer;text-decoration:none;transition:background .15s}
+.ma-create-btn:hover{background:rgba(91,116,255,.2)}
+.ma-or-divider{display:flex;align-items:center;gap:10px;margin:16px 0 4px;color:var(--faint);font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.5px}
+.ma-or-divider::before,.ma-or-divider::after{content:'';flex:1;height:1px;background:var(--line)}
 .ma-broker{display:flex;align-items:center;gap:10px;width:100%;padding:11px 14px;border-radius:10px;
   border:1px solid var(--line);background:none;color:var(--ink);font-size:14px;font-weight:500;
   cursor:pointer;transition:all .12s;margin-bottom:8px;text-align:left}
 .ma-broker:hover{background:rgba(91,116,255,.06);border-color:var(--accent)}
 .ma-broker.sel{background:var(--accent-soft);border-color:var(--accent)}
 .ma-broker-icon{width:32px;height:32px;border-radius:8px;background:var(--card-2);display:flex;align-items:center;
-  justify-content:center;font-size:14px;font-weight:700;color:var(--accent);flex-shrink:0;overflow:hidden}
-.ma-broker-logo{width:100%;height:100%;object-fit:contain;padding:3px}
+  justify-content:center;font-size:14px;font-weight:700;color:var(--accent);flex-shrink:0}
 .ma-field{margin-bottom:14px}
 .ma-label{display:block;font-size:12px;font-weight:600;color:var(--muted);margin-bottom:6px;text-transform:uppercase;letter-spacing:.5px}
 .ma-input{width:100%;padding:11px 14px;border-radius:10px;border:1px solid var(--line);background:var(--card-2);
@@ -664,3 +664,22 @@ td.neg{color:var(--red-val)}
   .filter-drawer,.trade-drawer{width:100vw;max-width:100vw}
 }
 @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+
+/* ── Account gate overlay ── */
+.account-gate{position:fixed;inset:0;background:rgba(6,8,16,.75);backdrop-filter:blur(12px);
+  z-index:190;display:flex;align-items:center;justify-content:center;padding:24px;
+  animation:gateFadeIn .25s ease}
+@keyframes gateFadeIn{from{opacity:0;transform:scale(.97)}to{opacity:1;transform:scale(1)}}
+.gate-card{background:var(--card);border:1px solid var(--line);border-radius:22px;
+  padding:44px 40px 40px;max-width:420px;width:100%;text-align:center;
+  box-shadow:0 32px 80px -20px rgba(0,0,0,.85),0 0 0 1px rgba(255,255,255,.03) inset}
+.gate-icon{margin:0 auto 20px;width:64px;height:64px;border-radius:18px;
+  background:var(--accent-soft);border:1px solid rgba(91,116,255,.3);
+  display:flex;align-items:center;justify-content:center}
+.gate-icon svg{width:32px;height:32px;color:var(--accent)}
+.gate-title{margin:0 0 10px;font-size:22px;font-weight:800;letter-spacing:-.3px}
+.gate-desc{margin:0 0 28px;font-size:14px;line-height:1.6;color:var(--muted)}
+.gate-btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;
+  padding:13px 32px;border-radius:12px;font-size:15px;font-weight:700;
+  background:var(--accent);color:#fff;transition:opacity .15s,transform .15s;width:100%}
+.gate-btn:hover{opacity:.88;transform:translateY(-1px)}
