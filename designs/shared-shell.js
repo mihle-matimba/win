@@ -161,6 +161,40 @@ function applyUserInfo() {
   }
 }
 
+async function loadLinkedAccounts() {
+  const userObj = JSON.parse(localStorage.getItem('win_user') || 'null');
+  if (!userObj?.id) return;
+  try {
+    const res = await fetch(`/api/linked-accounts?user_id=${encodeURIComponent(userObj.id)}`);
+    if (!res.ok) return;
+    const { accounts } = await res.json();
+    if (!accounts || !accounts.length) return;
+    // Clear and repopulate ACCOUNTS from DB
+    ACCOUNTS.length = 0;
+    accounts.forEach(row => {
+      const bc = row.broker_clients || {};
+      ACCOUNTS.push({
+        name:    bc.name || 'Account ' + row.id,
+        nickname: '',
+        num:     '#' + row.id,
+        broker:  (communityBrokers && communityBrokers[0])
+                   ? (typeof communityBrokers[0] === 'string' ? communityBrokers[0] : communityBrokers[0].name)
+                   : 'Broker',
+        balance: bc.balance || 0,
+        currency: bc.account_currency || '',
+        synced:  'Linked'
+      });
+    });
+    // Notify account menu to refresh display
+    const acctBroker = document.getElementById('acctBroker');
+    if (acctBroker && ACCOUNTS.length) {
+      const a = ACCOUNTS[0];
+      acctBroker.textContent = a.broker;
+      document.getElementById('acctNum').textContent = a.num;
+    }
+  } catch { /* silent fail */ }
+}
+
 async function loadChannels() {
   try {
     const res = await fetch('/api/channels');
@@ -194,6 +228,7 @@ function initShell({ activePage = '' } = {}) {
   loadCommunity();
   applyUserInfo();
   initAccountMenu(activePage);
+  loadLinkedAccounts();
 
   // logo fallback
   const brandLogo = document.getElementById('brandLogo');

@@ -13,7 +13,7 @@ module.exports = async (req, res) => {
 
     const { data, error } = await supabase
       .from('linked_accounts')
-      .select('id')
+      .select('id, broker_clients(id, name, email, balance, account_currency)')
       .eq('user_id', userId);
 
     if (error) return res.status(500).json({ error: error.message });
