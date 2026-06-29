@@ -266,80 +266,46 @@ const COURSE_THEMES = [
 ];
 
 /* ================================================================
-   Fetch data via API endpoints (server-side Supabase key)
-   Falls back to demo data if API isn't available
+   Skeleton loader
+   ================================================================ */
+function showSkeletons(n) {
+  const grid = document.getElementById('courseGrid');
+  grid.innerHTML = Array.from({ length: n }, () => `
+    <div class="c-skeleton">
+      <div class="skel-banner"></div>
+      <div class="skel-body">
+        <div class="skel-line w80"></div>
+        <div class="skel-line w60"></div>
+        <div class="skel-line w40"></div>
+      </div>
+    </div>`).join('');
+}
+
+/* ================================================================
+   Fetch data from API
    ================================================================ */
 async function loadData() {
-  try {
-    const res = await fetch('/api/courses');
-    if (!res.ok) throw new Error('API error');
-    const data = await res.json();
+  showSkeletons(3);
 
-    courses = data.courses || [];
-    (data.chapters || []).forEach(ch => {
-      if (!chapters[ch.course_id]) chapters[ch.course_id] = [];
-      chapters[ch.course_id].push(ch);
-    });
+  const res = await fetch('/api/courses');
+  if (!res.ok) { render(); return; }
+  const data = await res.json();
 
-    // Load progress if user is logged in
-    if (userId) {
-      const progRes = await fetch(`/api/progress?user_id=${userId}`);
-      if (progRes.ok) {
-        const progData = await progRes.json();
-        (progData.progress || []).forEach(p => { progress[p.chapter_id] = true; });
-      }
+  courses = data.courses || [];
+  (data.chapters || []).forEach(ch => {
+    if (!chapters[ch.course_id]) chapters[ch.course_id] = [];
+    chapters[ch.course_id].push(ch);
+  });
+
+  if (userId) {
+    const progRes = await fetch(`/api/progress?user_id=${userId}`);
+    if (progRes.ok) {
+      const progData = await progRes.json();
+      (progData.progress || []).forEach(p => { progress[p.chapter_id] = true; });
     }
-  } catch {
-    loadDemoData();
   }
 
   render();
-}
-
-function loadDemoData() {
-  const cIntro = 'demo-intro';
-  const cForex = 'demo-forex';
-  const cSynth = 'demo-synth';
-
-  courses = [
-    { id: cIntro, title: 'Introduction to WIN Trading', description: 'Start your trading journey here. Learn the fundamentals of forex — from registering with a broker to understanding pips, leverage, lot sizes, and how to use MT5 & TradingView.', sort_order: 1 },
-    { id: cForex, title: "Hanré's Forex Course",     description: 'Take your trading to the next level with technical analysis. Master candlestick patterns, trendlines, support & resistance, order blocks, fair value gaps, and Fibonacci retracements.', sort_order: 2 },
-    { id: cSynth, title: "Hanré's Synthetics Course", description: 'Explore the world of synthetic indices trading. From the basics to advanced strategies — learn how to trade volatility indices with confidence.', sort_order: 3 },
-  ];
-
-  chapters[cIntro] = [
-    { id:'c1-1',  course_id:cIntro, chapter_num:'1.1',  title:'Introduction to Win',              description:'Welcome & overview of WIN Trading',     video_url:'https://youtu.be/M3FKBMtLFAI' },
-    { id:'c1-2',  course_id:cIntro, chapter_num:'1.2',  title:'How to Register with JP Markets',   description:'Dashboard setup & broker registration',  video_url:'https://youtu.be/piS43eTDNsA' },
-    { id:'c1-3',  course_id:cIntro, chapter_num:'1.3',  title:'What is Forex Trading',             description:'Understanding the forex market',          video_url:'https://youtu.be/8zFExpPAv_8' },
-    { id:'c1-4',  course_id:cIntro, chapter_num:'1.4',  title:'What are Spreads',                  description:'Bid/ask spreads explained',               video_url:'https://youtu.be/d2sd1-kzv-4' },
-    { id:'c1-5',  course_id:cIntro, chapter_num:'1.5',  title:'Lot Sizes',                         description:'Understanding position sizing',            video_url:'https://youtu.be/tDt-9oA665o' },
-    { id:'c1-6',  course_id:cIntro, chapter_num:'1.6',  title:'Leverage',                          description:'How leverage works in trading',            video_url:'https://youtu.be/NBo0iILFFmE' },
-    { id:'c1-7',  course_id:cIntro, chapter_num:'1.7',  title:'Take Profit & Stop Loss',           description:'Managing risk on every trade',             video_url:'https://youtu.be/2xGfBQ-A-I4' },
-    { id:'c1-8',  course_id:cIntro, chapter_num:'1.8',  title:'Market Orders',                     description:'Executing trades in the market',           video_url:'https://youtu.be/vjYzCWmDuHc' },
-    { id:'c1-9',  course_id:cIntro, chapter_num:'1.9',  title:'Pips',                              description:'Measuring price movement',                 video_url:'https://youtu.be/8ayZkaeh7tU' },
-    { id:'c1-10', course_id:cIntro, chapter_num:'1.10', title:'How MT5 Works',                     description:'Navigating MetaTrader 5',                  video_url:'https://youtu.be/54eKLMdNZMw' },
-    { id:'c1-11', course_id:cIntro, chapter_num:'1.11', title:'TradingView',                       description:'Charting & analysis platform',             video_url:'https://youtu.be/TaP_f9AhjjQ' },
-    { id:'c1-12', course_id:cIntro, chapter_num:'1.12', title:'Real & Demo Accounts',              description:'Practice vs live trading',                 video_url:'https://youtu.be/p1Xf0HrJsQE' },
-  ];
-
-  chapters[cForex] = [
-    { id:'c2-1',  course_id:cForex, chapter_num:'1',  title:'Candles',              description:'Reading candlestick charts',     video_url:'https://youtu.be/DcpnFbOmT7A' },
-    { id:'c2-2',  course_id:cForex, chapter_num:'2',  title:'Patterns',             description:'Identifying chart patterns',     video_url:'https://youtu.be/2eRxD2exvpo' },
-    { id:'c2-3',  course_id:cForex, chapter_num:'3',  title:'Trendlines',           description:'Drawing & trading trendlines',   video_url:'https://youtu.be/tq9xjZbTPyQ' },
-    { id:'c2-4',  course_id:cForex, chapter_num:'4',  title:'Support & Resistance', description:'Key price levels',               video_url:'https://youtu.be/4OZ0QojFp4E' },
-    { id:'c2-5',  course_id:cForex, chapter_num:'5',  title:'Retests',              description:'Confirmation through retests',   video_url:'https://youtu.be/LSImmLMmma8' },
-    { id:'c2-6',  course_id:cForex, chapter_num:'6',  title:'Example Trades',       description:'Real trade setups walkthrough',  video_url:'https://youtu.be/BV9wsRbDwRI' },
-    { id:'c2-7',  course_id:cForex, chapter_num:'7',  title:'Order Blocks',         description:'Smart money concepts',           video_url:'https://youtu.be/pQ0F4VTjz8Y' },
-    { id:'c2-8',  course_id:cForex, chapter_num:'8',  title:'Fair Value Gaps',      description:'Imbalance & liquidity zones',    video_url:'https://youtu.be/O1ORrqhUZ6o' },
-    { id:'c2-9',  course_id:cForex, chapter_num:'9',  title:'Break of Structure',   description:'Market structure shifts',        video_url:'https://youtu.be/SUOT7gmXF0o' },
-    { id:'c2-10', course_id:cForex, chapter_num:'10', title:'Fibonacci',            description:'Fibonacci retracement levels',   video_url:'https://youtu.be/8JdlgLTwVLU' },
-    { id:'c2-11', course_id:cForex, chapter_num:'11', title:'Example Trades',       description:'Advanced trade examples',        video_url:'https://youtu.be/klrX0e4RwMw' },
-  ];
-
-  chapters[cSynth] = [
-    { id:'c3-1', course_id:cSynth, chapter_num:'1', title:'The Basics', description:'Introduction to synthetic indices', video_url:'https://youtu.be/e8kpztbHn34' },
-    { id:'c3-2', course_id:cSynth, chapter_num:'2', title:'Advanced',   description:'Advanced synthetics strategies',    video_url:'https://youtu.be/yh6b27lz7d8' },
-  ];
 }
 
 /* ================================================================
