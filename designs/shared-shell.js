@@ -590,5 +590,79 @@ function initAccountMenu(activePage) {
   checkAccountGate(activePage);
 }
 
-return { initShell };
+async function loadCommunity() {
+  try {
+    const userObj = JSON.parse(localStorage.getItem('win_user') || 'null');
+    const communityId = userObj?.user_metadata?.community_id;
+    const param = communityId
+      ? `id=${encodeURIComponent(communityId)}`
+      : `domain=${encodeURIComponent(location.hostname)}`;
+    const res = await fetch(`/api/community?${param}`);
+    if (!res.ok) throw new Error();
+    const { community } = await res.json();
+    communityBrokers = Array.isArray(community?.allowed_brokers) && community.allowed_brokers.length
+      ? community.allowed_brokers
+      : BROKERS_FALLBACK;
+    if (community?.logo_url) {
+      const brandLogo = document.getElementById('brandLogo');
+      if (brandLogo) { brandLogo.src = community.logo_url; brandLogo.style.display = ''; }
+      const logoFallback = document.getElementById('logoFallback');
+      if (logoFallback) logoFallback.style.display = 'none';
+    }
+  } catch {
+    communityBrokers = BROKERS_FALLBACK;
+  }
+  const modal = document.getElementById('manageAccountsModal');
+  if (modal && modal.classList.contains('show') && modal.querySelector('.ma-loading')) {
+    modal.dispatchEvent(new CustomEvent('community-loaded'));
+  }
+}
+
+function applyUserInfo() {
+  const userObj = JSON.parse(localStorage.getItem('win_user') || 'null');
+  const email    = userObj?.email || '';
+  const name     = userObj?.user_metadata?.full_name || '';
+  const avatar   = userObj?.user_metadata?.avatar_url || '';
+  const firstName = (name || email).split(/[\s@]/)[0] || '?';
+  const initial  = firstName.charAt(0).toUpperCase();
+  const avatarWrap = document.getElementById('sideAvatarWrap');
+  if (avatarWrap) {
+    avatarWrap.innerHTML = avatar
+      ? `<img class="side-avatar" alt="${firstName}" src="${avatar}">`
+      : `<div class="side-avatar-init">${initial}</div>`;
+  }
+  const sideEmail = document.getElementById('sideUserEmail');
+  if (sideEmail) sideEmail.textContent = email;
+  const sideName = document.getElementById('sideUserName');
+  if (sideName) sideName.textContent = firstName;
+  const tbWrap = document.getElementById('tbAvatarWrap');
+  if (tbWrap) {
+    tbWrap.innerHTML = avatar
+      ? `<img class="tb-avatar" alt="${firstName}" src="${avatar}">`
+      : `<div class="tb-avatar-init">${initial}</div>`;
+  }
+}
+
+async function loadChannels() {
+  try {
+    const res = await fetch('/api/channels');
+    if (!res.ok) throw new Error();
+    const { channels } = await res.json();
+    const group = document.getElementById('networkGroup');
+    if (!group) return;
+    if (!channels || !channels.length) {
+      group.innerHTML = '<div class="nav-empty">No channels yet</div>';
+      return;
+    }
+    group.innerHTML = channels.map(ch => `
+      <a class="nav-sub" href="${ch.url}" target="_blank" rel="noopener">
+        <span class="dot"></span><span>${ch.name}</span>
+      </a>`).join('');
+  } catch {
+    const group = document.getElementById('networkGroup');
+    if (group) group.innerHTML = '<div class="nav-empty">No channels yet</div>';
+  }
+}
+
+return { initShell, loadChannels };
 })();
