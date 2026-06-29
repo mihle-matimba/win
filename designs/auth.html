@@ -336,8 +336,6 @@
         <h1 class="auth-title"><strong>Create Account</strong></h1>
         <p class="auth-desc">Join the Wealthy Individuals Network and start your trading journey.</p>
 
-        <div class="auth-msg" id="signUpMsg"></div>
-
         <form class="auth-form" id="signUpForm" novalidate>
 
           <!-- First + Last Name -->
@@ -414,6 +412,7 @@
           </div>
 
           <button type="submit" class="auth-submit" id="suBtn">Create Account</button>
+          <div class="auth-msg" id="signUpMsg"></div>
         </form>
 
         <p class="auth-switch">Already have an account? <a href="#" id="goSignIn">Sign In</a></p>
@@ -620,6 +619,7 @@ function showMsg(id, msg, type) {
   const el = document.getElementById(id);
   el.textContent = msg;
   el.className = 'auth-msg ' + type;
+  el.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
 }
 
 /* ================================================================
