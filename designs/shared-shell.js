@@ -535,12 +535,24 @@ function initAccountMenu(activePage) {
       btn.onclick = () => { confirmRemoveIdx = -1; renderModal(); };
     });
     overlay.querySelectorAll('[data-remove]').forEach(btn => {
-      btn.onclick = () => {
+      btn.onclick = async () => {
         const idx = +btn.dataset.remove;
+        const acct = ACCOUNTS[idx];
+        const userObj = JSON.parse(localStorage.getItem('win_user') || 'null');
+        if (acct && userObj?.id) {
+          const accountId = acct.num.replace('#', '');
+          try {
+            await fetch('/api/link-account', {
+              method: 'DELETE',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ user_id: userObj.id, account_id: accountId })
+            });
+          } catch { /* ignore network errors — remove locally anyway */ }
+        }
         ACCOUNTS.splice(idx, 1);
         confirmRemoveIdx = -1;
         if (selected >= ACCOUNTS.length) selected = Math.max(0, ACCOUNTS.length - 1);
-        if (ACCOUNTS.length) applyAccount(selected);
+        if (ACCOUNTS.length) applyAccount(selected); else applyAccount(0);
         renderModal();
       };
     });
@@ -684,29 +696,72 @@ function initAccountMenu(activePage) {
 
   function showAccountGate() {
     if (document.getElementById('accountGate')) return;
+
+    const broker     = communityBrokers?.[0] || null;
+    const brokerName = broker ? (typeof broker === 'string' ? broker : broker.name) : 'your broker';
+    const signupUrl  = broker && typeof broker !== 'string' ? (broker.signup_url || null) : null;
+    const externalIcon = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:14px;height:14px;flex-shrink:0"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>';
+
     const gate = document.createElement('div');
     gate.id = 'accountGate';
     gate.className = 'account-gate';
     gate.innerHTML = `
       <div class="gate-card">
-        <div class="gate-icon">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
-            <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10Z"/>
-          </svg>
+        <h2 class="gate-title">Welcome to WIN</h2>
+        <p class="gate-desc">To enjoy the WIN platform for free, please connect your brokerage account.</p>
+        ${signupUrl ? `
+        <a class="gate-btn gate-broker-btn" href="${signupUrl}" target="_blank" rel="noopener">
+          <span>Create a ${brokerName} account</span>
+          ${externalIcon}
+        </a>` : ''}
+        <p class="gate-support">Struggling to create an account? <a href="mailto:support@mdmtraders.com">Contact support</a></p>
+        <div class="gate-divider"><span>Already have an account?</span></div>
+        <div class="gate-search-row">
+          <input class="gate-input" id="gateAcctNum" type="text" placeholder="Enter your account number" autocomplete="off" maxlength="20">
+          <button class="gate-connect-btn" id="gateConnectBtn" disabled>Connect</button>
         </div>
-        <h2 class="gate-title">Link a trading account</h2>
-        <p class="gate-desc">Connect your broker account to unlock this page — track performance, review your trades, and access all your tools.</p>
-        <button class="gate-btn" id="gateAddBtn">Add Account</button>
+        <div class="gate-msg" id="gateMsg"></div>
       </div>`;
     document.body.appendChild(gate);
-    document.getElementById('gateAddBtn').onclick = () => {
-      modalView = 'add-step1';
-      addBroker = '';
-      addBrokerObj = null;
-      foundAccount = null;
-      searchAcctNum = '';
-      renderModal();
-      overlay.classList.add('show');
+
+    const numInput   = gate.querySelector('#gateAcctNum');
+    const connectBtn = gate.querySelector('#gateConnectBtn');
+    const gateMsg    = gate.querySelector('#gateMsg');
+
+    numInput.addEventListener('input', () => {
+      connectBtn.disabled = !numInput.value.trim();
+    });
+
+    connectBtn.onclick = async () => {
+      const num = numInput.value.trim();
+      if (!num) return;
+      const userObj = JSON.parse(localStorage.getItem('win_user') || 'null');
+      if (!userObj?.id) { gateMsg.textContent = 'Please sign in first.'; gateMsg.style.color = 'var(--red-val)'; return; }
+      connectBtn.disabled = true;
+      gateMsg.textContent = 'Connecting…';
+      gateMsg.style.color = 'var(--muted)';
+      try {
+        const res  = await fetch('/api/link-account', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ user_id: userObj.id, account_id: num })
+        });
+        const json = await res.json();
+        if (!res.ok) {
+          gateMsg.textContent = json.error || 'Failed to connect account.';
+          gateMsg.style.color = 'var(--red-val)';
+          connectBtn.disabled = false;
+        } else {
+          gateMsg.textContent = 'Account connected!';
+          gateMsg.style.color = 'var(--green-val)';
+          await loadLinkedAccounts();
+          setTimeout(() => gate.remove(), 600);
+        }
+      } catch {
+        gateMsg.textContent = 'Network error. Please try again.';
+        gateMsg.style.color = 'var(--red-val)';
+        connectBtn.disabled = false;
+      }
     };
   }
 
