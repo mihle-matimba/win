@@ -1,0 +1,594 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>WIN · Monte Carlo</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<link rel="stylesheet" href="global.css">
+<style>
+/* ── Layout ── */
+.mc-wrap{display:flex;flex-direction:column;gap:18px;width:100%}
+.mc-cols{display:grid;grid-template-columns:360px 1fr;gap:18px;align-items:start}
+@media(max-width:1000px){.mc-cols{grid-template-columns:1fr}}
+
+/* ── Params panel ── */
+.mc-panel{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);padding:24px}
+.mc-panel-title{font-size:11px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--accent);margin-bottom:20px}
+
+.mc-field{margin-bottom:18px}
+.mc-field:last-of-type{margin-bottom:0}
+.mc-label{display:flex;align-items:center;gap:6px;font-size:13px;font-weight:600;color:var(--ink-2);margin-bottom:8px}
+.mc-label .tip{width:16px;height:16px;border-radius:50%;background:var(--card-2);border:1px solid var(--line);display:inline-flex;align-items:center;justify-content:center;font-size:9px;color:var(--faint);cursor:default;flex:0 0 16px}
+
+.mc-input{width:100%;background:var(--card-2);border:1px solid var(--line);border-radius:10px;padding:10px 14px;font-size:15px;font-weight:600;color:var(--ink);font-family:Inter,sans-serif;outline:none;transition:border-color .15s,box-shadow .15s;box-sizing:border-box}
+.mc-input:focus{border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-soft)}
+.mc-input::-webkit-inner-spin-button,.mc-input::-webkit-outer-spin-button{-webkit-appearance:none}
+
+.mc-chips{display:flex;gap:8px;flex-wrap:wrap;margin-top:8px}
+.mc-chip{background:var(--card-2);border:1px solid var(--line);border-radius:20px;padding:5px 14px;font-size:12px;font-weight:600;color:var(--ink-2);cursor:pointer;transition:all .15s;white-space:nowrap}
+.mc-chip:hover{border-color:var(--accent);color:var(--accent)}
+.mc-chip.active{background:var(--accent);border-color:var(--accent);color:#fff}
+
+.mc-toggle{display:flex;gap:0;background:var(--card-2);border:1px solid var(--line);border-radius:10px;overflow:hidden;margin-top:4px}
+.mc-toggle-btn{flex:1;padding:9px 12px;font-size:12px;font-weight:600;color:var(--ink-2);cursor:pointer;border:none;background:transparent;font-family:Inter,sans-serif;transition:all .15s;text-align:center}
+.mc-toggle-btn.active{background:var(--accent);color:#fff}
+
+/* ── Run button ── */
+.mc-run-btn{width:100%;margin-top:22px;padding:14px;border:none;border-radius:12px;background:linear-gradient(90deg,#7c5cfc,#ff6bab);color:#fff;font-size:15px;font-weight:700;font-family:Inter,sans-serif;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:10px;transition:opacity .15s,transform .1s}
+.mc-run-btn:hover{opacity:.9}
+.mc-run-btn:active{transform:scale(.98)}
+.mc-run-btn:disabled{opacity:.5;cursor:not-allowed}
+.mc-run-btn .spinner{width:16px;height:16px;border:2px solid rgba(255,255,255,.3);border-top-color:#fff;border-radius:50%;animation:spin .7s linear infinite;display:none}
+.mc-run-btn.running .spinner{display:block}
+.mc-run-btn.running .run-label{display:none}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+/* ── Results ── */
+.mc-results{display:flex;flex-direction:column;gap:18px}
+.mc-results.hidden{display:none}
+.mc-placeholder{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;background:var(--card);border:1px solid var(--line);border-radius:var(--radius);padding:60px 24px;text-align:center;color:var(--muted)}
+.mc-placeholder i{font-size:36px;color:var(--accent);opacity:.4}
+.mc-placeholder-title{font-size:16px;font-weight:700;color:var(--ink-2)}
+.mc-placeholder-sub{font-size:13px;color:var(--faint);max-width:280px;line-height:1.5}
+
+/* ── Chart card ── */
+.mc-chart-card{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);padding:22px}
+.mc-chart-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:18px;flex-wrap:wrap;gap:10px}
+.mc-chart-title{font-size:15px;font-weight:800;letter-spacing:-.3px}
+.mc-legend{display:flex;align-items:center;gap:14px;font-size:12px;font-weight:600;color:var(--muted);flex-wrap:wrap}
+.mc-leg-item{display:flex;align-items:center;gap:5px}
+.mc-leg-dot{width:20px;height:2px;border-radius:1px}
+.mc-leg-dot.sims{background:rgba(139,148,170,.35)}
+.mc-leg-dot.best{background:#35d79b}
+.mc-leg-dot.worst{background:#ff6b81}
+.mc-leg-dot.median{background:#a29bfe}
+.mc-chart-wrap{height:280px;position:relative}
+
+/* ── Section header ── */
+.mc-section-title{font-size:11px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--accent);margin-bottom:14px}
+
+/* ── Key metrics ── */
+.mc-metrics-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:18px}
+@media(max-width:900px){.mc-metrics-grid{grid-template-columns:repeat(2,1fr)}}
+@media(max-width:480px){.mc-metrics-grid{grid-template-columns:1fr 1fr}}
+.mc-metric{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);padding:16px 18px}
+.mc-metric-label{font-size:10px;font-weight:700;letter-spacing:.6px;text-transform:uppercase;color:var(--muted);margin-bottom:6px}
+.mc-metric-val{font-size:24px;font-weight:800;letter-spacing:-.5px;line-height:1.1}
+.mc-metric-val.green{color:var(--green-val)}
+.mc-metric-val.red{color:var(--red-val)}
+.mc-metric-val.accent{color:var(--accent)}
+.mc-metric-sub{font-size:11px;font-weight:500;color:var(--faint);margin-top:4px}
+
+/* ── Percentiles ── */
+.mc-pct-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:10px}
+@media(max-width:700px){.mc-pct-grid{grid-template-columns:repeat(3,1fr)}}
+@media(max-width:420px){.mc-pct-grid{grid-template-columns:repeat(2,1fr)}}
+.mc-pct-card{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);padding:14px 16px;text-align:center}
+.mc-pct-rank{font-size:11px;font-weight:700;letter-spacing:.5px;text-transform:uppercase;margin-bottom:6px}
+.mc-pct-rank.p50{color:var(--accent)}
+.mc-pct-rank.p95{color:var(--green-val)}
+.mc-pct-rank.p5{color:var(--red-val)}
+.mc-pct-rank.p25,.mc-pct-rank.p75{color:var(--muted)}
+.mc-pct-val{font-size:16px;font-weight:800;letter-spacing:-.3px}
+
+/* ── Additional stats ── */
+.mc-stats-card{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);padding:0}
+.mc-stat-row{display:flex;align-items:center;justify-content:space-between;padding:13px 20px;border-bottom:1px solid var(--line-soft)}
+.mc-stat-row:last-child{border-bottom:none}
+.mc-stat-label{font-size:13px;font-weight:500;color:var(--ink-2)}
+.mc-stat-val{font-size:14px;font-weight:700}
+.mc-stat-val.green{color:var(--green-val)}
+.mc-stat-val.red{color:var(--red-val)}
+.mc-stat-val.accent{color:var(--accent)}
+
+/* ── Divider ── */
+.mc-divider{border:none;border-top:1px solid var(--line);margin:4px 0}
+</style>
+</head>
+<body>
+<div class="app" id="app">
+  <aside class="sidebar" id="sidebar"></aside>
+  <div class="main">
+    <header class="topbar" id="topbar"></header>
+    <main class="content">
+
+      <div class="mc-wrap">
+
+        <div class="mc-cols">
+
+          <!-- ── Parameters panel ── -->
+          <div class="mc-panel">
+            <div class="mc-panel-title">Strategy Parameters</div>
+
+            <!-- Starting Capital -->
+            <div class="mc-field">
+              <div class="mc-label">Starting Capital <span class="tip" title="Your initial account size">?</span></div>
+              <input class="mc-input" type="number" id="pCapital" value="25000" min="100">
+            </div>
+
+            <!-- Win Rate -->
+            <div class="mc-field">
+              <div class="mc-label">Win Rate (%) <span class="tip" title="% of trades that are profitable">?</span></div>
+              <input class="mc-input" type="number" id="pWinRate" value="55" min="1" max="99" step="0.5">
+              <div class="mc-chips">
+                <div class="mc-chip" data-field="pWinRate" data-val="40">40%</div>
+                <div class="mc-chip" data-field="pWinRate" data-val="50">50%</div>
+                <div class="mc-chip active" data-field="pWinRate" data-val="55">55%</div>
+                <div class="mc-chip" data-field="pWinRate" data-val="60">60%</div>
+              </div>
+            </div>
+
+            <!-- Risk per Trade -->
+            <div class="mc-field">
+              <div class="mc-label">Risk per Trade (%) <span class="tip" title="% of account risked per trade">?</span></div>
+              <input class="mc-input" type="number" id="pRisk" value="1" min="0.1" max="100" step="0.1">
+              <div class="mc-chips">
+                <div class="mc-chip" data-field="pRisk" data-val="0.5">0.5%</div>
+                <div class="mc-chip active" data-field="pRisk" data-val="1">1%</div>
+                <div class="mc-chip" data-field="pRisk" data-val="2">2%</div>
+                <div class="mc-chip" data-field="pRisk" data-val="3">3%</div>
+              </div>
+            </div>
+
+            <!-- Position Sizing -->
+            <div class="mc-field">
+              <div class="mc-label">Position Sizing <span class="tip" title="Compounding recalculates risk on current balance; Fixed Dollar uses starting capital">?</span></div>
+              <div class="mc-toggle">
+                <button class="mc-toggle-btn active" id="btnCompound" data-mode="compound">Compounding</button>
+                <button class="mc-toggle-btn" id="btnFixed" data-mode="fixed">Fixed Dollar</button>
+              </div>
+            </div>
+
+            <!-- R:R Ratio -->
+            <div class="mc-field">
+              <div class="mc-label">Reward : Risk Ratio <span class="tip" title="Profit target relative to stop loss (e.g. 1.5 means 1.5R per winner)">?</span></div>
+              <input class="mc-input" type="number" id="pRRR" value="1.5" min="0.1" step="0.1">
+              <div class="mc-chips">
+                <div class="mc-chip" data-field="pRRR" data-val="1">1:1</div>
+                <div class="mc-chip active" data-field="pRRR" data-val="1.5">1.5:1</div>
+                <div class="mc-chip" data-field="pRRR" data-val="2">2:1</div>
+                <div class="mc-chip" data-field="pRRR" data-val="3">3:1</div>
+              </div>
+            </div>
+
+            <!-- Number of Trades -->
+            <div class="mc-field">
+              <div class="mc-label">Number of Trades <span class="tip" title="Trades simulated per run">?</span></div>
+              <input class="mc-input" type="number" id="pTrades" value="200" min="10" max="2000">
+            </div>
+
+            <!-- Ruin Threshold -->
+            <div class="mc-field">
+              <div class="mc-label">Ruin Threshold (%) <span class="tip" title="Max drawdown that counts as account ruin">?</span></div>
+              <div class="mc-chips">
+                <div class="mc-chip" data-field="pRuin" data-val="30">30%</div>
+                <div class="mc-chip active" data-field="pRuin" data-val="50">50%</div>
+                <div class="mc-chip" data-field="pRuin" data-val="70">70%</div>
+              </div>
+              <input class="mc-input" type="number" id="pRuin" value="50" min="5" max="99" style="margin-top:8px">
+            </div>
+
+            <!-- Simulations -->
+            <div class="mc-field">
+              <div class="mc-label">Simulations <span class="tip" title="Number of Monte Carlo paths (more = more accurate, slower)">?</span></div>
+              <input class="mc-input" type="number" id="pSims" value="1000" min="100" max="5000" step="100">
+            </div>
+
+            <button class="mc-run-btn" id="runBtn">
+              <div class="spinner"></div>
+              <span class="run-label"><i class="fa-solid fa-play" style="font-size:12px"></i> &nbsp;Run Simulation</span>
+            </button>
+          </div>
+
+          <!-- ── Results panel ── -->
+          <div id="resultsCol">
+
+            <!-- Placeholder before first run -->
+            <div class="mc-placeholder" id="mcPlaceholder">
+              <i class="fa-solid fa-dice-d20"></i>
+              <div class="mc-placeholder-title">Ready to Simulate</div>
+              <div class="mc-placeholder-sub">Set your strategy parameters on the left and click Run Simulation to see your probability outcomes.</div>
+            </div>
+
+            <!-- Real results (hidden until run) -->
+            <div class="mc-results hidden" id="mcResults">
+
+              <!-- Equity Curve chart -->
+              <div class="mc-chart-card">
+                <div class="mc-chart-head">
+                  <div class="mc-chart-title">Equity Curve Simulation</div>
+                  <div class="mc-legend">
+                    <div class="mc-leg-item"><div class="mc-leg-dot sims"></div>Simulations</div>
+                    <div class="mc-leg-item"><div class="mc-leg-dot best"></div>Best</div>
+                    <div class="mc-leg-item"><div class="mc-leg-dot worst"></div>Worst</div>
+                    <div class="mc-leg-item"><div class="mc-leg-dot median"></div>Median</div>
+                  </div>
+                </div>
+                <div class="mc-chart-wrap">
+                  <canvas id="equityChart"></canvas>
+                </div>
+              </div>
+
+              <!-- Key metrics -->
+              <div>
+                <div class="mc-section-title">Key Metrics</div>
+                <div class="mc-metrics-grid">
+                  <div class="mc-metric">
+                    <div class="mc-metric-label">Profit Probability</div>
+                    <div class="mc-metric-val green" id="mProfitProb">—</div>
+                    <div class="mc-metric-sub">of sims ended profitable</div>
+                  </div>
+                  <div class="mc-metric">
+                    <div class="mc-metric-label">Risk of Ruin</div>
+                    <div class="mc-metric-val" id="mRuin">—</div>
+                    <div class="mc-metric-sub" id="mRuinSub">hit drawdown threshold</div>
+                  </div>
+                  <div class="mc-metric">
+                    <div class="mc-metric-label">Median Balance</div>
+                    <div class="mc-metric-val accent" id="mMedianBal">—</div>
+                    <div class="mc-metric-sub" id="mMedianReturn">—</div>
+                  </div>
+                  <div class="mc-metric">
+                    <div class="mc-metric-label">Median Max DD</div>
+                    <div class="mc-metric-val" id="mMedianDD">—</div>
+                    <div class="mc-metric-sub">peak-to-trough</div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Final Balance Percentiles -->
+              <div>
+                <div class="mc-section-title">Final Balance Percentiles</div>
+                <div class="mc-pct-grid">
+                  <div class="mc-pct-card">
+                    <div class="mc-pct-rank p5">5th (Worst)</div>
+                    <div class="mc-pct-val" id="pct5">—</div>
+                  </div>
+                  <div class="mc-pct-card">
+                    <div class="mc-pct-rank p25">25th</div>
+                    <div class="mc-pct-val" id="pct25">—</div>
+                  </div>
+                  <div class="mc-pct-card">
+                    <div class="mc-pct-rank p50">50th (Median)</div>
+                    <div class="mc-pct-val" id="pct50">—</div>
+                  </div>
+                  <div class="mc-pct-card">
+                    <div class="mc-pct-rank p75">75th</div>
+                    <div class="mc-pct-val" id="pct75">—</div>
+                  </div>
+                  <div class="mc-pct-card">
+                    <div class="mc-pct-rank p95">95th (Best)</div>
+                    <div class="mc-pct-val" id="pct95">—</div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Additional statistics -->
+              <div>
+                <div class="mc-section-title">Additional Statistics</div>
+                <div class="mc-stats-card">
+                  <div class="mc-stat-row">
+                    <div class="mc-stat-label">Expected Value per Trade</div>
+                    <div class="mc-stat-val accent" id="sEV">—</div>
+                  </div>
+                  <div class="mc-stat-row">
+                    <div class="mc-stat-label">Median Profit Factor</div>
+                    <div class="mc-stat-val green" id="sPF">—</div>
+                  </div>
+                  <div class="mc-stat-row">
+                    <div class="mc-stat-label">Median Max Consecutive Losses</div>
+                    <div class="mc-stat-val" id="sConsec">—</div>
+                  </div>
+                  <div class="mc-stat-row">
+                    <div class="mc-stat-label">95th %ile Max DD</div>
+                    <div class="mc-stat-val red" id="s95DD">—</div>
+                  </div>
+                  <div class="mc-stat-row">
+                    <div class="mc-stat-label">Best Final Balance</div>
+                    <div class="mc-stat-val green" id="sBest">—</div>
+                  </div>
+                  <div class="mc-stat-row">
+                    <div class="mc-stat-label">Worst Final Balance</div>
+                    <div class="mc-stat-val red" id="sWorst">—</div>
+                  </div>
+                </div>
+              </div>
+
+            </div><!-- /mcResults -->
+          </div><!-- /resultsCol -->
+        </div><!-- /mc-cols -->
+      </div><!-- /mc-wrap -->
+
+    </main>
+  </div>
+</div>
+
+<script src="shared-shell.js"></script>
+<script>
+WIN.initShell({ activePage: 'monte-carlo' });
+
+Chart.defaults.color = '#8a93a9';
+Chart.defaults.font.family = 'Inter';
+
+/* ── Helpers ── */
+const $ = id => document.getElementById(id);
+const fmt = (v, dec=2) => '$' + v.toLocaleString('en-US', { minimumFractionDigits: dec, maximumFractionDigits: dec });
+const pct  = v => v.toFixed(1) + '%';
+const sortArr = arr => [...arr].sort((a, b) => a - b);
+const percentile = (sorted, p) => sorted[Math.max(0, Math.floor(p / 100 * sorted.length))];
+const median = arr => percentile(sortArr(arr), 50);
+
+/* ── Chip wiring ── */
+document.querySelectorAll('.mc-chip').forEach(chip => {
+  chip.addEventListener('click', () => {
+    const field = chip.dataset.field;
+    const val   = chip.dataset.val;
+    $(field).value = val;
+    document.querySelectorAll(`.mc-chip[data-field="${field}"]`).forEach(c => c.classList.remove('active'));
+    chip.classList.add('active');
+  });
+});
+
+/* Sync chip active state when input is manually changed */
+document.querySelectorAll('.mc-input').forEach(inp => {
+  inp.addEventListener('input', () => {
+    document.querySelectorAll(`.mc-chip[data-field="${inp.id}"]`).forEach(c => {
+      c.classList.toggle('active', parseFloat(c.dataset.val) === parseFloat(inp.value));
+    });
+  });
+});
+
+/* ── Toggle ── */
+let positionMode = 'compound';
+$('btnCompound').addEventListener('click', () => {
+  positionMode = 'compound';
+  $('btnCompound').classList.add('active');
+  $('btnFixed').classList.remove('active');
+});
+$('btnFixed').addEventListener('click', () => {
+  positionMode = 'fixed';
+  $('btnFixed').classList.add('active');
+  $('btnCompound').classList.remove('active');
+});
+
+/* ── Simulation engine ── */
+function runMonteCarlo(params) {
+  const { capital, winRate, riskPct, rrr, numTrades, simCount, ruinPct, compound } = params;
+  const wr = winRate / 100;
+  const rp = riskPct / 100;
+
+  const allCurves    = [];
+  const finalBals    = [];
+  const maxDDs       = [];
+  const maxConsecs   = [];
+  const profFactors  = [];
+  let ruinCount = 0;
+
+  for (let s = 0; s < simCount; s++) {
+    let bal   = capital;
+    let peak  = bal;
+    let maxDD = 0;
+    let consec = 0, maxConsec = 0;
+    let grossW = 0, grossL = 0;
+    let ruined = false;
+    const curve = [bal];
+
+    for (let t = 0; t < numTrades; t++) {
+      const risk = compound ? bal * rp : capital * rp;
+      if (Math.random() < wr) {
+        const gain = risk * rrr;
+        bal   += gain;
+        grossW += gain;
+        consec = 0;
+      } else {
+        bal   = Math.max(0, bal - risk);
+        grossL += risk;
+        consec++;
+        if (consec > maxConsec) maxConsec = consec;
+      }
+      if (bal > peak) peak = bal;
+      const dd = peak > 0 ? (peak - bal) / peak * 100 : 0;
+      if (dd > maxDD) maxDD = dd;
+      if (!ruined && maxDD >= ruinPct) ruined = true;
+      curve.push(bal);
+    }
+
+    allCurves.push(curve);
+    finalBals.push(bal);
+    maxDDs.push(maxDD);
+    maxConsecs.push(maxConsec);
+    if (grossL > 0) profFactors.push(grossW / grossL);
+    if (ruined) ruinCount++;
+  }
+
+  const srtFinals = sortArr(finalBals);
+  const srtDDs    = sortArr(maxDDs);
+  const srtConsec = sortArr(maxConsecs);
+  const srtPF     = sortArr(profFactors);
+
+  const medBal = percentile(srtFinals, 50);
+  /* Find the curve whose final balance is closest to the median */
+  let medIdx = 0, medDiff = Infinity;
+  for (let i = 0; i < finalBals.length; i++) {
+    const d = Math.abs(finalBals[i] - medBal);
+    if (d < medDiff) { medDiff = d; medIdx = i; }
+  }
+  let bestIdx = 0, worstIdx = 0;
+  for (let i = 1; i < finalBals.length; i++) {
+    if (finalBals[i] > finalBals[bestIdx]) bestIdx = i;
+    if (finalBals[i] < finalBals[worstIdx]) worstIdx = i;
+  }
+
+  const ev = wr * rrr - (1 - wr);
+
+  return {
+    allCurves,
+    bestCurve:   allCurves[bestIdx],
+    worstCurve:  allCurves[worstIdx],
+    medianCurve: allCurves[medIdx],
+    profitProb:  finalBals.filter(b => b > capital).length / simCount * 100,
+    riskOfRuin:  ruinCount / simCount * 100,
+    medianBal:   medBal,
+    medianMaxDD: percentile(srtDDs, 50),
+    dd95:        percentile(srtDDs, 95),
+    pct5:        percentile(srtFinals, 5),
+    pct25:       percentile(srtFinals, 25),
+    pct50:       medBal,
+    pct75:       percentile(srtFinals, 75),
+    pct95:       percentile(srtFinals, 95),
+    ev,
+    medianPF:    profFactors.length ? percentile(srtPF, 50) : 0,
+    medianConsec: percentile(srtConsec, 50),
+    bestFinal:   finalBals[bestIdx],
+    worstFinal:  finalBals[worstIdx],
+  };
+}
+
+/* ── Chart ── */
+let eqChart;
+function renderChart(result, numTrades) {
+  const ctx = $('equityChart');
+  if (!ctx) return;
+  if (eqChart) eqChart.destroy();
+
+  const labels = Array.from({ length: numTrades + 1 }, (_, i) => i === 0 ? 'Trade 0' : (i % Math.ceil(numTrades / 6) === 0 ? 'Trade ' + i : ''));
+
+  /* Sample at most 100 background curves for performance */
+  const step   = Math.max(1, Math.floor(result.allCurves.length / 100));
+  const bgCurves = result.allCurves.filter((_, i) => i % step === 0);
+
+  const datasets = [
+    /* background sims */
+    ...bgCurves.map(curve => ({
+      data: curve,
+      borderColor: 'rgba(139,148,170,.18)',
+      borderWidth: 1,
+      pointRadius: 0,
+      tension: 0,
+      fill: false,
+    })),
+    /* Worst */
+    { data: result.worstCurve,  borderColor: '#ff6b81', borderWidth: 2, pointRadius: 0, tension: 0.2, fill: false },
+    /* Best */
+    { data: result.bestCurve,   borderColor: '#35d79b', borderWidth: 2, pointRadius: 0, tension: 0.2, fill: false },
+    /* Median */
+    { data: result.medianCurve, borderColor: '#a29bfe', borderWidth: 2.5, pointRadius: 0, tension: 0.2, fill: false },
+  ];
+
+  eqChart = new Chart(ctx, {
+    type: 'line',
+    data: { labels, datasets },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      animation: { duration: 400 },
+      plugins: {
+        legend: { display: false },
+        tooltip: { filter: item => item.datasetIndex >= bgCurves.length }
+      },
+      scales: {
+        x: {
+          ticks: { font: { size: 11 }, maxRotation: 0, autoSkip: false, callback: (_, i) => labels[i] || '' },
+          grid: { color: 'rgba(27,34,51,.6)' }
+        },
+        y: {
+          ticks: { font: { size: 11 }, callback: v => fmt(v, 0) },
+          grid: { color: 'rgba(27,34,51,.6)' }
+        }
+      }
+    }
+  });
+}
+
+/* ── Render results ── */
+function renderResults(res, capital) {
+  const returnPct = ((res.medianBal - capital) / capital * 100).toFixed(1);
+
+  $('mProfitProb').textContent = pct(res.profitProb);
+  $('mProfitProb').className   = 'mc-metric-val ' + (res.profitProb >= 50 ? 'green' : 'red');
+
+  $('mRuin').textContent     = pct(res.riskOfRuin);
+  $('mRuin').className       = 'mc-metric-val ' + (res.riskOfRuin <= 5 ? 'green' : res.riskOfRuin <= 20 ? 'accent' : 'red');
+
+  $('mMedianBal').textContent    = fmt(res.medianBal);
+  $('mMedianReturn').textContent = (returnPct >= 0 ? '+' : '') + returnPct + '% return';
+
+  $('mMedianDD').textContent  = pct(res.medianMaxDD);
+  $('mMedianDD').className    = 'mc-metric-val ' + (res.medianMaxDD <= 15 ? 'green' : res.medianMaxDD <= 30 ? 'accent' : 'red');
+
+  $('pct5').textContent  = fmt(res.pct5);
+  $('pct25').textContent = fmt(res.pct25);
+  $('pct50').textContent = fmt(res.pct50);
+  $('pct75').textContent = fmt(res.pct75);
+  $('pct95').textContent = fmt(res.pct95);
+
+  const evSign = res.ev >= 0 ? '+' : '';
+  $('sEV').textContent       = evSign + res.ev.toFixed(3) + 'R';
+  $('sEV').className         = 'mc-stat-val ' + (res.ev > 0 ? 'green' : res.ev < 0 ? 'red' : '');
+  $('sPF').textContent       = res.medianPF.toFixed(2);
+  $('sPF').className         = 'mc-stat-val ' + (res.medianPF >= 1 ? 'green' : 'red');
+  $('sConsec').textContent   = res.medianConsec + ' trades';
+  $('s95DD').textContent     = pct(res.dd95);
+  $('sBest').textContent     = fmt(res.bestFinal);
+  $('sWorst').textContent    = fmt(res.worstFinal);
+}
+
+/* ── Run ── */
+$('runBtn').addEventListener('click', async () => {
+  const capital  = Math.max(100, parseFloat($('pCapital').value) || 25000);
+  const winRate  = Math.min(99, Math.max(1, parseFloat($('pWinRate').value) || 55));
+  const riskPct  = Math.min(100, Math.max(0.1, parseFloat($('pRisk').value) || 1));
+  const rrr      = Math.max(0.1, parseFloat($('pRRR').value) || 1.5);
+  const numTrades = Math.min(2000, Math.max(10, parseInt($('pTrades').value) || 200));
+  const simCount  = Math.min(5000, Math.max(100, parseInt($('pSims').value) || 1000));
+  const ruinPct   = Math.min(99, Math.max(5, parseFloat($('pRuin').value) || 50));
+
+  const btn = $('runBtn');
+  btn.disabled = true;
+  btn.classList.add('running');
+
+  /* Yield to browser to paint the spinner before heavy computation */
+  await new Promise(r => setTimeout(r, 30));
+
+  const result = runMonteCarlo({
+    capital, winRate, riskPct, rrr, numTrades, simCount, ruinPct,
+    compound: positionMode === 'compound'
+  });
+
+  renderChart(result, numTrades);
+  renderResults(result, capital);
+
+  $('mcPlaceholder').classList.add('hidden');
+  $('mcResults').classList.remove('hidden');
+
+  btn.disabled = false;
+  btn.classList.remove('running');
+});
+</script>
+</body>
+</html>

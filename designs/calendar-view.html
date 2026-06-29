@@ -121,7 +121,8 @@ const MONTHS=["January","February","March","April","May","June","July","August",
 const DOW=["Mon","Tue","Wed","Thu","Fri","Sat","Sun"];
 const WD=["Sun","Mon","Tue","Wed","Thu","Fri","Sat"];
 
-const fmt$=v=>new Intl.NumberFormat('en-US',{style:'currency',currency:_currency,minimumFractionDigits:2,maximumFractionDigits:2}).format(v);
+const CUR_SYM={'USD':'$','EUR':'€','GBP':'£','ZAR':'R','JPY':'¥','AUD':'A$','CAD':'C$','CHF':'Fr','NZD':'NZ$','SGD':'S$','HKD':'HK$','NOK':'kr','SEK':'kr','DKK':'kr','PLN':'zł','INR':'₹','BRL':'R$','MXN':'MX$','TRY':'₺','RUB':'₽','KRW':'₩'};
+const fmt$=v=>{const sym=CUR_SYM[_currency]||(_currency+' ');const abs=Math.abs(v).toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2});return(v<0?'-':'')+sym+abs;};
 const fmtN=v=>(v<0?"-":"")+Math.abs(v).toLocaleString("en-US",{minimumFractionDigits:2,maximumFractionDigits:2});
 
 /* --- state --- */

@@ -27,7 +27,7 @@ const SIDEBAR_HTML = `
       <svg class="grp-chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="m6 9 6 6 6-6"/></svg>
     </button>
     <div class="nav-group" id="toolsGroup">
-      <a class="nav-sub" data-page="monte-carlo"><span class="dot"></span><span>Monte Carlo</span></a>
+      <a class="nav-sub" data-page="monte-carlo" href="monte-carlo.html"><span class="dot"></span><span>Monte Carlo</span></a>
       <a class="nav-sub" data-page="economic-calendar" href="economic-calendar.html"><span class="dot"></span><span>Economic Calendar</span></a>
     </div>
     <button class="nav-item nav-group-trigger" id="compTrigger" aria-expanded="false" data-group="competitions">
