@@ -75,9 +75,53 @@
     position:relative;
   }
   .glass-input:focus-within{
-    border-color:rgba(124,92,255,.6);
-    background:rgba(124,92,255,.08);
+    border-color:rgba(47,123,255,.6);
+    background:rgba(47,123,255,.08);
   }
+
+  /* ── Name row ── */
+  .name-row{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+
+  /* ── Phone / country code ── */
+  .phone-field-wrap{position:relative}
+  .phone-wrap{display:flex;align-items:stretch}
+  .cc-btn{
+    display:flex;align-items:center;gap:6px;
+    padding:0 14px;border-right:1px solid var(--line);
+    background:transparent;border-radius:14px 0 0 14px;
+    font:500 14px 'Inter';color:var(--ink);white-space:nowrap;
+    cursor:pointer;flex-shrink:0;
+  }
+  .cc-btn svg{width:14px;height:14px;color:var(--muted);flex-shrink:0}
+  .cc-btn:hover{background:rgba(255,255,255,.04)}
+  .phone-wrap .glass-input{border-radius:0 14px 14px 0;border-left:0;flex:1}
+  .phone-wrap .glass-input input{border-radius:0 14px 14px 0}
+
+  .cc-dropdown{
+    position:absolute;top:calc(100% + 6px);left:0;z-index:999;
+    width:280px;background:var(--card-2);
+    border:1px solid var(--line);border-radius:16px;
+    box-shadow:0 16px 40px rgba(0,0,0,.5);
+    overflow:hidden;display:none;
+  }
+  .cc-dropdown.open{display:block}
+  .cc-search{padding:12px 12px 8px}
+  .cc-search input{
+    width:100%;background:rgba(255,255,255,.06);
+    border:1px solid var(--line);border-radius:10px;
+    color:var(--ink);font:400 13px 'Inter';
+    padding:9px 12px;outline:none;
+  }
+  .cc-search input::placeholder{color:var(--faint)}
+  .cc-search input:focus{border-color:rgba(47,123,255,.5)}
+  .cc-list{max-height:220px;overflow-y:auto;padding:4px 6px 8px}
+  .cc-opt{
+    display:flex;align-items:center;gap:10px;
+    padding:9px 10px;border-radius:10px;cursor:pointer;
+    font:400 13px 'Inter';color:var(--ink-2);
+  }
+  .cc-opt:hover{background:rgba(255,255,255,.06);color:var(--ink)}
+  .cc-opt .cc-dial{margin-left:auto;color:var(--muted);font-size:12px}
   .glass-input input{
     width:100%;background:transparent;border:none;outline:none;
     font:400 14px 'Inter';color:var(--ink);
@@ -295,14 +339,26 @@
         <div class="auth-msg" id="signUpMsg"></div>
 
         <form class="auth-form" id="signUpForm" novalidate>
-          <div class="field-group">
-            <label class="field-label">Full Name</label>
-            <div class="glass-input">
-              <input type="text" id="suName" placeholder="Enter your full name" autocomplete="name">
+
+          <!-- First + Last Name -->
+          <div class="name-row">
+            <div class="field-group">
+              <label class="field-label">First Name</label>
+              <div class="glass-input">
+                <input type="text" id="suFirst" placeholder="First name" autocomplete="given-name">
+              </div>
+              <div class="field-err" id="suFirstErr"></div>
             </div>
-            <div class="field-err" id="suNameErr"></div>
+            <div class="field-group">
+              <label class="field-label">Last Name</label>
+              <div class="glass-input">
+                <input type="text" id="suLast" placeholder="Last name" autocomplete="family-name">
+              </div>
+              <div class="field-err" id="suLastErr"></div>
+            </div>
           </div>
 
+          <!-- Email -->
           <div class="field-group">
             <label class="field-label">Email Address</label>
             <div class="glass-input">
@@ -311,6 +367,29 @@
             <div class="field-err" id="suEmailErr"></div>
           </div>
 
+          <!-- Phone with country code -->
+          <div class="field-group">
+            <label class="field-label">Phone Number</label>
+            <div class="phone-field-wrap">
+              <div style="display:flex;align-items:stretch;background:rgba(255,255,255,.04);border:1px solid var(--line);border-radius:14px;transition:border-color .2s,background .2s" id="phoneWrap">
+                <button type="button" class="cc-btn" id="ccBtn">
+                  <span id="ccFlag">🇿🇦</span>
+                  <span id="ccDial">+27</span>
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg>
+                </button>
+                <input type="tel" id="suPhone" placeholder="815 708 524" autocomplete="tel-national"
+                  style="flex:1;background:transparent;border:none;outline:none;font:400 14px 'Inter';color:var(--ink);padding:15px 16px;border-radius:0 14px 14px 0">
+              </div>
+              <!-- Country code dropdown -->
+              <div class="cc-dropdown" id="ccDropdown">
+                <div class="cc-search"><input type="text" id="ccSearch" placeholder="Search country..."></div>
+                <div class="cc-list" id="ccList"></div>
+              </div>
+            </div>
+            <div class="field-err" id="suPhoneErr"></div>
+          </div>
+
+          <!-- Password -->
           <div class="field-group">
             <label class="field-label">Password</label>
             <div class="glass-input">
@@ -325,6 +404,7 @@
             <div class="field-err" id="suPassErr"></div>
           </div>
 
+          <!-- Confirm Password -->
           <div class="field-group">
             <label class="field-label">Confirm Password</label>
             <div class="glass-input">
@@ -441,6 +521,91 @@ setupToggle('siToggle', 'siPassword', 'siEyeOn', 'siEyeOff');
 setupToggle('suToggle', 'suPassword', 'suEyeOn', 'suEyeOff');
 
 /* ================================================================
+   Country code picker
+   ================================================================ */
+const COUNTRIES = [
+  {flag:'🇿🇦',name:'South Africa',dial:'+27'},
+  {flag:'🇺🇸',name:'United States',dial:'+1'},
+  {flag:'🇬🇧',name:'United Kingdom',dial:'+44'},
+  {flag:'🇳🇬',name:'Nigeria',dial:'+234'},
+  {flag:'🇰🇪',name:'Kenya',dial:'+254'},
+  {flag:'🇬🇭',name:'Ghana',dial:'+233'},
+  {flag:'🇹🇿',name:'Tanzania',dial:'+255'},
+  {flag:'🇺🇬',name:'Uganda',dial:'+256'},
+  {flag:'🇿🇼',name:'Zimbabwe',dial:'+263'},
+  {flag:'🇿🇲',name:'Zambia',dial:'+260'},
+  {flag:'🇧🇼',name:'Botswana',dial:'+267'},
+  {flag:'🇲🇿',name:'Mozambique',dial:'+258'},
+  {flag:'🇳🇦',name:'Namibia',dial:'+264'},
+  {flag:'🇲🇼',name:'Malawi',dial:'+265'},
+  {flag:'🇦🇺',name:'Australia',dial:'+61'},
+  {flag:'🇨🇦',name:'Canada',dial:'+1'},
+  {flag:'🇮🇳',name:'India',dial:'+91'},
+  {flag:'🇦🇪',name:'UAE',dial:'+971'},
+  {flag:'🇩🇪',name:'Germany',dial:'+49'},
+  {flag:'🇫🇷',name:'France',dial:'+33'},
+  {flag:'🇳🇱',name:'Netherlands',dial:'+31'},
+  {flag:'🇸🇬',name:'Singapore',dial:'+65'},
+  {flag:'🇧🇷',name:'Brazil',dial:'+55'},
+  {flag:'🇵🇹',name:'Portugal',dial:'+351'},
+];
+
+let selectedCountry = COUNTRIES[0];
+
+function renderCcList(filter) {
+  const list = document.getElementById('ccList');
+  const filtered = filter
+    ? COUNTRIES.filter(c => c.name.toLowerCase().includes(filter.toLowerCase()) || c.dial.includes(filter))
+    : COUNTRIES;
+  list.innerHTML = filtered.map((c,i) =>
+    `<div class="cc-opt" data-i="${COUNTRIES.indexOf(c)}">
+      <span>${c.flag}</span>
+      <span>${c.name}</span>
+      <span class="cc-dial">${c.dial}</span>
+    </div>`
+  ).join('');
+  list.querySelectorAll('.cc-opt').forEach(opt => {
+    opt.onclick = () => {
+      selectedCountry = COUNTRIES[+opt.dataset.i];
+      document.getElementById('ccFlag').textContent = selectedCountry.flag;
+      document.getElementById('ccDial').textContent = selectedCountry.dial;
+      closeCcDropdown();
+    };
+  });
+}
+
+function openCcDropdown() {
+  document.getElementById('ccDropdown').classList.add('open');
+  document.getElementById('ccSearch').value = '';
+  renderCcList('');
+  setTimeout(() => document.getElementById('ccSearch').focus(), 50);
+}
+function closeCcDropdown() {
+  document.getElementById('ccDropdown').classList.remove('open');
+}
+
+document.getElementById('ccBtn').onclick = (e) => {
+  e.preventDefault();
+  document.getElementById('ccDropdown').classList.contains('open') ? closeCcDropdown() : openCcDropdown();
+};
+document.getElementById('ccSearch').oninput = (e) => renderCcList(e.target.value);
+document.addEventListener('click', (e) => {
+  if (!e.target.closest('.phone-field-wrap')) closeCcDropdown();
+});
+
+// phone wrap focus highlight
+document.getElementById('suPhone').addEventListener('focus', () => {
+  document.getElementById('phoneWrap').style.borderColor = 'rgba(47,123,255,.6)';
+  document.getElementById('phoneWrap').style.background = 'rgba(47,123,255,.08)';
+});
+document.getElementById('suPhone').addEventListener('blur', () => {
+  document.getElementById('phoneWrap').style.borderColor = '';
+  document.getElementById('phoneWrap').style.background = '';
+});
+
+renderCcList('');
+
+/* ================================================================
    Validation helpers
    ================================================================ */
 const emailRe = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
@@ -504,19 +669,26 @@ document.getElementById('signUpForm').onsubmit = async (e) => {
   e.preventDefault();
   clearMessages();
 
-  const name     = document.getElementById('suName').value.trim();
+  const first    = document.getElementById('suFirst').value.trim();
+  const last     = document.getElementById('suLast').value.trim();
   const email    = document.getElementById('suEmail').value.trim();
+  const phone    = document.getElementById('suPhone').value.trim();
   const password = document.getElementById('suPassword').value;
   const confirm  = document.getElementById('suConfirm').value;
   let ok = true;
 
-  if (!name) { setErr('suNameErr', 'Please enter your name'); ok = false; }
+  if (!first) { setErr('suFirstErr', 'Please enter your first name'); ok = false; }
+  if (!last)  { setErr('suLastErr',  'Please enter your last name');  ok = false; }
   if (!email) { setErr('suEmailErr', 'Please enter your email'); ok = false; }
   else if (!emailRe.test(email)) { setErr('suEmailErr', 'Invalid email address'); ok = false; }
+  if (!phone) { setErr('suPhoneErr', 'Please enter your phone number'); ok = false; }
   if (!password) { setErr('suPassErr', 'Please enter a password'); ok = false; }
   else if (password.length < 6) { setErr('suPassErr', 'Password must be at least 6 characters'); ok = false; }
   if (password !== confirm) { setErr('suConfirmErr', 'Passwords do not match'); ok = false; }
   if (!ok) return;
+
+  const name = `${first} ${last}`;
+  const fullPhone = `${selectedCountry.dial}${phone.replace(/^0/, '')}`;
 
   const btn = document.getElementById('suBtn');
   btn.disabled = true; btn.textContent = 'Creating account...';
@@ -525,7 +697,7 @@ document.getElementById('signUpForm').onsubmit = async (e) => {
     const res = await fetch('/api/auth', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ action: 'sign-up', email, password, name }),
+      body: JSON.stringify({ action: 'sign-up', email, password, name, phone: fullPhone }),
     });
     const data = await res.json();
 

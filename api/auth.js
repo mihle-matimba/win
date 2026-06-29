@@ -13,7 +13,7 @@ module.exports = async (req, res) => {
   }
 
   const supabase = createClient(url, key);
-  const { action, email, password, name } = req.body;
+  const { action, email, password, name, phone } = req.body;
 
   try {
     // ── Sign Up ──
@@ -21,7 +21,7 @@ module.exports = async (req, res) => {
       const { data, error } = await supabase.auth.admin.createUser({
         email,
         password,
-        user_metadata: { full_name: name },
+        user_metadata: { full_name: name, phone },
         email_confirm: true,
       });
 
