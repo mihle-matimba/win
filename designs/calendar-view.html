@@ -57,7 +57,7 @@
           <table class="th-table">
             <thead><tr>
               <th>Date</th><th>Symbol</th><th>Net PNL</th>
-              <th>Qty</th><th>Commission</th><th>Duration</th><th>Win %</th><th></th>
+              <th>Qty</th><th>Commission</th><th>Duration</th><th>Type</th><th></th>
             </tr></thead>
             <tbody id="thBody"></tbody>
           </table>
@@ -109,73 +109,105 @@
   </div>
 </div>
 
+<style>
+@keyframes cal-shimmer{0%{background-position:200% 0}100%{background-position:-200% 0}}
+.th-skel-cell{display:inline-block;height:13px;border-radius:5px;background:linear-gradient(90deg,var(--card-2,#0e1320) 25%,rgba(255,255,255,.05) 50%,var(--card-2,#0e1320) 75%);background-size:200% 100%;animation:cal-shimmer 1.6s infinite}
+</style>
 <script src="shared-shell.js"></script>
 <script>
 WIN.initShell({ activePage: 'calendar' });
-function mulberry32(a){return function(){a|=0;a=a+0x6D2B79F5|0;let t=Math.imul(a^a>>>15,1|a);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296}}
 
-/* calendar data */
 const MONTHS=["January","February","March","April","May","June","July","August","September","October","November","December"];
 const DOW=["Mon","Tue","Wed","Thu","Fri","Sat","Sun"];
 const WD=["Sun","Mon","Tue","Wed","Thu","Fri","Sat"];
-const BASE=23045, BB=23005.23;
-const SEED={"2026-5":{
-  1:[169.12,"0.74%"],2:[57.65,"0.25%"],4:[39.14,"0.17%"],5:[76.63,"0.33%"],6:[25.29,"0.11%"],
-  8:[112.52,"0.48%"],9:[127.13,"0.54%"],10:[38.99,"0.17%"],11:[-24.21,"-0.10%"],13:[-242.07,"-1.02%"],14:[-200.32,"-0.86%"],
-  15:[97.84,"0.42%"],16:[-79.22,"-0.34%"],17:[288.31,"1.24%"],18:[187.00,"0.80%"],19:[180.04,"0.76%"],20:[19.73,"0.08%"],21:[-256.66,"-1.07%"],
-  22:[35.26,"0.15%"]
-}};
-const SUMMARY={"2026-5":{trades:25,wins:16,profits:"652.17",percent:"2.83%"}};
-const TODAY={y:2026,m:5,d:23};
-const mCache={};
-function monthData(y,m){
-  const key=y+"-"+m;if(SEED[key])return SEED[key];if(mCache[key])return mCache[key];
-  const rnd=mulberry32(y*100+m+7),days=new Date(y,m+1,0).getDate(),out={};
-  for(let d=1;d<=days;d++){const wd=new Date(y,m,d).getDay();if(wd===0||wd===6)continue;if(rnd()<0.22)continue;
-    const win=rnd()<0.58,v=+((win?1:-1)*(15+rnd()*270)).toFixed(2);out[d]=[v,(v/BASE*100).toFixed(2)+"%"];}
-  mCache[key]=out;return out;
-}
+
 const fmt$=v=>{const s=v<0?"-$":"$";return s+Math.abs(v).toLocaleString("en-US",{minimumFractionDigits:2,maximumFractionDigits:2});};
 const fmtN=v=>(v<0?"-":"")+Math.abs(v).toLocaleString("en-US",{minimumFractionDigits:2,maximumFractionDigits:2});
 
-/* ---------- Trading History ---------- */
-const SYMBOLS=[
-  {s:'MNQU6',c:'green'},{s:'XAUUSD',c:'amber'},{s:'USDJPY',c:'blue'},{s:'EURUSD',c:'blue'},
-  {s:'NAS100',c:'purple'},{s:'GBPUSD',c:'blue'},{s:'US30',c:'purple'},{s:'BTCUSD',c:'amber'}
-];
+/* --- state --- */
+let _accountId=null, _accountBalance=0, _allTransactions=[], _resolvedAccounts=[];
+
+function parseUTC(s){
+  if(!s)return null;
+  const str=/[Zz+\-]\d*$/.test(s.trim())?s:s+'Z';
+  return new Date(str);
+}
+
+function netPnl(t){
+  return (parseFloat(t.profit)||0)+(parseFloat(t.commission)||0)+(parseFloat(t.comm_deduction)||0)+(parseFloat(t.rebates)||0);
+}
+
+function symColor(sym){
+  if(!sym)return 'blue';
+  return /XAU|BTC|ETH|LTC|SOL|XRP|DOGE/i.test(sym)?'amber':'blue';
+}
+
+function fmtDur(ms){
+  if(!ms||ms<0)return '--';
+  const s=Math.floor(ms/1000),m=Math.floor(s/60),h=Math.floor(m/60);
+  if(h>0)return h+'h '+(m%60)+'m';
+  if(m>0)return m+' min '+(s%60)+' sec';
+  return s+' sec';
+}
+
+/* --- data helpers --- */
+function getMonthData(y,m){
+  const map={};
+  for(const t of _allTransactions){
+    const dt=parseUTC(t.close_time);
+    if(!dt||dt.getFullYear()!==y||dt.getMonth()!==m)continue;
+    const d=dt.getDate();
+    map[d]=+((( map[d]||0)+netPnl(t)).toFixed(2));
+  }
+  return map;
+}
+
+function getMonthSummary(y,m){
+  let trades=0,wins=0,total=0;
+  for(const t of _allTransactions){
+    const dt=parseUTC(t.close_time);
+    if(!dt||dt.getFullYear()!==y||dt.getMonth()!==m)continue;
+    trades++;const n=netPnl(t);if(n>0)wins++;total+=n;
+  }
+  total=+total.toFixed(2);
+  const pct=_accountBalance>0?(total/_accountBalance*100).toFixed(2)+'%':'0.00%';
+  return{trades,wins,profits:fmt$(total),percent:pct};
+}
+
+function getMonthTrades(y,m){
+  return _allTransactions
+    .filter(t=>{const dt=parseUTC(t.close_time);return dt&&dt.getFullYear()===y&&dt.getMonth()===m;})
+    .map(t=>{
+      const ct=parseUTC(t.close_time),ot=parseUTC(t.open_time);
+      return{
+        date:ct?ct.toLocaleDateString('en-US',{month:'2-digit',day:'2-digit',year:'numeric'}):'--',
+        ts:ct?ct.getTime():0,
+        sym:t.symbol||'--',symC:symColor(t.symbol),
+        pnl:netPnl(t),qty:t.volume||0,
+        comm:parseFloat(t.commission||0),
+        dur:fmtDur(ct&&ot?ct-ot:0),
+        type:t.type||'--'
+      };
+    })
+    .sort((a,b)=>b.ts-a.ts);
+}
+
+/* --- Trading History --- */
 const thBody=document.getElementById('thBody'),thCards=document.getElementById('thCards'),
       thCount=document.getElementById('thCount'),thPag=document.getElementById('thPag');
 let thPage=0,thPerPage=10,thAllTrades=[];
-function genTrades(y,m){
-  const data=monthData(y,m),trades=[];
-  for(const d in data){
-    const pnl=data[d][0],rnd=mulberry32(y*1000+(m+1)*50+(+d));
-    const nTrades=1+Math.floor(rnd()*3);
-    for(let t=0;t<nTrades;t++){
-      const splitPnl=+(pnl*(t===0?0.6+rnd()*0.3:(rnd()*0.4))).toFixed(2);
-      const win=splitPnl>=0;
-      const qty=Math.max(1,Math.round(4+rnd()*26));
-      const comm=+(qty*0.5+rnd()*8).toFixed(2);
-      const durMin=Math.round(1+rnd()*58),durSec=Math.round(rnd()*59);
-      const winPct=win?Math.round(40+rnd()*60):Math.round(rnd()*40);
-      const symPick=SYMBOLS[Math.floor(rnd()*SYMBOLS.length)];
-      trades.push({
-        date:String(m+1).padStart(2,'0')+'/'+String(d).padStart(2,'0')+'/'+y,
-        sym:symPick.s,symC:symPick.c,
-        pnl:splitPnl,qty,comm,
-        dur:durMin+' min '+durSec+' sec',
-        winPct
-      });
-    }
-  }
-  trades.sort((a,b)=>b.date.localeCompare(a.date));
-  return trades;
+
+function showTHSkeleton(){
+  thBody.innerHTML=Array.from({length:8},()=>`<tr><td colspan="8" style="padding:10px 14px"><span class="th-skel-cell" style="width:${50+Math.floor(Math.random()*40)}%"></span></td></tr>`).join('');
+  thCards.innerHTML='';thPag.innerHTML='';thCount.textContent='';
 }
+
 function renderTH(){
-  thAllTrades=genTrades(cy,cm);
+  thAllTrades=getMonthTrades(cy,cm);
   thCount.textContent=thAllTrades.length+' records';
   thPage=0;renderTHPage();
 }
+
 function renderTHPage(){
   const trades=thAllTrades;
   const totalPages=Math.max(1,Math.ceil(trades.length/thPerPage));
@@ -194,7 +226,7 @@ function renderTHPage(){
       <td>${t.qty}</td>
       <td>${fmt$(t.comm)}</td>
       <td>${t.dur}</td>
-      <td><span class="win-pct ${t.winPct>=60?'high':t.winPct>=40?'mid':'low'}">${t.winPct}%</span></td>
+      <td>${t.type}</td>
       <td><button class="journal-btn">Journal</button></td>`;
     thBody.appendChild(tr);
     const card=document.createElement('div');card.className='th-card-item';
@@ -202,7 +234,7 @@ function renderTHPage(){
       <div class="tc-top"><span class="tc-date">${t.date}</span><span class="sym ${t.symC}">${t.sym}</span></div>
       <div class="tc-grid">
         <div class="tc-row"><span class="label">Net PNL</span><span class="val ${pos?'pos':'neg'}">${fmt$(t.pnl)}</span></div>
-        <div class="tc-row"><span class="label">Win %</span><span class="val"><span class="win-pct ${t.winPct>=60?'high':t.winPct>=40?'mid':'low'}">${t.winPct}%</span></span></div>
+        <div class="tc-row"><span class="label">Type</span><span class="val">${t.type}</span></div>
         <div class="tc-row"><span class="label">Qty</span><span class="val">${t.qty}</span></div>
         <div class="tc-row"><span class="label">Commission</span><span class="val">${fmt$(t.comm)}</span></div>
         <div class="tc-row"><span class="label">Duration</span><span class="val">${t.dur}</span></div>
@@ -210,25 +242,24 @@ function renderTHPage(){
       <button class="tc-journal">Journal</button>`;
     thCards.appendChild(card);
   });
-  // pagination controls
   const info=`${start+1}–${end} of ${trades.length}`;
   let btns='';
   btns+='<button class="pag-btn" data-p="prev"'+(thPage===0?' disabled':'')+'><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="m15 18-6-6 6-6"/></svg></button>';
   for(let i=0;i<totalPages;i++){
-    if(totalPages>7&&i>1&&i<totalPages-2&&Math.abs(i-thPage)>1){if(btns.slice(-1)!=='…')btns+='<span style="color:var(--faint);padding:0 4px">…</span>';continue;}
-    btns+='<button class="pag-btn'+(i===thPage?' active':'')+'" data-p="'+i+'">'+( i+1)+'</button>';
+    if(totalPages>7&&i>1&&i<totalPages-2&&Math.abs(i-thPage)>1){if(btns.slice(-3)!=='…</span>')btns+='<span style="color:var(--faint);padding:0 4px">…</span>';continue;}
+    btns+='<button class="pag-btn'+(i===thPage?' active':'')+'" data-p="'+i+'">'+(i+1)+'</button>';
   }
   btns+='<button class="pag-btn" data-p="next"'+(thPage>=totalPages-1?' disabled':'')+'><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="m9 18 6-6-6-6"/></svg></button>';
   thPag.innerHTML='<span class="pag-info">'+info+'</span><div class="pag-btns">'+btns+'</div>';
 }
-// pagination clicks
+
 document.getElementById('thPag').addEventListener('click',e=>{
   const b=e.target.closest('[data-p]');if(!b||b.disabled)return;
   const v=b.dataset.p;
   if(v==='prev')thPage--;else if(v==='next')thPage++;else thPage=+v;
   renderTHPage();
 });
-// 3-dot menu: rows per page
+
 const thDots=document.getElementById('thDots');
 document.getElementById('thDotsBtn').addEventListener('click',e=>{e.stopPropagation();thDots.classList.toggle('open');});
 document.getElementById('thDotsMenu').addEventListener('click',e=>{
@@ -240,26 +271,32 @@ document.getElementById('thDotsMenu').addEventListener('click',e=>{
 });
 document.addEventListener('click',e=>{if(!e.target.closest('.th-dots'))thDots.classList.remove('open');});
 
-let cy=2026,cm=5;
+/* --- Calendar --- */
+let cy=new Date().getFullYear(),cm=new Date().getMonth();
 const grid=document.getElementById('calGrid'),title=document.getElementById('calTitle'),summaryEl=document.getElementById('summary');
+
 function renderCal(){
-  const data=monthData(cy,cm);
+  const data=getMonthData(cy,cm);
+  const base=_accountBalance||1;
   title.innerHTML=MONTHS[cm]+" <span>"+cy+"</span>";grid.innerHTML="";
   DOW.forEach(d=>{const h=document.createElement('div');h.className="dow";h.textContent=d;grid.appendChild(h);});
-  const th=document.createElement('div');th.className="dow tot";th.textContent="Total";grid.appendChild(th);
+  const totH=document.createElement('div');totH.className="dow tot";totH.textContent="Total";grid.appendChild(totH);
   const offset=(new Date(cy,cm,1).getDay()+6)%7,daysIn=new Date(cy,cm+1,0).getDate();
   const cells=[];for(let i=0;i<offset;i++)cells.push({out:true,n:new Date(cy,cm,1-offset+i).getDate()});
   for(let d=1;d<=daysIn;d++)cells.push({d});let nx=1;while(cells.length%7!==0)cells.push({out:true,n:nx++});
+  const now=new Date();
   for(let w=0;w<cells.length/7;w++){
     let wsum=0,whas=false;
     for(let i=0;i<7;i++){
       const c=cells[w*7+i],cell=document.createElement('div');
       if(c.out){cell.className="day out";cell.innerHTML='<div class="big">'+c.n+'</div>';grid.appendChild(cell);continue;}
-      const isToday=(cy===TODAY.y&&cm===TODAY.m&&c.d===TODAY.d),rec=data[c.d];
-      if(rec){
-        const v=rec[0],win=v>=0;
+      const isToday=(cy===now.getFullYear()&&cm===now.getMonth()&&c.d===now.getDate());
+      const v=data[c.d];
+      if(v!==undefined){
+        const win=v>=0;
         cell.className="day click "+(win?"win":"loss");
-        cell.innerHTML='<div class="n">'+c.d+'</div><div class="mid"><div class="v"></div><div class="p">'+rec[1]+'</div></div>';
+        const pct=(v/base*100).toFixed(2)+'%';
+        cell.innerHTML='<div class="n">'+c.d+'</div><div class="mid"><div class="v"></div><div class="p">'+pct+'</div></div>';
         cell.querySelector('.v').textContent=(v<0?"-$":"$")+Math.abs(v).toFixed(2);
         wsum+=v;whas=true;
       }else{cell.className="day flat click"+(isToday?" today":"");cell.innerHTML='<div class="big">'+c.d+'</div>';}
@@ -268,46 +305,51 @@ function renderCal(){
     }
     const t=document.createElement('div');
     if(whas){t.className="tot-cell "+(wsum>=0?"pos":"neg");
-      t.innerHTML='<div class="tv">'+fmt$(wsum)+'</div><div class="tp">'+(wsum>=0?"+":"")+(wsum/BASE*100).toFixed(2)+'%</div>';
+      t.innerHTML='<div class="tv">'+fmt$(wsum)+'</div><div class="tp">'+(wsum>=0?"+":"")+(wsum/base*100).toFixed(2)+'%</div>';
     }else{t.className="tot-cell empty";t.textContent="-";}
     grid.appendChild(t);
   }
-  const s=SUMMARY[cy+"-"+cm];
-  if(s){summaryEl.style.display="";summaryEl.innerHTML=
-    '<div class="it"><span class="k">Trades</span><span class="v">'+s.trades+'</span></div>'+
-    '<div class="it"><span class="k">Wins</span><span class="v">'+s.wins+'</span></div>'+
-    '<div class="it"><span class="k">Profits</span><span class="v">'+s.profits+'</span></div>'+
-    '<div class="it"><span class="k">Percent</span><span class="v">'+s.percent+'</span></div>';
+  const s=getMonthSummary(cy,cm);
+  if(s.trades>0){
+    summaryEl.style.display="";
+    summaryEl.innerHTML=
+      '<div class="it"><span class="k">Trades</span><span class="v">'+s.trades+'</span></div>'+
+      '<div class="it"><span class="k">Wins</span><span class="v">'+s.wins+'</span></div>'+
+      '<div class="it"><span class="k">Profits</span><span class="v">'+s.profits+'</span></div>'+
+      '<div class="it"><span class="k">Percent</span><span class="v">'+s.percent+'</span></div>';
   }else{summaryEl.style.display="none";}
 }
+
 document.getElementById('prevM').onclick=()=>{cm--;if(cm<0){cm=11;cy--;}renderCal();renderTH();};
 document.getElementById('nextM').onclick=()=>{cm++;if(cm>11){cm=0;cy++;}renderCal();renderTH();};
-renderCal();renderTH();
 
-/* ---- per-day stats for modal ---- */
+/* --- Modal day stats (real data) --- */
 function dayStats(y,m,d){
-  const data=monthData(y,m),rec=data[d];
-  const pnl=rec?rec[0]:0,pct=rec?rec[1]:"0.00%";
-  let cum=0;for(const k in data){if(+k<d)cum+=data[k][0];}
-  const startBal=BB+cum,endBal=startBal+pnl;
-  if(!rec)return{pnl:0,pct:"0.00%",startBal,endBal,deposit:0,buys:0,sells:0,trades:0,best:0,worst:0,hold:0,maxDD:0,fees:0,winrate:0,pf:0,exp:0};
-  const rnd=mulberry32(y*1000+(m+1)*50+d);
-  const trades=1+Math.floor(rnd()*4),win=pnl>=0;
-  let wins=win?Math.max(1,Math.round(trades*(0.5+rnd()*0.45))):Math.floor(trades*rnd()*0.45);
-  if(wins>trades)wins=trades;const losses=trades-wins;
-  let buys=Math.max(1,Math.round(trades*(0.45+rnd()*0.4)));if(buys>trades)buys=trades;const sells=trades-buys;
-  let best,worst;
-  if(trades===1){best=win?pnl:0;worst=win?0:pnl;}
-  else{best=wins>0?+(Math.abs(pnl)/wins*(0.7+rnd()*0.6)).toFixed(2):0;
-       worst=losses>0?-+(Math.abs(pnl)/losses*(0.7+rnd()*0.6)).toFixed(2):0;}
-  const exp=+(pnl/trades).toFixed(2);
-  const hold=3+Math.floor(rnd()*180);
-  const maxDD=rnd()<0.6?0:-+(rnd()*350).toFixed(2);
-  const fees=-+(0.5*trades).toFixed(2);
-  const winrate=Math.round(wins/trades*100);
-  let pf;if(wins===0)pf=0;else if(losses===0)pf=+(1.5+rnd()*4).toFixed(2);else pf=+(0.2+rnd()*2.6).toFixed(2);
-  return{pnl,pct,startBal,endBal,deposit:0,buys,sells,trades,best,worst,hold,maxDD,fees,winrate,pf,exp};
+  const dayTrades=_allTransactions.filter(t=>{
+    const dt=parseUTC(t.close_time);
+    return dt&&dt.getFullYear()===y&&dt.getMonth()===m&&dt.getDate()===d;
+  });
+  const pnlList=dayTrades.map(t=>netPnl(t));
+  const pnl=+pnlList.reduce((a,b)=>a+b,0).toFixed(2);
+  const pct=_accountBalance>0?(pnl/_accountBalance*100).toFixed(2)+'%':'0.00%';
+  const buys=dayTrades.filter(t=>/buy/i.test(t.type||'')).length;
+  const sells=dayTrades.filter(t=>/sell/i.test(t.type||'')).length;
+  const trades=dayTrades.length;
+  const wins=pnlList.filter(v=>v>0).length;
+  const best=pnlList.length?Math.max(...pnlList):0;
+  const worst=pnlList.length?Math.min(...pnlList):0;
+  const fees=+dayTrades.reduce((a,t)=>a+(parseFloat(t.commission)||0),0).toFixed(2);
+  const winrate=trades>0?Math.round(wins/trades*100):0;
+  const grossW=pnlList.filter(v=>v>0).reduce((a,b)=>a+b,0);
+  const grossL=Math.abs(pnlList.filter(v=>v<0).reduce((a,b)=>a+b,0));
+  const pf=grossL>0?+(grossW/grossL).toFixed(2):(grossW>0?'∞':0);
+  const exp=trades>0?+(pnl/trades).toFixed(2):0;
+  let totalMs=0;
+  dayTrades.forEach(t=>{const o=parseUTC(t.open_time),c=parseUTC(t.close_time);if(o&&c)totalMs+=c-o;});
+  const hold=trades>0?Math.round(totalMs/trades/60000):0;
+  return{pnl,pct,buys,sells,trades,best,worst,hold,fees,winrate,pf,exp};
 }
+
 const fmtHold=m=>m<=0?"—":(m<60?m+" min":Math.floor(m/60)+"h "+(m%60)+"m");
 const sign=(elm,v)=>{elm.classList.remove('pos','neg','neu','accent');elm.classList.add(v>0?'pos':v<0?'neg':'neu');};
 const modal=document.getElementById('modal');
@@ -341,31 +383,71 @@ function openModal(y,m,d){
   const down='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M22 17 13.5 8.5l-5 5L2 7"/><path d="M16 17h6v-6"/></svg>';
   const pctEl=document.getElementById('mPct');pctEl.innerHTML=(pos?up:down)+'<span>'+s.pct+'</span>';
   pctEl.style.color=s.pnl>0?'var(--green-val)':s.pnl<0?'var(--red-val)':'var(--muted)';
-  document.getElementById('mStart').textContent=fmt$(s.startBal);
-  document.getElementById('mEnd').textContent=fmt$(s.endBal);
-  document.getElementById('mDep').textContent=fmt$(s.deposit);
+  document.getElementById('mStart').textContent='—';
+  document.getElementById('mEnd').textContent='—';
+  document.getElementById('mDep').textContent=fmt$(0);
   document.getElementById('mBuys').textContent=s.buys;
   document.getElementById('mSells').textContent=s.sells;
   document.getElementById('mTrades').textContent=s.trades;
   document.getElementById('mBest').textContent=fmt$(s.best);
-  const worst=document.getElementById('mWorst');worst.textContent=fmt$(s.worst);sign(worst,s.worst||(-0));worst.classList.toggle('neg',s.worst<0);worst.classList.toggle('neu',s.worst>=0);
+  const worst=document.getElementById('mWorst');worst.textContent=fmt$(s.worst);sign(worst,s.worst||-0);worst.classList.toggle('neg',s.worst<0);worst.classList.toggle('neu',s.worst>=0);
   document.getElementById('mHold').textContent=fmtHold(s.hold);
-  document.getElementById('mDD').textContent=fmt$(s.maxDD);
+  document.getElementById('mDD').textContent='—';
   document.getElementById('mFees').textContent=fmt$(s.fees);
   const wr=document.getElementById('mWR');wr.textContent=s.winrate+'%';wr.className='mv '+(s.winrate>=50?'pos':'neg');
-  const pf=document.getElementById('mPF');pf.textContent=s.pf;pf.className='mv '+(s.pf>1?'pos':'neu');
+  const pf=document.getElementById('mPF');pf.textContent=s.pf;pf.className='mv '+(typeof s.pf==='number'&&s.pf>1?'pos':'neu');
   const ex=document.getElementById('mExp');ex.textContent=fmtN(s.exp);ex.className='mv '+(s.exp>0?'pos':s.exp<0?'neg':'neu');
   modal.classList.add('show');
   document.body.style.overflow='hidden';
   replayEntrance();
 }
-function closeModal(){
-  modal.classList.remove('show');
-  document.body.style.overflow='';
-}
+function closeModal(){modal.classList.remove('show');document.body.style.overflow='';}
 document.getElementById('mClose').onclick=closeModal;
 modal.addEventListener('click',e=>{if(e.target===modal)closeModal();});
 addEventListener('keydown',e=>{if(e.key==='Escape'&&modal.classList.contains('show'))closeModal();});
+
+/* --- Init --- */
+async function init(){
+  showTHSkeleton();
+  renderCal();
+  try{
+    const raw=localStorage.getItem('win_user');
+    if(!raw){renderTH();return;}
+    const user=JSON.parse(raw);
+    const res=await fetch(`/api/linked-accounts?user_id=${encodeURIComponent(user.id)}`);
+    const json=await res.json();
+    const rows=json.accounts||[];
+    _resolvedAccounts=rows.map(r=>r.broker_clients?.id??r.id);
+    const idx=+(localStorage.getItem('win_selected_account')||0);
+    const acctRow=rows[idx]||rows[0];
+    if(acctRow?.broker_clients)_accountBalance=parseFloat(acctRow.broker_clients.balance||0);
+    _accountId=_resolvedAccounts[idx]??_resolvedAccounts[0]??null;
+    if(_accountId){
+      const txRes=await fetch(`/api/transactions?account_id=${_accountId}&page=0&per_page=1000`);
+      const txJson=await txRes.json();
+      _allTransactions=txJson.transactions||[];
+    }
+  }catch(e){console.error(e);}
+  renderCal();renderTH();
+}
+
+let _lastIdx=+(localStorage.getItem('win_selected_account')||0);
+setInterval(async()=>{
+  const idx=+(localStorage.getItem('win_selected_account')||0);
+  if(idx===_lastIdx)return;
+  _lastIdx=idx;
+  _accountId=_resolvedAccounts[idx]??null;
+  if(!_accountId)return;
+  showTHSkeleton();
+  try{
+    const txRes=await fetch(`/api/transactions?account_id=${_accountId}&page=0&per_page=1000`);
+    const txJson=await txRes.json();
+    _allTransactions=txJson.transactions||[];
+  }catch(e){console.error(e);}
+  renderCal();renderTH();
+},500);
+
+init();
 </script>
 </body>
 </html>
