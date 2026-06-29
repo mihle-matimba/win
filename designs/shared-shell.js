@@ -108,6 +108,16 @@ let communityBrokers = null; // null = not loaded yet
 
 // ── Helper functions (defined before initShell to avoid hoisting issues) ──
 
+function timeAgo(dateStr) {
+  if (!dateStr) return 'Synced';
+  const diff = Math.floor((Date.now() - new Date(dateStr).getTime()) / 1000);
+  if (diff < 60)  return 'Synced just now';
+  if (diff < 3600) { const m = Math.floor(diff / 60); return `Synced ${m}m ago`; }
+  if (diff < 86400) { const h = Math.floor(diff / 3600); return `Synced ${h}h ago`; }
+  const d = Math.floor(diff / 86400);
+  return `Synced ${d}d ago`;
+}
+
 async function loadCommunity() {
   try {
     const userObj = JSON.parse(localStorage.getItem('win_user') || 'null');
@@ -182,7 +192,7 @@ async function loadLinkedAccounts() {
                    : 'Broker',
         balance: bc.balance || 0,
         currency: bc.account_currency || '',
-        synced:  'Linked'
+        synced:  timeAgo(bc.synced_at)
       });
     });
     // Notify account menu to refresh display
@@ -707,6 +717,7 @@ function initAccountMenu(activePage) {
     gate.className = 'account-gate';
     gate.innerHTML = `
       <div class="gate-card">
+        <button class="gate-close" id="gateClose" aria-label="Close"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M18 6 6 18M6 6l12 12"/></svg></button>
         <img class="gate-logo" src="https://ffxlryusmstnfjedleds.supabase.co/storage/v1/object/public/Assets/WIN.png" alt="WIN">
         <p class="gate-desc">To enjoy the WIN platform for free, please connect your brokerage account.</p>
         ${signupUrl
@@ -722,6 +733,8 @@ function initAccountMenu(activePage) {
         <div class="gate-msg" id="gateMsg"></div>
       </div>`;
     document.body.appendChild(gate);
+
+    gate.querySelector('#gateClose').onclick = () => gate.remove();
 
     const numInput   = gate.querySelector('#gateAcctNum');
     const connectBtn = gate.querySelector('#gateConnectBtn');

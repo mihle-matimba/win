@@ -681,7 +681,7 @@ td.neg{color:var(--red-val)}
   z-index:190;display:flex;align-items:center;justify-content:center;padding:24px;
   animation:gateFadeIn .25s ease}
 @keyframes gateFadeIn{from{opacity:0;transform:scale(.97)}to{opacity:1;transform:scale(1)}}
-.gate-card{background:var(--card);border:1px solid var(--line);border-radius:22px;
+.gate-card{position:relative;background:var(--card);border:1px solid var(--line);border-radius:22px;
   padding:44px 40px 40px;max-width:420px;width:100%;text-align:center;
   box-shadow:0 32px 80px -20px rgba(0,0,0,.85),0 0 0 1px rgba(255,255,255,.03) inset}
 .gate-icon{margin:0 auto 20px;width:64px;height:64px;border-radius:18px;
@@ -710,3 +710,8 @@ td.neg{color:var(--red-val)}
 .gate-connect-btn:hover{opacity:.85}
 .gate-connect-btn:disabled{opacity:.4;cursor:not-allowed}
 .gate-msg{font-size:12px;min-height:16px;text-align:left}
+.gate-close{position:absolute;top:14px;right:14px;width:30px;height:30px;border-radius:50%;
+  display:flex;align-items:center;justify-content:center;
+  background:rgba(255,255,255,.06);color:var(--muted);transition:background .15s,color .15s}
+.gate-close:hover{background:rgba(255,255,255,.12);color:var(--ink)}
+.gate-close svg{width:16px;height:16px}
