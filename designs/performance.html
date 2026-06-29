@@ -614,9 +614,9 @@ function renderStats(data) {
   el('tileBalancePct').innerHTML = `<i class="fa-solid fa-arrow-trend-up"></i> ${fmtPct(stats.gainPct || 0)}`;
   el('tileNetPnl').textContent = fmt(stats.netPnl || 0, currency);
   el('tileNetPnlSub').textContent = stats.netPnl >= 0 ? 'Profitable' : 'Loss';
-  el('tileWinRate').textContent = stats.winRate != null ? stats.winRate.toFixed(1) + '%' : '—';
+  el('tileWinRate').textContent = (stats.winRate ?? 0).toFixed(1) + '%';
   el('tileWinRateSub').textContent = 'of closed trades';
-  el('tileTrades').textContent = stats.totalTrades || '—';
+  el('tileTrades').textContent = stats.totalTrades ?? 0;
   el('tileTradesSub').textContent = 'closed positions';
 
   /* Account pill */
@@ -632,31 +632,31 @@ function renderStats(data) {
   el('balTotalLots').textContent = (stats.totalLots || 0).toFixed(2);
 
   /* Risk */
-  el('riskMaxBalDD').textContent = stats.maxBalDD != null ? fmt(stats.maxBalDD, currency) : '—';
-  el('riskMaxBalDDPct').textContent = stats.maxBalDDPct != null ? `(${stats.maxBalDDPct.toFixed(2)}%)` : '';
-  el('riskHighBal').textContent = fmt(stats.highestBalance || 0, currency);
-  el('riskEquity').textContent = fmt(stats.currentEquity || 0, currency);
-  el('riskProfitFactor').textContent = stats.profitFactor != null ? stats.profitFactor.toFixed(2) : '—';
-  el('riskSharpe').textContent = stats.sharpeRatio != null ? stats.sharpeRatio.toFixed(2) : '—';
-  el('riskExpectancy').textContent = stats.expectancy != null ? fmt(stats.expectancy, currency) : '—';
-  el('riskStdDev').textContent = stats.stdDev != null ? fmt(stats.stdDev, currency) : '—';
-  el('riskCommissions').textContent = stats.commissions != null ? fmt(stats.commissions, currency) : '—';
+  el('riskMaxBalDD').textContent = fmt(stats.maxBalDD ?? 0, currency);
+  el('riskMaxBalDDPct').textContent = `(${(stats.maxBalDDPct ?? 0).toFixed(2)}%)`;
+  el('riskHighBal').textContent = fmt(stats.highestBalance ?? 0, currency);
+  el('riskEquity').textContent = fmt(stats.currentEquity ?? 0, currency);
+  el('riskProfitFactor').textContent = (stats.profitFactor ?? 0).toFixed(2);
+  el('riskSharpe').textContent = (stats.sharpeRatio ?? 0).toFixed(2);
+  el('riskExpectancy').textContent = fmt(stats.expectancy ?? 0, currency);
+  el('riskStdDev').textContent = fmt(stats.stdDev ?? 0, currency);
+  el('riskCommissions').textContent = fmt(stats.commissions ?? 0, currency);
 
   /* Trade stats */
-  el('statWinRate').textContent = stats.winRate != null ? stats.winRate.toFixed(1) + '%' : '—';
-  el('statProfitFactor').textContent = stats.profitFactor != null ? stats.profitFactor.toFixed(2) : '—';
-  el('statAvgWin').textContent = stats.avgWin != null ? fmt(stats.avgWin, currency) : '—';
-  el('statAvgLoss').textContent = stats.avgLoss != null ? fmt(stats.avgLoss, currency) : '—';
-  el('statAvgDuration').textContent = stats.avgDuration || '—';
-  el('statBestTrade').textContent = stats.bestTrade != null ? fmt(stats.bestTrade, currency) : '—';
-  el('statWorstTrade').textContent = stats.worstTrade != null ? fmt(stats.worstTrade, currency) : '—';
-  el('statDailyWR').textContent = stats.dailyWR != null ? stats.dailyWR.toFixed(1) + '%' : '—';
+  el('statWinRate').textContent = (stats.winRate ?? 0).toFixed(1) + '%';
+  el('statProfitFactor').textContent = (stats.profitFactor ?? 0).toFixed(2);
+  el('statAvgWin').textContent = fmt(stats.avgWin ?? 0, currency);
+  el('statAvgLoss').textContent = fmt(stats.avgLoss ?? 0, currency);
+  el('statAvgDuration').textContent = stats.avgDuration || '0m';
+  el('statBestTrade').textContent = fmt(stats.bestTrade ?? 0, currency);
+  el('statWorstTrade').textContent = fmt(stats.worstTrade ?? 0, currency);
+  el('statDailyWR').textContent = (stats.dailyWR ?? 0).toFixed(1) + '%';
 
   /* Winstreak */
-  el('wsDaysBest').textContent = stats.wsDaysBest != null ? stats.wsDaysBest : '—';
-  el('wsDaysWorst').textContent = stats.wsDaysWorst != null ? stats.wsDaysWorst : '—';
-  el('wsTradesBest').textContent = stats.wsTradesBest != null ? stats.wsTradesBest : '—';
-  el('wsTradesWorst').textContent = stats.wsTradesWorst != null ? stats.wsTradesWorst : '—';
+  el('wsDaysBest').textContent = stats.wsDaysBest ?? 0;
+  el('wsDaysWorst').textContent = stats.wsDaysWorst ?? 0;
+  el('wsTradesBest').textContent = stats.wsTradesBest ?? 0;
+  el('wsTradesWorst').textContent = stats.wsTradesWorst ?? 0;
 
   /* Net Daily P&L */
   el('pnlTotal').textContent = fmt(stats.netPnl || 0, currency);
@@ -695,60 +695,39 @@ async function loadPerformance() {
     const json = await res.json();
     const accounts = json.broker_clients || [];
 
-    if (!accounts.length) {
-      el('noAccountBanner').style.display = '';
-      el('perfMain').style.display = 'none';
-      return;
-    }
-
-    /* Use selected account or first */
+    /* Use selected account or first; fall back to empty account if none linked */
     const selectedId = localStorage.getItem('win_selected_account');
-    const account = accounts.find(a => String(a.id) === String(selectedId)) || accounts[0];
+    const account = accounts.length
+      ? (accounts.find(a => String(a.id) === String(selectedId)) || accounts[0])
+      : { id: null, name: 'No account linked', balance: 0, account_currency: 'USD' };
 
-    /* Show mock stats (real stats require trade history API) */
-    const mockStats = {
-      gainPct: 0,
-      absGainPct: 0,
-      netPnl: 0,
-      totalTrades: 0,
-      winRate: null,
-      profitFactor: null,
-      sharpeRatio: null,
-      expectancy: null,
-      stdDev: null,
-      commissions: null,
-      maxBalDD: null,
-      maxBalDDPct: null,
-      highestBalance: account.balance,
-      currentEquity: 0,
-      deposits: 0,
-      withdrawals: 0,
-      totalLots: 0,
-      avgWin: null,
-      avgLoss: null,
-      avgDuration: null,
-      bestTrade: null,
-      worstTrade: null,
-      dailyWR: null,
-      wsDaysBest: null,
-      wsDaysWorst: null,
-      wsTradesBest: null,
-      wsTradesWorst: null
+    const zeroStats = {
+      gainPct: 0, absGainPct: 0, netPnl: 0, totalTrades: 0,
+      winRate: 0, profitFactor: 0, sharpeRatio: 0, expectancy: 0,
+      stdDev: 0, commissions: 0, maxBalDD: 0, maxBalDDPct: 0,
+      highestBalance: account.balance || 0, currentEquity: 0,
+      deposits: 0, withdrawals: 0, totalLots: 0,
+      avgWin: 0, avgLoss: 0, avgDuration: '0m',
+      bestTrade: 0, worstTrade: 0, dailyWR: 0,
+      wsDaysBest: 0, wsDaysWorst: 0, wsTradesBest: 0, wsTradesWorst: 0
     };
 
-    renderStats({
-      account,
-      stats: mockStats,
-      equity: [],
-      dailyPnl: [],
-      monthly: [],
-      symbols: []
-    });
-
+    renderStats({ account, stats: zeroStats, equity: [], dailyPnl: [], monthly: [], symbols: [] });
     renderEmptyCharts();
 
   } catch (e) {
     console.error('Performance load error:', e);
+    const fallbackAccount = { id: null, name: 'No account', balance: 0, account_currency: 'USD' };
+    const zeroStats = {
+      gainPct: 0, absGainPct: 0, netPnl: 0, totalTrades: 0,
+      winRate: 0, profitFactor: 0, sharpeRatio: 0, expectancy: 0,
+      stdDev: 0, commissions: 0, maxBalDD: 0, maxBalDDPct: 0,
+      highestBalance: 0, currentEquity: 0, deposits: 0, withdrawals: 0,
+      totalLots: 0, avgWin: 0, avgLoss: 0, avgDuration: '0m',
+      bestTrade: 0, worstTrade: 0, dailyWR: 0,
+      wsDaysBest: 0, wsDaysWorst: 0, wsTradesBest: 0, wsTradesWorst: 0
+    };
+    renderStats({ account: fallbackAccount, stats: zeroStats, equity: [], dailyPnl: [], monthly: [], symbols: [] });
     renderEmptyCharts();
   }
 }
