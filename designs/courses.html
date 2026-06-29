@@ -90,74 +90,153 @@
 .c-meta .mi svg{width:13px;height:13px}
 .c-meta .free{margin-left:auto;color:var(--green-val);font-weight:700}
 
-/* ── Course detail panel ── */
-.c-detail{
-  background:var(--card);border:1px solid var(--line);border-radius:var(--radius);
-  overflow:hidden;display:none;
+/* ── Detail view ── */
+.dv{display:none;animation:fadeUp .25s ease}
+.dv.open{display:block}
+
+.dv-breadcrumb{
+  display:flex;align-items:center;gap:8px;
+  font-size:13px;color:var(--muted);margin-bottom:20px;
 }
-.c-detail.open{display:block}
-.c-detail-head{
-  padding:24px 24px 18px;
-  border-bottom:1px solid var(--line);
+.dv-back{
+  display:flex;align-items:center;gap:6px;
+  padding:7px 14px;border-radius:10px;
+  border:1px solid var(--line);background:var(--card);
+  font:500 13px 'Inter';color:var(--ink-2);
+  cursor:pointer;transition:border-color .15s,color .15s;
+}
+.dv-back:hover{border-color:var(--accent);color:#fff}
+.dv-back svg{width:14px;height:14px}
+.dv-bc-sep{color:var(--faint)}
+.dv-bc-cur{color:var(--ink);font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:280px}
+
+.dv-header{
   display:flex;align-items:flex-start;justify-content:space-between;gap:16px;
+  margin-bottom:20px;
 }
-.c-detail-head h2{font-size:22px;font-weight:800;letter-spacing:-.4px}
-.c-detail-head .info{font-size:13px;color:var(--muted);margin-top:4px}
-.c-detail-head .close-btn{
-  width:36px;height:36px;border-radius:10px;flex-shrink:0;
-  background:var(--card-2);border:1px solid var(--line);
-  display:flex;align-items:center;justify-content:center;
-  cursor:pointer;color:var(--muted);transition:color .15s,border-color .15s;
+.dv-header h1{font-size:24px;font-weight:800;letter-spacing:-.5px;line-height:1.2}
+.dv-header .dv-meta{
+  display:flex;align-items:center;gap:14px;flex-wrap:wrap;
+  font-size:13px;color:var(--muted);margin-top:8px;
 }
-.c-detail-head .close-btn:hover{color:#fff;border-color:var(--accent)}
-.c-detail-head .close-btn svg{width:16px;height:16px}
+.dv-header .dv-meta span{display:flex;align-items:center;gap:5px}
+.dv-header .dv-meta svg{width:14px;height:14px}
 
-/* chapter progress bar in detail */
-.c-detail-progress{padding:0 24px 16px}
-.c-detail-progress .c-progress-bar{height:4px}
+.dv-layout{
+  display:grid;
+  grid-template-columns:1fr 360px;
+  gap:20px;
+  align-items:start;
+}
 
-/* chapter list */
-.ch-list{padding:4px 0}
-.ch{
+/* Video */
+.dv-video-wrap{
+  position:relative;width:100%;padding-bottom:56.25%;
+  background:#000;border-radius:var(--radius);overflow:hidden;
+  border:1px solid var(--line);
+}
+.dv-video-wrap iframe{
+  position:absolute;inset:0;width:100%;height:100%;border:0;
+}
+.dv-video-placeholder{
+  position:absolute;inset:0;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;
+  background:var(--card-2);color:var(--muted);font-size:14px;text-align:center;padding:20px;
+}
+.dv-video-placeholder svg{width:48px;height:48px;opacity:.3}
+
+/* Now playing */
+.dv-now-playing{
+  margin-top:14px;padding:14px 16px;
+  background:var(--card);border:1px solid var(--line);border-radius:12px;
+  display:flex;align-items:center;gap:12px;
+}
+.dv-np-dot{
+  width:8px;height:8px;border-radius:50%;
+  background:var(--accent);flex-shrink:0;
+  box-shadow:0 0 8px var(--accent);
+  animation:pulse 2s infinite;
+}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
+.dv-np-label{font-size:11px;color:var(--muted);font-weight:600;text-transform:uppercase;letter-spacing:.4px}
+.dv-np-title{font-size:13.5px;font-weight:600;color:var(--ink);margin-top:1px}
+
+/* Tabs */
+.dv-tabs{
+  display:flex;gap:4px;margin-top:16px;
+  border-bottom:1px solid var(--line);padding-bottom:0;
+}
+.dv-tab{
+  padding:10px 18px;border-radius:10px 10px 0 0;
+  font:500 13px 'Inter';color:var(--muted);
+  cursor:pointer;border:none;background:none;
+  border-bottom:2px solid transparent;margin-bottom:-1px;
+  transition:color .15s;
+}
+.dv-tab:hover{color:var(--ink)}
+.dv-tab.active{color:var(--accent);border-bottom-color:var(--accent)}
+
+.dv-tab-body{padding:20px 0}
+.dv-tab-body h3{font-size:16px;font-weight:700;margin-bottom:10px}
+.dv-tab-body p{font-size:14px;color:var(--muted);line-height:1.7}
+
+/* Progress in overview */
+.dv-prog-row{
   display:flex;align-items:center;gap:14px;
-  padding:14px 24px;
-  transition:background .12s;
-  cursor:pointer;text-decoration:none;color:inherit;
-  position:relative;
+  margin-top:20px;padding:16px;
+  background:var(--card-2);border:1px solid var(--line);border-radius:12px;
 }
-.ch:hover{background:rgba(255,255,255,.025)}
-.ch.completed{opacity:.7}
-.ch.completed .ch-title{text-decoration:line-through;text-decoration-color:var(--faint)}
-.ch-num{
-  width:36px;height:36px;border-radius:10px;flex-shrink:0;
-  display:flex;align-items:center;justify-content:center;
-  font-size:12px;font-weight:700;
-}
-.ch-info{flex:1;min-width:0}
-.ch-title{font-size:13.5px;font-weight:600;color:var(--ink)}
-.ch-sub{font-size:11.5px;color:var(--faint);margin-top:1px}
-.ch-actions{display:flex;align-items:center;gap:8px}
+.dv-prog-row .pct-big{font-size:28px;font-weight:800;color:var(--green-val);flex-shrink:0}
+.dv-prog-row .pct-info{flex:1}
+.dv-prog-row .pct-label{font-size:12px;color:var(--muted);margin-bottom:6px}
+.dv-prog-bar{height:6px;border-radius:99px;background:var(--line);overflow:hidden}
+.dv-prog-fill{height:100%;border-radius:99px;background:linear-gradient(90deg,var(--accent),var(--green-val));transition:width .4s}
 
-.ch-check{
-  width:28px;height:28px;border-radius:8px;flex-shrink:0;
+/* Sidebar */
+.dv-sidebar{
+  background:var(--card);border:1px solid var(--line);border-radius:var(--radius);
+  overflow:hidden;position:sticky;top:20px;max-height:calc(100vh - 160px);
+  display:flex;flex-direction:column;
+}
+.dv-sidebar-head{
+  padding:18px 20px;border-bottom:1px solid var(--line);
+  display:flex;align-items:center;justify-content:space-between;flex-shrink:0;
+}
+.dv-sidebar-head h3{font-size:15px;font-weight:700}
+.dv-sidebar-meta{font-size:12px;color:var(--muted)}
+.dv-ch-list{overflow-y:auto;flex:1}
+
+/* Chapter rows */
+.dv-ch{
+  display:flex;align-items:center;gap:12px;
+  padding:13px 16px;cursor:pointer;
+  transition:background .12s;border-bottom:1px solid rgba(255,255,255,.04);
+}
+.dv-ch:hover{background:rgba(255,255,255,.035)}
+.dv-ch.active{background:var(--accent-soft);border-left:3px solid var(--accent)}
+.dv-ch.active .dv-ch-num{background:var(--accent);color:#fff}
+.dv-ch-num{
+  width:32px;height:32px;border-radius:8px;flex-shrink:0;
+  display:flex;align-items:center;justify-content:center;
+  font-size:11px;font-weight:700;background:var(--card-2);color:var(--muted);
+  transition:background .15s,color .15s;
+}
+.dv-ch-info{flex:1;min-width:0}
+.dv-ch-title{
+  font-size:13px;font-weight:600;color:var(--ink);
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+}
+.dv-ch.completed .dv-ch-title{text-decoration:line-through;text-decoration-color:var(--faint);color:var(--faint)}
+.dv-ch-sub{font-size:11px;color:var(--faint);margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.dv-ch-check{
+  width:26px;height:26px;border-radius:7px;flex-shrink:0;
   border:1.5px solid var(--line);background:transparent;
   display:flex;align-items:center;justify-content:center;
   cursor:pointer;transition:all .15s;color:transparent;
 }
-.ch-check:hover{border-color:var(--green-val);background:var(--green-soft)}
-.ch-check.done{
-  border-color:var(--green-val);background:var(--green-soft);color:var(--green-val);
-}
-.ch-check svg{width:14px;height:14px}
-
-.ch-play{
-  width:32px;height:32px;border-radius:50%;flex-shrink:0;
-  background:var(--accent-soft);border:1px solid rgba(91,116,255,.25);
-  display:flex;align-items:center;justify-content:center;
-  transition:background .15s,transform .15s;
-}
-.ch-play svg{width:12px;height:12px}
-.ch:hover .ch-play{background:rgba(91,116,255,.25);transform:scale(1.06)}
+.dv-ch-check:hover{border-color:var(--green-val)}
+.dv-ch-check.done{border-color:var(--green-val);background:var(--green-soft);color:var(--green-val)}
+.dv-ch-check svg{width:13px;height:13px}
 
 /* ── Empty state ── */
 .c-empty{
@@ -184,14 +263,21 @@
 @keyframes shimmer{0%{background-position:200% 0}100%{background-position:-200% 0}}
 
 /* ── Responsive ── */
+@media(max-width:900px){
+  .dv-layout{grid-template-columns:1fr}
+  .dv-sidebar{position:static;max-height:none}
+  .dv-ch-list{max-height:420px}
+}
 @media(max-width:680px){
   .c-grid{grid-template-columns:1fr}
   .c-header{flex-direction:column}
-  .c-stats{gap:12px}
+  .c-stats{gap:10px}
   .c-stat{padding:10px 14px;min-width:70px}
   .c-stat .num{font-size:18px}
-  .c-detail-head{padding:18px 16px 14px}
-  .ch{padding:12px 16px}
+  .dv-header{flex-direction:column;gap:10px}
+  .dv-header h1{font-size:19px}
+  .dv-breadcrumb{flex-wrap:wrap}
+  .dv-bc-cur{max-width:180px}
 }
 </style>
 </head>
@@ -206,38 +292,90 @@
 
     <main class="content">
 
-      <!-- Header -->
-      <div class="c-header">
-        <div>
-          <h1>Courses</h1>
-          <p class="sub">Master the markets — from beginner fundamentals to advanced strategies.</p>
+      <!-- ── Grid view ── -->
+      <div id="gridView">
+        <div class="c-header">
+          <div>
+            <h1>Courses</h1>
+            <p class="sub">Master the markets — from beginner fundamentals to advanced strategies.</p>
+          </div>
+          <div class="c-stats">
+            <div class="c-stat"><div class="num" id="statCourses">—</div><div class="lbl">Courses</div></div>
+            <div class="c-stat"><div class="num" id="statLessons">—</div><div class="lbl">Lessons</div></div>
+            <div class="c-stat"><div class="num" id="statProgress">0%</div><div class="lbl">Complete</div></div>
+          </div>
         </div>
-        <div class="c-stats">
-          <div class="c-stat">
-            <div class="num" id="statCourses">—</div>
-            <div class="lbl">Courses</div>
-          </div>
-          <div class="c-stat">
-            <div class="num" id="statLessons">—</div>
-            <div class="lbl">Lessons</div>
-          </div>
-          <div class="c-stat">
-            <div class="num" id="statProgress">0%</div>
-            <div class="lbl">Complete</div>
-          </div>
+        <div class="c-grid" id="courseGrid">
+          <div class="c-skeleton"><div class="skel-banner"></div><div class="skel-body"><div class="skel-line w80"></div><div class="skel-line w60"></div><div class="skel-line w40"></div></div></div>
+          <div class="c-skeleton"><div class="skel-banner"></div><div class="skel-body"><div class="skel-line w80"></div><div class="skel-line w60"></div><div class="skel-line w40"></div></div></div>
+          <div class="c-skeleton"><div class="skel-banner"></div><div class="skel-body"><div class="skel-line w80"></div><div class="skel-line w60"></div><div class="skel-line w40"></div></div></div>
         </div>
       </div>
 
-      <!-- Course grid (populated by JS) -->
-      <div class="c-grid" id="courseGrid">
-        <!-- Loading skeletons -->
-        <div class="c-skeleton"><div class="skel-banner"></div><div class="skel-body"><div class="skel-line w80"></div><div class="skel-line w60"></div><div class="skel-line w40"></div></div></div>
-        <div class="c-skeleton"><div class="skel-banner"></div><div class="skel-body"><div class="skel-line w80"></div><div class="skel-line w60"></div><div class="skel-line w40"></div></div></div>
-        <div class="c-skeleton"><div class="skel-banner"></div><div class="skel-body"><div class="skel-line w80"></div><div class="skel-line w60"></div><div class="skel-line w40"></div></div></div>
-      </div>
+      <!-- ── Detail view ── -->
+      <div class="dv" id="detailView">
 
-      <!-- Detail panel (shown when a course is clicked) -->
-      <div class="c-detail" id="courseDetail"></div>
+        <!-- Breadcrumb -->
+        <div class="dv-breadcrumb">
+          <button class="dv-back" onclick="closeDetail()">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 12H5M12 5l-7 7 7 7"/></svg>
+            Courses
+          </button>
+          <span class="dv-bc-sep">/</span>
+          <span class="dv-bc-cur" id="dvBreadTitle"></span>
+        </div>
+
+        <!-- Course title -->
+        <div class="dv-header">
+          <div>
+            <h1 id="dvTitle"></h1>
+            <div class="dv-meta" id="dvMeta"></div>
+          </div>
+        </div>
+
+        <!-- Two-column layout -->
+        <div class="dv-layout">
+
+          <!-- Left: video + tabs -->
+          <div class="dv-main">
+            <div class="dv-video-wrap" id="dvVideoWrap">
+              <div class="dv-video-placeholder" id="dvVideoPlaceholder">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="10"/><path d="M10 8l6 4-6 4V8z"/></svg>
+                <span>Select a chapter to watch</span>
+              </div>
+            </div>
+
+            <!-- Now playing -->
+            <div class="dv-now-playing" id="dvNowPlaying" style="display:none">
+              <div class="dv-np-dot"></div>
+              <div>
+                <div class="dv-np-label">Now playing</div>
+                <div class="dv-np-title" id="dvNowTitle"></div>
+              </div>
+            </div>
+
+            <!-- Tabs -->
+            <div class="dv-tabs">
+              <button class="dv-tab active">Overview</button>
+            </div>
+            <div class="dv-tab-body">
+              <h3>About this course</h3>
+              <p id="dvDesc"></p>
+              <div id="dvProgRow"></div>
+            </div>
+          </div>
+
+          <!-- Right: chapter list -->
+          <div class="dv-sidebar">
+            <div class="dv-sidebar-head">
+              <h3>Course content</h3>
+              <span class="dv-sidebar-meta" id="dvSidebarMeta"></span>
+            </div>
+            <div class="dv-ch-list" id="dvChList"></div>
+          </div>
+
+        </div>
+      </div>
 
     </main>
   </div>
@@ -266,29 +404,11 @@ const COURSE_THEMES = [
 ];
 
 /* ================================================================
-   Skeleton loader
-   ================================================================ */
-function showSkeletons(n) {
-  const grid = document.getElementById('courseGrid');
-  grid.innerHTML = Array.from({ length: n }, () => `
-    <div class="c-skeleton">
-      <div class="skel-banner"></div>
-      <div class="skel-body">
-        <div class="skel-line w80"></div>
-        <div class="skel-line w60"></div>
-        <div class="skel-line w40"></div>
-      </div>
-    </div>`).join('');
-}
-
-/* ================================================================
    Fetch data from API
    ================================================================ */
 async function loadData() {
-  showSkeletons(3);
-
   const res = await fetch('/api/courses');
-  if (!res.ok) { render(); return; }
+  if (!res.ok) { renderGrid(); return; }
   const data = await res.json();
 
   courses = data.courses || [];
@@ -305,13 +425,13 @@ async function loadData() {
     }
   }
 
-  render();
+  renderGrid();
 }
 
 /* ================================================================
-   Render
+   Render grid view
    ================================================================ */
-function render() {
+function renderGrid() {
   const grid = document.getElementById('courseGrid');
 
   if (!courses.length) {
@@ -319,8 +439,7 @@ function render() {
     return;
   }
 
-  let totalChapters = 0;
-  let totalDone = 0;
+  let totalChapters = 0, totalDone = 0;
   courses.forEach(c => {
     const chs = chapters[c.id] || [];
     totalChapters += chs.length;
@@ -336,9 +455,8 @@ function render() {
     const chs = chapters[c.id] || [];
     const done = chs.filter(ch => progress[ch.id]).length;
     const pct = chs.length ? Math.round((done / chs.length) * 100) : 0;
-
     return `
-      <div class="c-card" onclick="toggleCourse('${c.id}')">
+      <div class="c-card" onclick="openDetail('${c.id}')">
         <div class="c-banner">
           <div class="grad" style="background:${theme.gradient}"></div>
           <span class="icon">${theme.icon}</span>
@@ -354,105 +472,144 @@ function render() {
             <div class="c-progress-text"><span>${done} / ${chs.length} completed</span><span class="pct">${pct}%</span></div>
           </div>` : ''}
           <div class="c-meta">
-            <span class="mi"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg> ${chs.length} lessons</span>
-            <span class="mi"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 3h6a4 4 0 014 4v14a3 3 0 00-3-3H2z"/><path d="M22 3h-6a4 4 0 00-4 4v14a3 3 0 013-3h7z"/></svg> ${theme.level.charAt(0).toUpperCase() + theme.level.slice(1)}</span>
+            <span class="mi"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>${chs.length} lessons</span>
+            <span class="mi"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 3h6a4 4 0 014 4v14a3 3 0 00-3-3H2z"/><path d="M22 3h-6a4 4 0 00-4 4v14a3 3 0 013-3h7z"/></svg>${theme.level.charAt(0).toUpperCase() + theme.level.slice(1)}</span>
             <span class="free">FREE</span>
           </div>
         </div>
       </div>`;
   }).join('');
-
-  if (openCourseId) renderDetail(openCourseId);
 }
 
-function renderDetail(courseId) {
-  const detail = document.getElementById('courseDetail');
+/* ================================================================
+   Open course detail view
+   ================================================================ */
+function openDetail(courseId) {
   const course = courses.find(c => c.id === courseId);
-  if (!course) { detail.classList.remove('open'); return; }
+  if (!course) return;
 
+  openCourseId = courseId;
   const idx = courses.indexOf(course);
   const theme = COURSE_THEMES[idx % COURSE_THEMES.length];
   const chs = chapters[courseId] || [];
   const done = chs.filter(ch => progress[ch.id]).length;
   const pct = chs.length ? Math.round((done / chs.length) * 100) : 0;
 
-  const checkSvg = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6"><path d="m5 12 5 5L20 7"/></svg>';
-  const playSvg = '<svg viewBox="0 0 24 24" fill="var(--accent)"><path d="M8 5v14l11-7z"/></svg>';
+  document.getElementById('dvBreadTitle').textContent = course.title;
+  document.getElementById('dvTitle').textContent = course.title;
+  document.getElementById('dvMeta').innerHTML = `
+    <span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>${chs.length} lessons</span>
+    <span class="c-badge ${theme.level}" style="position:static">${theme.level}</span>
+    <span style="color:var(--green-val);font-weight:700">FREE</span>`;
 
-  detail.innerHTML = `
-    <div class="c-detail-head">
-      <div>
-        <h2>${esc(course.title)}</h2>
-        <p class="info">${chs.length} chapters · ${done} completed · ${pct}% done</p>
+  document.getElementById('dvDesc').textContent = course.description || '';
+  document.getElementById('dvProgRow').innerHTML = chs.length ? `
+    <div class="dv-prog-row">
+      <div class="pct-big">${pct}%</div>
+      <div class="pct-info">
+        <div class="pct-label">${done} of ${chs.length} chapters completed</div>
+        <div class="dv-prog-bar"><div class="dv-prog-fill" style="width:${pct}%"></div></div>
       </div>
-      <button class="close-btn" onclick="toggleCourse('${courseId}')">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6 6 18M6 6l12 12"/></svg>
-      </button>
-    </div>
-    <div class="c-detail-progress">
-      <div class="c-progress-bar"><div class="c-progress-fill" style="width:${pct}%"></div></div>
-    </div>
-    <div class="ch-list">
-      ${chs.map(ch => {
-        const isDone = progress[ch.id];
-        return `
-        <div class="ch${isDone ? ' completed' : ''}">
-          <div class="ch-num" style="background:${theme.numBg};color:${theme.color}">${esc(ch.chapter_num)}</div>
-          <div class="ch-info">
-            <div class="ch-title">${esc(ch.title)}</div>
-            <div class="ch-sub">${esc(ch.description)}</div>
-          </div>
-          <div class="ch-actions">
-            <button class="ch-check${isDone ? ' done' : ''}" onclick="event.stopPropagation();toggleProgress('${ch.id}')" title="${isDone ? 'Mark incomplete' : 'Mark complete'}">
-              ${checkSvg}
-            </button>
-            <a class="ch-play" href="${esc(ch.video_url)}" target="_blank" rel="noopener" onclick="event.stopPropagation()" title="Watch video">
-              ${playSvg}
-            </a>
-          </div>
-        </div>`;
-      }).join('')}
-    </div>`;
+    </div>` : '';
 
-  detail.classList.add('open');
+  document.getElementById('dvSidebarMeta').textContent = `${done}/${chs.length} done`;
+
+  const checkSvg = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6"><path d="m5 12 5 5L20 7"/></svg>';
+  document.getElementById('dvChList').innerHTML = chs.map(ch => {
+    const isDone = progress[ch.id];
+    return `
+      <div class="dv-ch${isDone ? ' completed' : ''}" id="dch-${ch.id}" onclick="playChapter('${ch.id}','${courseId}')">
+        <div class="dv-ch-num">${esc(ch.chapter_num)}</div>
+        <div class="dv-ch-info">
+          <div class="dv-ch-title">${esc(ch.title)}</div>
+          <div class="dv-ch-sub">${esc(ch.description)}</div>
+        </div>
+        <button class="dv-ch-check${isDone ? ' done' : ''}"
+          onclick="event.stopPropagation();toggleProgress('${ch.id}','${courseId}')"
+          title="${isDone ? 'Mark incomplete' : 'Mark complete'}">
+          ${checkSvg}
+        </button>
+      </div>`;
+  }).join('');
+
+  setVideoPlaceholder();
+  if (chs.length) playChapter(chs[0].id, courseId);
+
+  document.getElementById('gridView').style.display = 'none';
+  document.getElementById('detailView').classList.add('open');
+  window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 
-function toggleCourse(id) {
-  const detail = document.getElementById('courseDetail');
-  if (openCourseId === id) {
-    detail.classList.remove('open');
-    openCourseId = null;
-    return;
-  }
-  openCourseId = id;
-  renderDetail(id);
-  setTimeout(() => detail.scrollIntoView({ behavior:'smooth', block:'start' }), 80);
+function closeDetail() {
+  document.getElementById('detailView').classList.remove('open');
+  document.getElementById('gridView').style.display = 'block';
+  setVideoPlaceholder();
+  openCourseId = null;
 }
 
 /* ================================================================
-   Progress toggle — calls /api/progress
+   Video player
    ================================================================ */
-async function toggleProgress(chapterId) {
+function getYtId(url) {
+  if (!url) return null;
+  const m = url.match(/(?:youtu\.be\/|[?&]v=)([a-zA-Z0-9_-]{11})/);
+  return m ? m[1] : null;
+}
+
+function setVideoPlaceholder() {
+  const old = document.getElementById('dvVideoFrame');
+  if (old) old.remove();
+  const ph = document.getElementById('dvVideoPlaceholder');
+  if (ph) ph.style.display = 'flex';
+  document.getElementById('dvNowPlaying').style.display = 'none';
+  document.querySelectorAll('.dv-ch').forEach(el => el.classList.remove('active'));
+}
+
+function playChapter(chId, courseId) {
+  const ch = (chapters[courseId] || []).find(c => c.id === chId);
+  if (!ch) return;
+
+  const ytId = getYtId(ch.video_url);
+  const wrap = document.getElementById('dvVideoWrap');
+  const ph = document.getElementById('dvVideoPlaceholder');
+
+  const old = document.getElementById('dvVideoFrame');
+  if (old) old.remove();
+
+  if (ytId) {
+    if (ph) ph.style.display = 'none';
+    const iframe = document.createElement('iframe');
+    iframe.id = 'dvVideoFrame';
+    iframe.src = `https://www.youtube.com/embed/${ytId}?autoplay=1&rel=0&modestbranding=1`;
+    iframe.allow = 'accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture';
+    iframe.allowFullscreen = true;
+    iframe.style.cssText = 'position:absolute;inset:0;width:100%;height:100%;border:0';
+    wrap.appendChild(iframe);
+  } else {
+    if (ph) ph.style.display = 'flex';
+  }
+
+  document.getElementById('dvNowTitle').textContent = ch.title;
+  document.getElementById('dvNowPlaying').style.display = 'flex';
+
+  document.querySelectorAll('.dv-ch').forEach(el => el.classList.remove('active'));
+  const active = document.getElementById('dch-' + chId);
+  if (active) active.classList.add('active');
+}
+
+/* ================================================================
+   Progress toggle
+   ================================================================ */
+async function toggleProgress(chapterId, courseId) {
   if (progress[chapterId]) {
     delete progress[chapterId];
-    if (userId) {
-      fetch('/api/progress', {
-        method: 'DELETE',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ user_id: userId, chapter_id: chapterId }),
-      });
-    }
+    if (userId) fetch('/api/progress', { method:'DELETE', headers:{'Content-Type':'application/json'}, body:JSON.stringify({ user_id:userId, chapter_id:chapterId }) });
   } else {
     progress[chapterId] = true;
-    if (userId) {
-      fetch('/api/progress', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ user_id: userId, chapter_id: chapterId }),
-      });
-    }
+    if (userId) fetch('/api/progress', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({ user_id:userId, chapter_id:chapterId }) });
   }
-  render();
+  if (openCourseId) openDetail(openCourseId);
+  else renderGrid();
 }
 
 /* ================================================================

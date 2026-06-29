@@ -28,6 +28,7 @@ const SIDEBAR_HTML = `
     </button>
     <div class="nav-group" id="toolsGroup">
       <a class="nav-sub" data-page="monte-carlo"><span class="dot"></span><span>Monte Carlo</span></a>
+      <a class="nav-sub" data-page="economic-calendar" href="economic-calendar.html"><span class="dot"></span><span>Economic Calendar</span></a>
     </div>
     <button class="nav-item nav-group-trigger" id="compTrigger" aria-expanded="false" data-group="competitions">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6m12 5h1.5a2.5 2.5 0 0 0 0-5H18M6 4h12v5a6 6 0 0 1-12 0V4Z"/><path d="M9 18h6M10 22h4M12 14v4"/></svg>
@@ -63,7 +64,6 @@ const SIDEBAR_HTML = `
       <a class="nav-sub" data-page="courses" href="courses.html"><span class="dot"></span><span>All Courses</span></a>
     </div>
 
-    <a class="nav-item" data-page="economic-calendar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18M8 14h.01M12 14h.01M16 14h.01M8 18h.01M12 18h.01"/></svg><span>Economic Calendar</span></a>
   </nav>
   <div class="side-foot">
     <div class="side-user">
