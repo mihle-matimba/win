@@ -715,3 +715,22 @@ td.neg{color:var(--red-val)}
   background:rgba(255,255,255,.06);color:var(--muted);transition:background .15s,color .15s}
 .gate-close:hover{background:rgba(255,255,255,.12);color:var(--ink)}
 .gate-close svg{width:16px;height:16px}
+
+/* ── Card-level lock overlays ── */
+.has-lock{position:relative!important;overflow:hidden}
+.has-lock>*:not(.card-lock){filter:blur(6px);pointer-events:none;user-select:none}
+.card-lock{
+  position:absolute;inset:0;z-index:20;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px;
+  background:rgba(6,8,16,.45);border-radius:inherit;
+  backdrop-filter:blur(2px)
+}
+.lock-icon-svg{width:42px;height:42px;stroke:rgba(255,255,255,.45)}
+.lock-unlock-btn{
+  padding:10px 32px;border-radius:99px;
+  background:var(--accent);color:#fff;
+  font-size:14px;font-weight:700;letter-spacing:.3px;
+  border:none;cursor:pointer;transition:opacity .15s,transform .15s;
+  box-shadow:0 4px 20px -4px var(--accent-glow)
+}
+.lock-unlock-btn:hover{opacity:.88;transform:translateY(-1px)}
