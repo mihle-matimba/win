@@ -707,11 +707,11 @@ function initAccountMenu(activePage) {
     gate.className = 'account-gate';
     gate.innerHTML = `
       <div class="gate-card">
-        <h2 class="gate-title">Welcome to WIN</h2>
+        <img class="gate-logo" src="https://ffxlryusmstnfjedleds.supabase.co/storage/v1/object/public/Assets/WIN.png" alt="WIN">
         <p class="gate-desc">To enjoy the WIN platform for free, please connect your brokerage account.</p>
         ${signupUrl ? `
         <a class="gate-btn gate-broker-btn" href="${signupUrl}" target="_blank" rel="noopener">
-          <span>Create a ${brokerName} account</span>
+          <span>Create Account</span>
           ${externalIcon}
         </a>` : ''}
         <p class="gate-support">Struggling to create an account? <a href="mailto:support@mdmtraders.com">Contact support</a></p>
