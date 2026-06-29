@@ -380,7 +380,9 @@ function countUp(el,target,duration){
   }
   requestAnimationFrame(tick);
 }
+let _modalY,_modalM,_modalD;
 function openModal(y,m,d){
+  _modalY=y;_modalM=m;_modalD=d;
   const s=dayStats(y,m,d),dt=new Date(y,m,d),pos=s.pnl>=0;
   document.getElementById('mDate').textContent=`${WD[dt.getDay()]}, ${MONTHS[m].slice(0,3)} ${d}, ${y}`;
   const wrap=document.getElementById('mPnlWrap');wrap.classList.toggle('pos',pos);
@@ -413,6 +415,11 @@ function closeModal(){modal.classList.remove('show');document.body.style.overflo
 document.getElementById('mClose').onclick=closeModal;
 modal.addEventListener('click',e=>{if(e.target===modal)closeModal();});
 addEventListener('keydown',e=>{if(e.key==='Escape'&&modal.classList.contains('show'))closeModal();});
+document.querySelector('.m-journal').addEventListener('click',()=>{
+  if(_modalY==null)return;
+  const mm=String(_modalM+1).padStart(2,'0'),dd=String(_modalD).padStart(2,'0');
+  window.location.href=`journal.html?date=${_modalY}-${mm}-${dd}`;
+});
 
 /* --- Init --- */
 async function init(){

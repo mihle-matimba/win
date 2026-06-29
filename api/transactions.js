@@ -9,7 +9,7 @@ module.exports = async (req, res) => {
 
   const supabase = createClient(url, key);
 
-  const { account_id, page = '0', per_page = '16', symbol, type, profit_min, profit_max } = req.query;
+  const { account_id, page = '0', per_page = '16', symbol, type, profit_min, profit_max, date } = req.query;
   if (!account_id) return res.status(400).json({ error: 'Missing account_id' });
 
   const pageNum = Math.max(0, parseInt(page, 10) || 0);
@@ -33,6 +33,10 @@ module.exports = async (req, res) => {
   if (type)                      q = q.ilike('type', type);
   if (profit_min !== undefined)  q = q.gte('profit', parseFloat(profit_min));
   if (profit_max !== undefined)  q = q.lte('profit', parseFloat(profit_max));
+  /* date = YYYY-MM-DD — filter to rows whose close_time (or open_time) falls on that calendar day */
+  if (date && /^\d{4}-\d{2}-\d{2}$/.test(date)) {
+    q = q.gte('close_time', date + 'T00:00:00').lte('close_time', date + 'T23:59:59.999');
+  }
 
   q = q.order('open_time', { ascending: false }).range(from, to);
 

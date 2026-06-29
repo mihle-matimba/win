@@ -24,6 +24,7 @@
         <div class="card j-table-card">
           <div class="j-table-top">
             <div class="info" id="jInfo"></div>
+            <div id="jDateBanner" style="display:none;align-items:center;gap:8px;background:rgba(91,116,255,.13);border:1px solid rgba(91,116,255,.3);border-radius:8px;padding:5px 12px;font-size:12px;font-weight:600;color:var(--accent)"></div>
             <button class="j-filter-btn" id="filterBtn">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 3H2l8 9.46V19l4 2v-8.54L22 3Z"/></svg>
               Filters<span class="badge" id="filterBadge" style="display:none">0</span>
@@ -251,6 +252,7 @@ let jTotal = 0, jPage = 0, jPerPage = 16;
 let selectedIdx = -1, currentTrade = -1;
 let activeAccountId = null;
 let _userId = null;
+const _dateFilter = new URLSearchParams(location.search).get('date') || null; // YYYY-MM-DD from calendar
 
 /* ── map DB row → trade object ── */
 function mapRow(r, localIdx) {
@@ -367,7 +369,8 @@ async function loadPage(accountId, page) {
   if (!accountId) { TRADES=[]; jTotal=0; renderTable(); return; }
   showSkeleton();
   try {
-    const params = new URLSearchParams({ account_id: accountId, page, per_page: jPerPage, tab: 'trades' });
+    const params = new URLSearchParams({ account_id: accountId, page, per_page: jPerPage });
+    if (_dateFilter) params.set('date', _dateFilter);
     const res  = await fetch(`/api/transactions?${params}`);
     const json = await res.json();
     jTotal = json.total || 0;
@@ -404,6 +407,13 @@ async function resolveAccountId() {
 async function init() {
   const raw = localStorage.getItem('win_user');
   if (raw) { try { _userId = JSON.parse(raw).id; } catch {} }
+  if (_dateFilter) {
+    const banner = document.getElementById('jDateBanner');
+    banner.style.display = 'flex';
+    const d = new Date(_dateFilter + 'T12:00:00');
+    const label = d.toLocaleDateString('en-US', { weekday:'short', month:'long', day:'numeric', year:'numeric' });
+    banner.innerHTML = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:14px;height:14px"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>Filtered: ${label}<button onclick="location.href='journal.html'" style="margin-left:8px;background:none;border:none;color:var(--muted);cursor:pointer;font-size:14px;line-height:1">×</button>`;
+  }
   activeAccountId = await resolveAccountId();
   loadPage(activeAccountId, 0);
 }
