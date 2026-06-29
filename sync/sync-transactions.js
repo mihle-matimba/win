@@ -39,7 +39,7 @@ async function fetchAndInsertTransactions(client) {
   const text = await httpGet(url, { 'X-API-KEY': HFM_API_KEY });
 
   if (!text || text.trim() === '') {
-    console.log(`  ✓ Client ${clientId} | last trade: ${lastTradeStr} | 0 transactions`);
+    console.log(`  ✓ Client ${clientId} | last trade: ${lastTradeStr} | empty response`);
     return 0;
   }
 
@@ -52,17 +52,26 @@ async function fetchAndInsertTransactions(client) {
       const fixed = '[' + trimmed.replace(/\}\{/g, '},{') + ']';
       transactions = JSON.parse(fixed);
     } else {
-      console.log(`  ✓ Client ${clientId} | last trade: ${lastTradeStr} | 0 transactions`);
+      console.log(`  ✗ Client ${clientId} | last trade: ${lastTradeStr} | unexpected response format:`);
+      console.log(`    ${text.slice(0, 300)}`);
       return 0;
     }
   } catch (e) {
     console.log(`  ✗ Client ${clientId} | last trade: ${lastTradeStr} | parse error: ${e.message}`);
+    console.log(`    Raw: ${text.slice(0, 300)}`);
     return 0;
   }
 
   if (!transactions.length) {
-    console.log(`  ✓ Client ${clientId} | last trade: ${lastTradeStr} | 0 transactions`);
+    console.log(`  ✓ Client ${clientId} | last trade: ${lastTradeStr} | 0 transactions (empty array)`);
     return 0;
+  }
+
+  // Log a sample of the first transaction's keys on first success, to verify field names
+  if (fetchAndInsertTransactions._loggedKeys !== true) {
+    fetchAndInsertTransactions._loggedKeys = true;
+    console.log(`  ℹ First transaction keys: ${Object.keys(transactions[0]).join(', ')}`);
+    console.log(`  ℹ Sample: ${JSON.stringify(transactions[0]).slice(0, 300)}`);
   }
 
   const rows = transactions.map((t) => ({
