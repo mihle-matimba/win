@@ -140,30 +140,9 @@
 .ws-box-val.green{color:var(--green-val)}
 .ws-box-val.red{color:var(--red-val)}
 
-/* ── Chart wrap ── */
-.chart-area{position:relative;width:100%}
-.chart-area canvas{display:block;width:100%!important}
-.chart-empty{display:flex;align-items:center;justify-content:center;height:100%;color:var(--faint);font-size:13px;font-weight:500;letter-spacing:.3px;flex-direction:column;gap:8px}
-.chart-empty i{font-size:20px;opacity:.4}
-
-/* ── Net Daily P&L bar chart ── */
+/* ── Chart wraps ── */
 .pnl-chart-wrap{height:200px}
-
-/* ── Monthly profit ── */
 .monthly-chart-wrap{height:160px}
-
-/* ── No account state ── */
-.no-account-state{display:flex;flex-direction:column;align-items:center;justify-content:center;padding:40px 20px;gap:12px;text-align:center}
-.no-account-state i{font-size:28px;color:var(--faint)}
-.no-account-state-title{font-size:15px;font-weight:700;color:var(--ink-2)}
-.no-account-state-sub{font-size:13px;color:var(--muted)}
-.no-account-btn{margin-top:4px;padding:10px 22px;border-radius:11px;font-size:13px;font-weight:700;background:var(--accent);color:#fff;border:none;cursor:pointer;transition:opacity .15s}
-.no-account-btn:hover{opacity:.88}
-
-/* ── Section divider ── */
-.perf-section-label{font-size:11px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--faint);padding:4px 0}
-
-/* ── Equity curve chart ── */
 .equity-chart-wrap{height:160px;margin-top:16px}
 
 /* ── Responsive ── */
@@ -173,6 +152,28 @@
   .risk-grid{grid-template-columns:1fr}
   .risk-item:nth-child(odd){border-right:none}
 }
+
+/* ── Skeleton shimmer ── */
+@keyframes shimmer{0%{background-position:200% 0}100%{background-position:-200% 0}}
+.skel{
+  border-radius:8px;
+  background:linear-gradient(90deg,var(--card-2) 25%,rgba(255,255,255,.04) 50%,var(--card-2) 75%);
+  background-size:200% 100%;
+  animation:shimmer 1.6s infinite;
+}
+.skel-h8{height:8px}.skel-h12{height:12px}.skel-h16{height:16px}.skel-h20{height:20px}
+.skel-h28{height:28px}.skel-h36{height:36px}.skel-h48{height:48px}
+.skel-full{width:100%}.skel-w70{width:70%}.skel-w50{width:50%}.skel-w40{width:40%}.skel-w30{width:30%}
+.skel-chart{border-radius:10px}
+
+/* skeleton tile */
+.skel-tile{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);padding:18px 20px;display:flex;flex-direction:column;gap:10px}
+
+/* ── Loading / loaded state ── */
+.perf-skeletons{display:flex;flex-direction:column;gap:18px}
+.perf-real{display:none;flex-direction:column;gap:18px}
+.perf-real.visible{display:flex}
+.perf-skeletons.hidden{display:none}
 </style>
 </head>
 <body>
@@ -184,18 +185,114 @@
 
       <div class="perf-content" id="perfContent">
 
-        <!-- ── No account state (shown when no account linked) ── -->
-        <div id="noAccountBanner" style="display:none" class="perf-card" style="text-align:center;padding:40px">
-          <div class="no-account-state">
-            <i class="fa-solid fa-chart-line"></i>
-            <div class="no-account-state-title">No trading account linked</div>
-            <div class="no-account-state-sub">Connect your broker account to view performance analytics</div>
-            <button class="no-account-btn" onclick="location.href='accounts.html'">Connect Account</button>
+        <!-- ══════════════════════════════════════
+             SKELETON (shown while loading)
+        ══════════════════════════════════════ -->
+        <div class="perf-skeletons perf-wrap" id="perfSkeleton">
+
+          <!-- Header skeleton -->
+          <div style="display:flex;align-items:center;justify-content:space-between;gap:12px">
+            <div class="skel skel-h28" style="width:160px;border-radius:10px"></div>
+            <div style="display:flex;gap:10px">
+              <div class="skel skel-h28" style="width:90px;border-radius:9px"></div>
+              <div class="skel skel-h28" style="width:160px;border-radius:12px"></div>
+            </div>
+          </div>
+
+          <!-- Strip skeleton -->
+          <div class="perf-strip">
+            <div class="skel-tile"><div class="skel skel-h8 skel-w50"></div><div class="skel skel-h36 skel-w70"></div><div class="skel skel-h8 skel-w30"></div></div>
+            <div class="skel-tile"><div class="skel skel-h8 skel-w50"></div><div class="skel skel-h36 skel-w70"></div><div class="skel skel-h8 skel-w30"></div></div>
+            <div class="skel-tile"><div class="skel skel-h8 skel-w50"></div><div class="skel skel-h36 skel-w70"></div><div class="skel skel-h8 skel-w30"></div></div>
+            <div class="skel-tile"><div class="skel skel-h8 skel-w50"></div><div class="skel skel-h36 skel-w70"></div><div class="skel skel-h8 skel-w30"></div></div>
+          </div>
+
+          <!-- Row 1 skeleton: balance + risk -->
+          <div class="perf-row perf-row-2">
+            <div class="perf-card" style="gap:14px;display:flex;flex-direction:column">
+              <div style="display:flex;justify-content:space-between;align-items:flex-start">
+                <div style="display:flex;flex-direction:column;gap:10px;flex:1">
+                  <div class="skel skel-h8 skel-w40"></div>
+                  <div class="skel skel-h48" style="width:220px;border-radius:10px"></div>
+                  <div class="skel skel-h12" style="width:130px"></div>
+                </div>
+                <div style="display:flex;flex-direction:column;gap:8px;align-items:flex-end">
+                  <div class="skel skel-h8 skel-w50" style="width:80px"></div>
+                  <div class="skel skel-h28" style="width:120px;border-radius:8px"></div>
+                </div>
+              </div>
+              <div style="display:flex;gap:0;margin-top:6px;padding-top:14px;border-top:1px solid var(--line)">
+                <div style="flex:1;display:flex;flex-direction:column;gap:8px"><div class="skel skel-h8 skel-w50"></div><div class="skel skel-h16 skel-w70"></div></div>
+                <div style="flex:1;display:flex;flex-direction:column;gap:8px"><div class="skel skel-h8 skel-w50"></div><div class="skel skel-h16 skel-w70"></div></div>
+                <div style="flex:1;display:flex;flex-direction:column;gap:8px"><div class="skel skel-h8 skel-w50"></div><div class="skel skel-h16 skel-w70"></div></div>
+              </div>
+              <div class="skel skel-chart" style="height:160px;margin-top:4px"></div>
+            </div>
+            <div class="perf-card" style="padding:0;overflow:hidden">
+              <div style="padding:18px 20px;border-bottom:1px solid var(--line)"><div class="skel skel-h8 skel-w40"></div></div>
+              <div class="risk-grid">
+                <div class="risk-item"><div class="skel skel-h8 skel-w70" style="margin-bottom:8px"></div><div class="skel skel-h16 skel-w50"></div></div>
+                <div class="risk-item"><div class="skel skel-h8 skel-w70" style="margin-bottom:8px"></div><div class="skel skel-h16 skel-w50"></div></div>
+                <div class="risk-item"><div class="skel skel-h8 skel-w70" style="margin-bottom:8px"></div><div class="skel skel-h16 skel-w50"></div></div>
+                <div class="risk-item"><div class="skel skel-h8 skel-w70" style="margin-bottom:8px"></div><div class="skel skel-h16 skel-w50"></div></div>
+                <div class="risk-item"><div class="skel skel-h8 skel-w70" style="margin-bottom:8px"></div><div class="skel skel-h16 skel-w50"></div></div>
+                <div class="risk-item"><div class="skel skel-h8 skel-w70" style="margin-bottom:8px"></div><div class="skel skel-h16 skel-w50"></div></div>
+                <div class="risk-item"><div class="skel skel-h8 skel-w70" style="margin-bottom:8px"></div><div class="skel skel-h16 skel-w50"></div></div>
+                <div class="risk-item"><div class="skel skel-h8 skel-w70" style="margin-bottom:8px"></div><div class="skel skel-h16 skel-w50"></div></div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Row 2 skeleton: 3 cards -->
+          <div class="perf-row perf-row-3">
+            <div class="perf-card" style="display:flex;flex-direction:column;gap:12px">
+              <div class="skel skel-h8 skel-w40"></div>
+              <div class="skel skel-h12 skel-full"></div><div class="skel skel-h12 skel-w70"></div>
+              <div class="skel skel-h12 skel-full"></div><div class="skel skel-h12 skel-w50"></div>
+              <div class="skel skel-h12 skel-full"></div><div class="skel skel-h12 skel-w70"></div>
+            </div>
+            <div class="perf-card" style="display:flex;flex-direction:column;gap:14px">
+              <div class="skel skel-h8 skel-w40"></div>
+              <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+                <div style="display:flex;flex-direction:column;gap:8px"><div class="skel skel-h8 skel-w50"></div><div style="display:flex;gap:8px"><div class="skel" style="height:56px;flex:1;border-radius:10px"></div><div class="skel" style="height:56px;flex:1;border-radius:10px"></div></div></div>
+                <div style="display:flex;flex-direction:column;gap:8px"><div class="skel skel-h8 skel-w50"></div><div style="display:flex;gap:8px"><div class="skel" style="height:56px;flex:1;border-radius:10px"></div><div class="skel" style="height:56px;flex:1;border-radius:10px"></div></div></div>
+              </div>
+              <div class="skel skel-chart" style="height:80px"></div>
+            </div>
+            <div class="perf-card" style="display:flex;flex-direction:column;gap:10px">
+              <div class="skel skel-h8 skel-w40"></div>
+              <div style="display:flex;align-items:center;gap:10px"><div class="skel skel-h8" style="width:60px"></div><div class="skel skel-h8" style="flex:1"></div><div class="skel skel-h8" style="width:32px"></div></div>
+              <div style="display:flex;align-items:center;gap:10px"><div class="skel skel-h8" style="width:60px"></div><div class="skel skel-h8" style="flex:1;width:80%"></div><div class="skel skel-h8" style="width:32px"></div></div>
+              <div style="display:flex;align-items:center;gap:10px"><div class="skel skel-h8" style="width:60px"></div><div class="skel skel-h8" style="flex:1;width:65%"></div><div class="skel skel-h8" style="width:32px"></div></div>
+              <div style="display:flex;align-items:center;gap:10px"><div class="skel skel-h8" style="width:60px"></div><div class="skel skel-h8" style="flex:1;width:50%"></div><div class="skel skel-h8" style="width:32px"></div></div>
+              <div style="display:flex;align-items:center;gap:10px"><div class="skel skel-h8" style="width:60px"></div><div class="skel skel-h8" style="flex:1;width:40%"></div><div class="skel skel-h8" style="width:32px"></div></div>
+            </div>
+          </div>
+
+          <!-- Row 3 skeleton: P&L chart -->
+          <div class="perf-card" style="display:flex;flex-direction:column;gap:14px">
+            <div style="display:flex;justify-content:space-between"><div class="skel skel-h8 skel-w40"></div><div class="skel skel-h8 skel-w30"></div></div>
+            <div class="skel skel-h28" style="width:160px;border-radius:8px"></div>
+            <div class="skel skel-chart" style="height:200px"></div>
+          </div>
+
+          <!-- Row 4 skeleton: monthly + trade count -->
+          <div class="perf-row" style="grid-template-columns:1fr 1fr">
+            <div class="perf-card" style="display:flex;flex-direction:column;gap:14px">
+              <div class="skel skel-h8 skel-w40"></div>
+              <div class="skel skel-chart" style="height:160px"></div>
+            </div>
+            <div class="perf-card" style="display:flex;flex-direction:column;gap:14px">
+              <div class="skel skel-h8 skel-w40"></div>
+              <div class="skel skel-chart" style="height:160px"></div>
+            </div>
           </div>
         </div>
 
-        <!-- ── Main performance content ── -->
-        <div id="perfMain">
+        <!-- ══════════════════════════════════════
+             REAL CONTENT (shown after load)
+        ══════════════════════════════════════ -->
+        <div class="perf-real perf-wrap" id="perfMain">
 
           <!-- Page header -->
           <div class="perf-header">
@@ -571,15 +668,21 @@ function mkWsChart(data) {
   });
 }
 
-/* ─── Render empty state charts ─── */
+/* ─── Empty flat charts (no data state) ─── */
 function renderEmptyCharts() {
   const months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
-  const emptyVals = new Array(12).fill(0);
-  mkEquityChart(months, emptyVals);
-  mkPnlChart(months, emptyVals);
-  mkMonthlyChart(months, emptyVals);
-  mkTradeCountChart(months, emptyVals);
+  const zeros = new Array(12).fill(0);
+  mkEquityChart(months, zeros);
+  mkPnlChart(months, zeros);
+  mkMonthlyChart(months, zeros);
+  mkTradeCountChart(months, zeros);
   mkWsChart(new Array(10).fill(0));
+}
+
+/* ─── Show real content, hide skeleton ─── */
+function revealContent() {
+  document.getElementById('perfSkeleton').classList.add('hidden');
+  document.getElementById('perfMain').classList.add('visible');
 }
 
 /* ─── Render symbols ─── */
@@ -587,7 +690,16 @@ function renderSymbols(symbols) {
   const list = el('symList');
   if (!list) return;
   if (!symbols || symbols.length === 0) {
-    list.innerHTML = '<div class="chart-empty" style="height:120px"><i class="fa-solid fa-circle-info"></i>No trade data</div>';
+    /* Show placeholder bars at 0 width so it looks like an empty chart */
+    const placeholders = ['—','—','—','—','—'];
+    list.innerHTML = placeholders.map(() => `
+      <div class="sym-row">
+        <div class="sym-name" style="color:var(--faint)">—</div>
+        <div class="sym-bar-wrap"><div class="sym-bar" style="width:0%"></div></div>
+        <div class="sym-pct" style="color:var(--faint)">0%</div>
+        <div class="sym-count" style="color:var(--faint)">0</div>
+      </div>
+    `).join('');
     return;
   }
   const max = Math.max(...symbols.map(s => s.pct));
@@ -714,6 +826,7 @@ async function loadPerformance() {
 
     renderStats({ account, stats: zeroStats, equity: [], dailyPnl: [], monthly: [], symbols: [] });
     renderEmptyCharts();
+    revealContent();
 
   } catch (e) {
     console.error('Performance load error:', e);
@@ -729,6 +842,7 @@ async function loadPerformance() {
     };
     renderStats({ account: fallbackAccount, stats: zeroStats, equity: [], dailyPnl: [], monthly: [], symbols: [] });
     renderEmptyCharts();
+    revealContent();
   }
 }
 
