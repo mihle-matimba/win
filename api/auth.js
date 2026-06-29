@@ -18,10 +18,18 @@ module.exports = async (req, res) => {
   try {
     // ── Sign Up ──
     if (action === 'sign-up') {
+      // Fetch the default community so the profiles trigger has a community_id
+      const { data: community } = await supabase
+        .from('communities')
+        .select('id')
+        .order('created_at')
+        .limit(1)
+        .single();
+
       const { data, error } = await supabase.auth.admin.createUser({
         email,
         password,
-        user_metadata: { full_name: name, phone },
+        user_metadata: { full_name: name, phone, community_id: community?.id },
         email_confirm: true,
       });
 
