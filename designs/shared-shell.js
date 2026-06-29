@@ -119,7 +119,9 @@ let communityLoadPromise = null;
 
 function timeAgo(dateStr) {
   if (!dateStr) return 'Synced';
-  const diff = Math.floor((Date.now() - new Date(dateStr).getTime()) / 1000);
+  // Supabase stores synced_at in UTC; if no timezone suffix, force UTC parsing
+  const utcStr = /[Zz+\-]\d*$/.test(dateStr.trim()) ? dateStr : dateStr + 'Z';
+  const diff = Math.floor((Date.now() - new Date(utcStr).getTime()) / 1000);
   if (diff < 60)  return 'Synced just now';
   if (diff < 3600) { const m = Math.floor(diff / 60); return `Synced ${m}m ago`; }
   if (diff < 86400) { const h = Math.floor(diff / 3600); return `Synced ${h}h ago`; }
