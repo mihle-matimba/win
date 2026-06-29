@@ -602,6 +602,9 @@ document.getElementById('suPhone').addEventListener('blur', () => {
   document.getElementById('phoneWrap').style.borderColor = '';
   document.getElementById('phoneWrap').style.background = '';
 });
+document.getElementById('suPhone').addEventListener('input', (e) => {
+  if (e.target.value.startsWith('0')) e.target.value = e.target.value.slice(1);
+});
 
 renderCcList('');
 
