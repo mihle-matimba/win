@@ -1,0 +1,128 @@
+-- ============================================================
+-- 013: Broker clients, linked accounts, and transactions
+-- Run in Supabase SQL editor
+-- ============================================================
+
+-- ── 1. broker_clients ────────────────────────────────────────
+-- Stores all broker-side client accounts synced from the IB portal.
+-- id = the broker's account number (bigint, not a UUID).
+
+create table if not exists public.broker_clients (
+  id                   bigint                      not null,
+  name                 character varying(255),
+  email                character varying(255),
+  country              character varying(100),
+  account_currency     character varying(10),
+  platform             character varying(20),
+  server               integer,
+  type                 character varying(100),
+  conversion_device    character varying(50),
+  wallet               bigint,
+  balance              numeric(18,2),
+  equity               numeric(18,2),
+  free_margin          numeric(18,2),
+  margin               numeric(18,2),
+  commission           numeric(18,2),
+  deposits             numeric(18,2),
+  withdrawals          numeric(18,2),
+  rebates_paid         numeric(18,2),
+  rebates_rejected     numeric(18,2),
+  rebates_unpaid       numeric(18,2),
+  volume               numeric(18,2),
+  first_funding        timestamp without time zone,
+  first_trade          timestamp without time zone,
+  last_trade           timestamp without time zone,
+  registration         timestamp without time zone,
+  synced_at            timestamp without time zone default now(),
+
+  constraint broker_clients_pkey primary key (id)
+) tablespace pg_default;
+
+create index if not exists idx_broker_clients_country      on public.broker_clients using btree (country);
+create index if not exists idx_broker_clients_type         on public.broker_clients using btree (type);
+create index if not exists idx_broker_clients_registration on public.broker_clients using btree (registration desc);
+
+-- RLS: only the service role (server-side sync script) can write;
+--      linked-account holders can read their own record (enforced via linked_accounts).
+alter table public.broker_clients enable row level security;
+
+-- Service role bypasses RLS by default, so no insert/update policy needed.
+-- Read access is granted through the linked_accounts join below.
+
+
+-- ── 2. linked_accounts ───────────────────────────────────────
+-- Maps a WIN user (auth.users) to one or more broker accounts.
+
+create table if not exists public.linked_accounts (
+  user_id   uuid   not null references auth.users (id) on delete cascade,
+  id        bigint not null references public.broker_clients (id) on delete cascade,
+  synced_at timestamp without time zone default now(),
+
+  constraint linked_accounts_pkey primary key (id)
+) tablespace pg_default;
+
+create index if not exists idx_linked_accounts_user_id on public.linked_accounts using btree (user_id);
+create index if not exists idx_linked_accounts_id      on public.linked_accounts using btree (id);
+
+alter table public.linked_accounts enable row level security;
+
+-- Users can see and manage only their own linked accounts.
+create policy "linked_accounts_select" on public.linked_accounts
+  for select using (auth.uid() = user_id);
+
+create policy "linked_accounts_insert" on public.linked_accounts
+  for insert with check (auth.uid() = user_id);
+
+create policy "linked_accounts_delete" on public.linked_accounts
+  for delete using (auth.uid() = user_id);
+
+-- Allow a user to read a broker_client row only if they have a linked_accounts row for it.
+create policy "broker_clients_read_own" on public.broker_clients
+  for select using (
+    exists (
+      select 1 from public.linked_accounts la
+      where la.id = broker_clients.id
+        and la.user_id = auth.uid()
+    )
+  );
+
+
+-- ── 3. transactions ──────────────────────────────────────────
+-- Individual trade records synced from the broker, keyed by order_id.
+
+create table if not exists public.transactions (
+  order_id             bigint                      not null,
+  account_id           bigint,
+  symbol               character varying(50),
+  type                 character varying(20),
+  volume               numeric(18,2),
+  open_price           numeric(18,8),
+  close_price          numeric(18,8),
+  open_time            timestamp without time zone,
+  close_time           timestamp without time zone,
+  profit               numeric(18,2),
+  commission           numeric(18,2),
+  comm_deduction       numeric(18,2),
+  rebates              numeric(18,2),
+  synced_at            timestamp without time zone default now(),
+  notional_volume_usd  numeric(18,2),
+
+  constraint transactions_pkey         primary key (order_id),
+  constraint transactions_account_fkey foreign key (account_id) references public.broker_clients (id)
+) tablespace pg_default;
+
+create index if not exists idx_transactions_account_id on public.transactions using btree (account_id);
+create index if not exists idx_transactions_open_time  on public.transactions using btree (open_time desc);
+create index if not exists idx_transactions_synced_at  on public.transactions using btree (synced_at desc);
+
+alter table public.transactions enable row level security;
+
+-- Users can read transactions for accounts they have linked.
+create policy "transactions_read_own" on public.transactions
+  for select using (
+    exists (
+      select 1 from public.linked_accounts la
+      where la.id = transactions.account_id
+        and la.user_id = auth.uid()
+    )
+  );
