@@ -430,7 +430,17 @@ async function init(){
       _allTransactions=txJson.transactions||[];
     }
   }catch(e){console.error(e);}
+  jumpToLatestMonth();
   renderCal();renderTH();
+}
+
+/* If the current month has no trades, jump to the most recent month that does */
+function jumpToLatestMonth(){
+  if(Object.keys(getMonthData(cy,cm)).length>0)return;
+  const latest=_allTransactions
+    .map(t=>tradeDate(t)).filter(Boolean)
+    .sort((a,b)=>b-a)[0];
+  if(latest){cy=latest.getFullYear();cm=latest.getMonth();}
 }
 
 let _lastIdx=+(localStorage.getItem('win_selected_account')||0);
@@ -446,6 +456,7 @@ setInterval(async()=>{
     const txJson=await txRes.json();
     _allTransactions=txJson.transactions||[];
   }catch(e){console.error(e);}
+  jumpToLatestMonth();
   renderCal();renderTH();
 },500);
 

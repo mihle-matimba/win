@@ -9,35 +9,32 @@ module.exports = async (req, res) => {
 
   const supabase = createClient(url, key);
 
-  const { account_id, page = '0', per_page = '16', symbol, type, profit_min, profit_max, tab } = req.query;
+  const { account_id, page = '0', per_page = '16', symbol, type, profit_min, profit_max } = req.query;
   if (!account_id) return res.status(400).json({ error: 'Missing account_id' });
 
   const pageNum = Math.max(0, parseInt(page, 10) || 0);
-  const perPage = Math.min(100, Math.max(1, parseInt(per_page, 10) || 16));
+  const perPage = Math.min(500, Math.max(1, parseInt(per_page, 10) || 16));
   const from = pageNum * perPage;
   const to = from + perPage - 1;
 
-  const BALANCE_WORDS = ['balance', 'deposit', 'withdrawal', 'credit'];
-
+  /* Build query — all filters applied BEFORE range so pagination is over the filtered set */
   let q = supabase
     .from('transactions')
     .select('*', { count: 'exact' })
     .eq('account_id', account_id)
-    .order('open_time', { ascending: false })
-    .range(from, to);
+    .not('type',   'ilike', '%deposit%')
+    .not('type',   'ilike', '%withdrawal%')
+    .not('type',   'ilike', '%balance%')
+    .not('type',   'ilike', '%credit%')
+    .not('symbol', 'ilike', '%deposit%')
+    .not('symbol', 'ilike', '%withdrawal%');
 
-  /* exclude any row where type OR symbol matches a balance operation word */
-  q = q.not('type', 'ilike', '%deposit%')
-       .not('type', 'ilike', '%withdrawal%')
-       .not('type', 'ilike', '%balance%')
-       .not('type', 'ilike', '%credit%')
-       .not('symbol', 'ilike', '%deposit%')
-       .not('symbol', 'ilike', '%withdrawal%');
+  if (symbol)                    q = q.ilike('symbol', `%${symbol}%`);
+  if (type)                      q = q.ilike('type', type);
+  if (profit_min !== undefined)  q = q.gte('profit', parseFloat(profit_min));
+  if (profit_max !== undefined)  q = q.lte('profit', parseFloat(profit_max));
 
-  if (symbol) q = q.ilike('symbol', `%${symbol}%`);
-  if (type)   q = q.ilike('type', type);
-  if (profit_min !== undefined) q = q.gte('profit', parseFloat(profit_min));
-  if (profit_max !== undefined) q = q.lte('profit', parseFloat(profit_max));
+  q = q.order('open_time', { ascending: false }).range(from, to);
 
   const { data, error, count } = await q;
 
