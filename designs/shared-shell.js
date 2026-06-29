@@ -252,6 +252,14 @@ async function loadChannels() {
 // ── Shell init ──
 
 function initShell({ activePage = '' } = {}) {
+  // Auth guard — redirect unauthenticated visitors to sign-in
+  const _session = localStorage.getItem('win_session');
+  const _user    = localStorage.getItem('win_user');
+  if (!_session || !_user) {
+    window.location.replace('auth.html');
+    return;
+  }
+
   const sidebar = document.getElementById('sidebar');
   const topbar  = document.querySelector('.topbar');
   if (sidebar) sidebar.innerHTML = SIDEBAR_HTML;
