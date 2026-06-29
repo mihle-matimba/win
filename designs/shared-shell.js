@@ -862,6 +862,7 @@ function initAccountMenu(activePage) {
       const { accounts } = await res.json();
       if (accounts && accounts.length > 0) return;
     } catch { return; }
+    if (communityLoadPromise) await communityLoadPromise;
     networksLocked = true;
     lockNetworkChannels();
     applyPageLocks(page);
