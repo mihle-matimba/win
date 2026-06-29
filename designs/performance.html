@@ -11,888 +11,437 @@
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 <link rel="stylesheet" href="global.css">
 <style>
-/* ── Performance page ── */
+/* ── Performance page layout ── */
+.perf-wrap{padding:28px clamp(14px,2.5vw,32px) 40px;display:flex;flex-direction:column;gap:18px;max-width:1400px}
 
-.perf-content {
-  display: grid;
-  gap: 0.75rem;
-  min-width: 0;
-  position: relative;
+/* ── Page header ── */
+.perf-header{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-bottom:4px}
+.perf-title{font-size:22px;font-weight:800;letter-spacing:-.4px}
+.perf-account-pill{
+  display:flex;align-items:center;gap:10px;background:var(--card);border:1px solid var(--line);
+  border-radius:12px;padding:8px 14px;font-size:13px;font-weight:600;color:var(--ink-2);cursor:pointer;
+  transition:border-color .15s,color .15s
 }
+.perf-account-pill:hover{border-color:var(--accent);color:#fff}
+.perf-account-pill .dot-live{width:7px;height:7px;border-radius:50%;background:var(--green-val);flex:0 0 7px;box-shadow:0 0 0 2px var(--green-soft)}
+.perf-range-badge{background:var(--card-2);border:1px solid var(--line);border-radius:9px;padding:6px 12px;font-size:12px;font-weight:600;color:var(--muted)}
 
-.perf-content > * {
-  min-width: 0;
-  max-width: 100%;
+/* ── Summary stat strip ── */
+.perf-strip{display:grid;grid-template-columns:repeat(4,1fr);gap:14px}
+@media(max-width:900px){.perf-strip{grid-template-columns:repeat(2,1fr)}}
+@media(max-width:480px){.perf-strip{grid-template-columns:1fr}}
+
+.stat-tile{
+  background:var(--card);border:1px solid var(--line);border-radius:var(--radius);
+  padding:18px 20px;display:flex;flex-direction:column;gap:6px;position:relative;overflow:hidden;
 }
+.stat-tile::before{content:'';position:absolute;inset:0;border-radius:var(--radius);pointer-events:none}
+.stat-tile-label{font-size:11px;font-weight:700;letter-spacing:.8px;text-transform:uppercase;color:var(--muted);display:flex;align-items:center;gap:7px}
+.stat-tile-label i{font-size:12px;opacity:.7}
+.stat-tile-value{font-size:26px;font-weight:800;letter-spacing:-.5px;line-height:1.1}
+.stat-tile-sub{font-size:12px;font-weight:500;color:var(--muted)}
+.stat-tile-badge{display:inline-flex;align-items:center;gap:4px;font-size:12px;font-weight:700;padding:3px 8px;border-radius:6px;margin-top:2px}
+.badge-green{background:var(--green-soft);color:var(--green-val)}
+.badge-red{background:var(--red-soft);color:var(--red-val)}
+.badge-blue{background:var(--accent-soft);color:var(--accent)}
 
-/* Balance Card */
-.balance-card {
-  background: linear-gradient(145deg, rgba(15, 24, 59, 0.94) 0%, rgba(9, 15, 38, 0.82) 100%);
-  border: 1px solid var(--line);
-  border-radius: var(--radius);
-  padding: 1.35rem 1.45rem;
-  color: #fff;
-  position: relative;
-  overflow: hidden;
-  box-shadow: 0 28px 80px rgba(31,41,100,.28);
+/* ── Two-col layout ── */
+.perf-row{display:grid;gap:14px}
+.perf-row-2{grid-template-columns:3fr 2fr}
+.perf-row-3{grid-template-columns:1fr 1fr 1fr}
+@media(max-width:1050px){.perf-row-2{grid-template-columns:1fr}.perf-row-3{grid-template-columns:1fr 1fr}}
+@media(max-width:650px){.perf-row-3{grid-template-columns:1fr}}
+
+/* ── Cards ── */
+.perf-card{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);padding:22px 22px 20px}
+.perf-card-title{font-size:11px;font-weight:700;letter-spacing:.8px;text-transform:uppercase;color:var(--muted);display:flex;align-items:center;gap:8px;margin-bottom:18px}
+.perf-card-title i{font-size:12px}
+
+/* ── Balance card ── */
+.balance-card{
+  background:linear-gradient(145deg,rgba(15,24,59,.96) 0%,rgba(9,15,38,.88) 100%);
+  border:1px solid rgba(91,116,255,.22);border-radius:var(--radius);
+  padding:22px 24px 20px;position:relative;overflow:hidden;
 }
-
-.balance-card::before {
-  content: '';
-  position: absolute;
-  top: -10%; left: -4%;
-  width: 320px; height: 180px;
-  background: radial-gradient(circle, rgba(125,133,255,.42) 0%, rgba(125,133,255,0) 72%);
-  border-radius: 50%;
-  filter: blur(26px);
+.balance-card::before{
+  content:'';position:absolute;top:-15%;left:-5%;width:340px;height:200px;
+  background:radial-gradient(circle,rgba(91,116,255,.32) 0%,transparent 70%);
+  border-radius:50%;filter:blur(30px);pointer-events:none
 }
-
-.balance-card::after {
-  content: '';
-  position: absolute;
-  inset: auto 8% -54% auto;
-  width: 240px; height: 240px;
-  background: radial-gradient(circle, rgba(91,116,255,.2) 0%, rgba(91,116,255,0) 72%);
-  border-radius: 50%;
-  filter: blur(28px);
-}
-
-.balance-top {
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-start;
-  margin-bottom: 1rem;
-  position: relative;
-  z-index: 1;
-}
-
-.balance-label {
-  font-size: .78rem;
-  letter-spacing: .12em;
-  text-transform: uppercase;
-  color: var(--accent);
-  margin-bottom: .5rem;
-}
-
-.balance-amount {
-  font-size: clamp(1.75rem, 3.4vw, 2.45rem);
-  font-weight: 700;
-  line-height: 1;
-  margin-bottom: .35rem;
-}
-
-.balance-actions {
-  display: flex;
-  gap: .75rem;
-  flex-wrap: wrap;
-}
-
-.perf-btn {
-  display: inline-flex;
-  align-items: center;
-  gap: .5rem;
-  padding: .5rem 1rem;
-  border-radius: 999px;
-  border: 1px solid rgba(255,255,255,.14);
-  background: rgba(255,255,255,.1);
-  backdrop-filter: blur(12px);
-  color: #fff;
-  font-size: .85rem;
-  font-weight: 500;
-  cursor: pointer;
-  transition: background .2s;
-}
-
-.perf-btn:hover { background: rgba(255,255,255,.18); }
-.perf-btn.manage { background: rgba(255,255,255,.22); font-weight: 600; }
-
-.account-details-grid {
-  position: relative;
-  z-index: 1;
-  background: rgba(255,255,255,.05);
-  backdrop-filter: blur(12px);
-  border: 1px solid rgba(255,255,255,.08);
-  border-radius: 8px;
-  padding: .85rem .95rem;
-  display: grid;
-  gap: 1rem;
-  grid-template-columns: repeat(3, minmax(0,1fr));
-  margin-top: 1rem;
-}
-
-.account-detail-label {
-  opacity: .72;
-  font-size: .72rem;
-  margin-bottom: .3rem;
-  text-transform: uppercase;
-  letter-spacing: .08em;
-}
-
-.account-detail-value {
-  font-weight: 600;
-  font-size: .96rem;
-  color: #eef2ff;
-}
-
-/* Dashboard summary (3-col stat row) */
-.dashboard-summary {
-  display: grid;
-  grid-template-columns: minmax(0,1.12fr) minmax(0,1.12fr) minmax(0,.86fr);
-  gap: .75rem;
-  align-items: stretch;
-}
-
-.perf-stat-card {
-  background: linear-gradient(145deg, rgba(16,27,64,.9) 0%, rgba(10,18,46,.8) 100%);
-  border: 1px solid var(--line);
-  border-radius: var(--radius);
-  padding: 1.15rem 1.1rem .65rem;
-  min-height: 140px;
-  position: relative;
-  overflow: hidden;
-  box-shadow: 0 16px 40px rgba(8,14,35,.28);
-  transition: border-color .2s, box-shadow .2s;
-}
-
-.perf-stat-card:hover {
-  border-color: rgba(125,133,255,.34);
-  box-shadow: 0 22px 48px rgba(12,20,52,.34);
-}
-
-.perf-stat-card::before {
-  content: '';
-  position: absolute;
-  inset: auto auto -45% -8%;
-  width: 160px; height: 140px;
-  background: radial-gradient(circle, rgba(125,133,255,.22) 0%, rgba(125,133,255,0) 72%);
-  filter: blur(20px);
-  pointer-events: none;
-}
-
-.p-stat-label {
-  font-size: .98rem;
-  color: var(--muted);
-  font-weight: 500;
-  margin-bottom: .75rem;
-  position: relative;
-  z-index: 1;
-}
-
-.p-stat-value-row {
-  display: flex;
-  align-items: center;
-  gap: .65rem;
-  flex-wrap: wrap;
-  margin-bottom: .65rem;
-  position: relative;
-  z-index: 1;
-}
-
-.p-stat-value {
-  font-size: clamp(1.55rem, 2.7vw, 2rem);
-  font-weight: 700;
-  color: #fff;
-  position: relative;
-  z-index: 1;
-}
-
-.p-stat-delta {
-  display: inline-flex;
-  align-items: center;
-  gap: .3rem;
-  padding: .34rem .52rem;
-  border-radius: 5px;
-  font-size: .7rem;
-  font-weight: 600;
-  border: 1px solid transparent;
-  line-height: 1;
-}
-
-.p-stat-delta.positive { color: var(--green-val); background: rgba(53,215,155,.12); border-color: rgba(53,215,155,.2); }
-.p-stat-delta.negative { color: #fb7185; background: rgba(251,113,133,.12); border-color: rgba(251,113,133,.2); }
-.p-stat-delta.neutral  { color: var(--muted); background: rgba(91,116,255,.08); border-color: rgba(91,116,255,.14); }
-.p-stat-delta.primary  { color: var(--accent); background: rgba(91,116,255,.12); border-color: rgba(91,116,255,.2); }
-.p-stat-delta.warning  { color: #fde68a; background: rgba(251,191,36,.12); border-color: rgba(251,191,36,.18); }
-
-/* Trader Edge sub-card */
-.p-summary-split {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0,1fr));
-  gap: .85rem;
-  position: relative;
-  z-index: 1;
-}
-
-.p-summary-metric {
-  padding: .9rem .95rem;
-  background: rgba(255,255,255,.04);
-  border: 1px solid rgba(255,255,255,.08);
-  border-radius: 12px;
-}
-
-.p-metric-label {
-  font-size: .72rem;
-  letter-spacing: .08em;
-  text-transform: uppercase;
-  color: rgba(154,166,209,.78);
-  margin-bottom: .4rem;
-}
-
-.p-metric-value-row {
-  display: flex;
-  align-items: center;
-  gap: .65rem;
-  flex-wrap: wrap;
-}
-
-.p-metric-value {
-  font-size: 1.35rem;
-  font-weight: 700;
-  color: #fff;
-  margin-bottom: .25rem;
-}
-
-/* Dashboard matrix (grid of chart panels + analysis) */
-.dashboard-matrix {
-  display: grid;
-  grid-template-columns: minmax(0,1.12fr) minmax(0,1.12fr) minmax(0,.86fr);
-  grid-template-areas:
-    "balance profit analysis"
-    "symbols calendar analysis";
-  gap: .75rem;
-  align-items: stretch;
-}
-
-.dash-balance-panel  { grid-area: balance; }
-.dash-profit-panel   { grid-area: profit; }
-.dash-analysis-panel { grid-area: analysis; }
-.dash-symbols-panel  { grid-area: symbols; }
-.dash-calendar-panel { grid-area: calendar; }
-
-/* Shared chart panel style */
-.perf-chart-card {
-  background: linear-gradient(160deg, rgba(13,22,54,.95) 0%, rgba(9,15,38,.9) 100%);
-  border: 1px solid var(--line);
-  border-radius: var(--radius);
-  padding: 1.45rem 1.5rem 1.35rem;
-  overflow: hidden;
-  position: relative;
-  box-shadow: 0 16px 40px rgba(8,14,35,.2);
-}
-
-.perf-chart-card::before {
-  content: '';
-  position: absolute;
-  inset: -16% auto auto -8%;
-  width: 420px; height: 180px;
-  background: radial-gradient(circle, rgba(125,133,255,.32) 0%, rgba(125,133,255,0) 72%);
-  filter: blur(26px);
-  pointer-events: none;
-}
-
-.p-chart-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  margin-bottom: .8rem;
-  gap: 1rem;
-  flex-wrap: wrap;
-  position: relative;
-  z-index: 1;
-}
-
-.p-chart-title-block {
-  display: flex;
-  flex-direction: column;
-  gap: .55rem;
-}
-
-.p-chart-title {
-  font-size: .98rem;
-  color: var(--muted);
-  font-weight: 500;
-}
-
-.p-chart-total-row {
-  display: flex;
-  align-items: center;
-  gap: .8rem;
-  flex-wrap: wrap;
-}
-
-.p-chart-total-value {
-  font-size: clamp(1.65rem, 2.7vw, 2.2rem);
-  line-height: 1;
-  font-weight: 700;
-  letter-spacing: -.04em;
-  color: #fff;
-}
-
-.p-status-chip {
-  display: inline-flex;
-  align-items: center;
-  gap: .5rem;
-  padding: .48rem .78rem;
-  border-radius: 999px;
-  font-size: .8rem;
-  font-weight: 500;
-  background: rgba(255,255,255,.04);
-  border: 1px solid rgba(255,255,255,.08);
-  color: var(--muted);
-  white-space: nowrap;
-}
-
-.p-status-chip.positive { color: var(--green-val); background: rgba(53,215,155,.12); border-color: rgba(53,215,155,.2); }
-.p-status-chip.negative { color: #fb7185; background: rgba(251,113,133,.12); border-color: rgba(251,113,133,.2); }
-
-.p-chart-controls {
-  display: flex;
-  align-items: center;
-  gap: .75rem;
-  flex-wrap: wrap;
-  margin-left: auto;
-  position: relative;
-  z-index: 1;
-}
-
-.p-range-chip {
-  display: inline-flex;
-  align-items: center;
-  gap: .5rem;
-  padding: .48rem .78rem;
-  border-radius: 999px;
-  font-size: .8rem;
-  font-weight: 500;
-  background: rgba(255,255,255,.04);
-  border: 1px solid rgba(255,255,255,.08);
-  color: var(--muted);
-  white-space: nowrap;
-}
-
-.p-legend-inline {
-  display: flex;
-  align-items: center;
-  gap: .75rem;
-  flex-wrap: wrap;
-}
-
-.p-legend-item {
-  display: inline-flex;
-  align-items: center;
-  gap: .5rem;
-  padding: .48rem .78rem;
-  border-radius: 999px;
-  font-size: .8rem;
-  background: rgba(255,255,255,.04);
-  border: 1px solid rgba(255,255,255,.08);
-  color: var(--muted);
-}
-
-.p-legend-dot {
-  width: 10px; height: 10px;
-  border-radius: 999px;
-  flex-shrink: 0;
-}
-
-.p-legend-dot.primary { background: var(--accent); box-shadow: 0 0 18px rgba(91,116,255,.55); }
-.p-legend-dot.secondary { background: var(--green-val); box-shadow: 0 0 18px rgba(53,215,155,.45); }
-
-.p-chart-canvas-wrap {
-  position: relative;
-  min-height: 270px;
-  z-index: 1;
-}
-
-.p-chart-canvas-wrap canvas {
-  display: block;
-  width: 100% !important;
-  height: auto !important;
-}
-
-/* Account Analysis panel */
-.perf-analysis {
-  background: linear-gradient(160deg, rgba(13,22,54,.92) 0%, rgba(9,15,38,.86) 100%);
-  border: 1px solid var(--line);
-  border-radius: var(--radius);
-  padding: 1.4rem 1.2rem;
-  box-shadow: 0 16px 40px rgba(8,14,35,.2);
-}
-
-.p-analysis-header {
-  font-size: .98rem;
-  color: var(--muted);
-  font-weight: 500;
-  margin-bottom: 1rem;
-}
-
-.p-analysis-item {
-  display: flex;
-  justify-content: space-between;
-  padding: .75rem 0;
-  border-bottom: 1px solid var(--line);
-  font-size: .85rem;
-}
-
-.p-analysis-item:last-child { border-bottom: none; }
-.p-analysis-label { color: var(--muted); }
-.p-analysis-value { color: #fff; font-weight: 500; }
-
-/* Symbols section */
-.symbols-chart-wrap {
-  max-width: 360px;
-  margin: 0 auto;
-  padding: .35rem 0 0;
-}
-
-/* Calendar section (below matrix) */
-.perf-calendar-card {
-  background: linear-gradient(160deg, rgba(13,22,54,.95) 0%, rgba(9,15,38,.9) 100%);
-  border: 1px solid var(--line);
-  border-radius: var(--radius);
-  padding: 1.5rem;
-  box-shadow: 0 16px 40px rgba(8,14,35,.2);
-}
-
-/* Calendar day grid */
-.cal-weekdays,
-.cal-days {
-  display: grid;
-  grid-template-columns: repeat(7, minmax(0,1fr));
-  gap: .5rem;
-}
-
-.cal-weekdays { margin-bottom: .5rem; }
-
-.cal-day-cell {
-  border-radius: 8px;
-  padding: .6rem .5rem;
-  text-align: left;
-  min-height: 64px;
-  display: flex;
-  flex-direction: column;
-  justify-content: flex-start;
-  gap: .35rem;
-  cursor: pointer;
-}
-
-.cal-day-num  { font-size: .7rem; color: var(--muted); font-weight: 600; }
-.cal-day-val  { font-size: .85rem; font-weight: 700; line-height: 1.1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; font-variant-numeric: tabular-nums; }
-.cal-day-meta { font-size: .65rem; color: var(--muted); line-height: 1.1; white-space: nowrap; }
-
-.cal-summary-bar {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 1rem;
-  background: var(--bg);
-  border-radius: 8px;
-  margin-bottom: 1.5rem;
-  gap: 1rem;
-  flex-wrap: wrap;
-}
-
-.cal-nav {
-  display: flex;
-  align-items: center;
-  gap: 1rem;
-  margin-bottom: .75rem;
-  flex-wrap: wrap;
-}
-
-.cal-month-title {
-  font-size: 1.25rem;
-  font-weight: 700;
-  color: #fff;
-  text-align: center;
-  flex: 1;
-}
-
-.cal-nav-btn {
-  background: var(--card);
-  border: 1px solid var(--line);
-  border-radius: 6px;
-  padding: .5rem .75rem;
-  color: #fff;
-  cursor: pointer;
-  font-size: .9rem;
-}
-
-.cal-nav-btn:hover { background: var(--hover); }
-
-/* Day modal */
-.cal-modal {
-  position: fixed;
-  inset: 0;
-  display: none;
-  align-items: center;
-  justify-content: center;
-  background: rgba(6,8,16,.75);
-  z-index: 2000;
-  padding: 1rem;
-}
-
-.cal-modal.active { display: flex; }
-
-.cal-modal-card {
-  background: var(--card);
-  border: 1px solid var(--line);
-  border-radius: 16px;
-  width: 100%;
-  max-width: 420px;
-  padding: 1.5rem;
-  box-shadow: 0 24px 60px rgba(0,0,0,.45);
-}
-
-.cal-modal-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 1rem;
-  margin-bottom: 1rem;
-}
-
-.cal-modal-title { font-size: 1.1rem; font-weight: 700; color: #fff; }
-
-.cal-modal-close {
-  background: transparent;
-  border: 1px solid var(--line);
-  border-radius: 8px;
-  padding: .35rem .6rem;
-  color: #fff;
-  cursor: pointer;
-}
-
-.cal-modal-stat {
-  display: flex;
-  justify-content: space-between;
-  gap: 1rem;
-  padding: .75rem 1rem;
-  border-radius: 12px;
-  background: var(--bg);
-  margin-bottom: 1rem;
-  font-variant-numeric: tabular-nums;
-}
-
-.cal-modal-list {
-  display: flex;
-  flex-direction: column;
-  gap: .5rem;
-  max-height: 240px;
-  overflow-y: auto;
-}
-
-.cal-modal-item {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  gap: .75rem;
-  padding: .6rem .8rem;
-  border-radius: 10px;
-  background: rgba(15,23,42,.6);
-  font-size: .85rem;
-  color: #fff;
-}
-
-/* Responsive */
-@media (max-width: 1280px) and (min-width: 901px) {
-  .dashboard-matrix {
-    grid-template-columns: repeat(2, minmax(0,1fr));
-    grid-template-areas:
-      "balance profit"
-      "analysis analysis"
-      "symbols calendar";
-  }
-}
-
-@media (max-width: 900px) {
-  .dashboard-summary {
-    grid-template-columns: 1fr;
-  }
-
-  .dashboard-matrix {
-    grid-template-columns: 1fr;
-    grid-template-areas:
-      "balance"
-      "profit"
-      "analysis"
-      "symbols"
-      "calendar";
-  }
-
-  .p-summary-split {
-    grid-template-columns: 1fr;
-  }
-}
-
-@media (max-width: 640px) {
-  .balance-top {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: .75rem;
-  }
-
-  .balance-actions {
-    width: 100%;
-    flex-direction: column;
-    align-items: stretch;
-  }
-
-  .balance-actions .perf-btn {
-    width: 100%;
-    justify-content: center;
-  }
-
-  .account-details-grid {
-    grid-template-columns: 1fr;
-  }
-
-  .cal-weekdays,
-  .cal-days {
-    grid-template-columns: repeat(4, minmax(0,1fr));
-  }
-
-  .cal-day-cell {
-    padding: .45rem .4rem;
-    min-height: 52px;
-    border-radius: 6px;
-  }
-
-  .cal-summary-bar {
-    flex-direction: column;
-    align-items: flex-start;
-  }
+.bal-top{display:flex;align-items:flex-start;justify-content:space-between;gap:16px;flex-wrap:wrap}
+.bal-main{}
+.bal-label{font-size:11px;font-weight:700;letter-spacing:.8px;text-transform:uppercase;color:rgba(200,210,255,.5);margin-bottom:6px}
+.bal-amount{font-size:36px;font-weight:800;letter-spacing:-.8px;color:#fff;line-height:1}
+.bal-gain{display:flex;align-items:center;gap:8px;margin-top:8px;flex-wrap:wrap}
+.bal-pct{font-size:17px;font-weight:800;color:var(--green-val)}
+.bal-abs{font-size:13px;font-weight:600;color:rgba(200,210,255,.55)}
+.bal-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:0;margin-top:20px;border-top:1px solid rgba(91,116,255,.18);padding-top:16px}
+.bal-stat{padding:0 16px;border-right:1px solid rgba(91,116,255,.12)}
+.bal-stat:first-child{padding-left:0}
+.bal-stat:last-child{border-right:none}
+.bal-stat-label{font-size:11px;font-weight:600;color:rgba(200,210,255,.45);margin-bottom:4px;text-transform:uppercase;letter-spacing:.5px}
+.bal-stat-val{font-size:15px;font-weight:700;color:#fff}
+.bal-stat-val.green{color:var(--green-val)}
+.bal-stat-val.red{color:var(--red-val)}
+.bal-stat-val.muted{color:rgba(200,210,255,.6)}
+.bal-chart-wrap{height:180px;position:relative;margin-top:18px}
+
+/* ── Risk card ── */
+.risk-grid{display:grid;grid-template-columns:1fr 1fr;gap:0}
+.risk-item{padding:14px 16px;border-bottom:1px solid var(--line);border-right:1px solid var(--line)}
+.risk-item:nth-child(even){border-right:none}
+.risk-item:nth-last-child(-n+2){border-bottom:none}
+.risk-item-label{font-size:11px;font-weight:600;color:var(--muted);margin-bottom:4px;text-transform:uppercase;letter-spacing:.4px}
+.risk-item-val{font-size:15px;font-weight:700;color:var(--ink)}
+.risk-item-val.red{color:var(--red-val)}
+.risk-item-val.green{color:var(--green-val)}
+.risk-item-val.muted{color:var(--muted)}
+.risk-item-sub{font-size:11px;font-weight:500;color:var(--faint);margin-top:2px}
+
+/* ── Capital flows ── */
+.flows-grid{display:flex;flex-direction:column;gap:12px}
+.flows-row{display:flex;align-items:center;justify-content:space-between;padding:10px 14px;background:var(--card-2);border-radius:10px;border:1px solid var(--line-soft)}
+.flows-row-label{font-size:12px;font-weight:600;color:var(--muted);display:flex;align-items:center;gap:8px}
+.flows-row-vals{display:flex;align-items:center;gap:6px;font-size:13px;font-weight:700}
+.flows-sep{color:var(--faint);font-size:12px}
+
+/* ── Stat list ── */
+.stat-list{display:flex;flex-direction:column;gap:0}
+.stat-row{display:flex;align-items:center;justify-content:space-between;padding:11px 0;border-bottom:1px solid var(--line-soft)}
+.stat-row:last-child{border-bottom:none}
+.stat-row-label{font-size:13px;font-weight:500;color:var(--ink-2);display:flex;align-items:center;gap:8px}
+.stat-row-label i{font-size:11px;color:var(--faint)}
+.stat-row-val{font-size:14px;font-weight:700;color:var(--ink)}
+.stat-row-val.green{color:var(--green-val)}
+.stat-row-val.red{color:var(--red-val)}
+.stat-row-val.accent{color:var(--accent)}
+.stat-row-dual{display:flex;align-items:center;gap:6px}
+.stat-row-dual span:first-child{color:var(--green-val)}
+.stat-row-dual .sep{color:var(--faint)}
+.stat-row-dual span:last-child{color:var(--red-val)}
+
+/* ── Symbols table ── */
+.sym-list{display:flex;flex-direction:column;gap:8px}
+.sym-row{display:flex;align-items:center;gap:12px}
+.sym-name{font-size:13px;font-weight:700;color:var(--ink);min-width:72px}
+.sym-bar-wrap{flex:1;height:6px;background:var(--line);border-radius:4px;overflow:hidden}
+.sym-bar{height:100%;border-radius:4px;background:var(--accent);transition:width .4s ease}
+.sym-pct{font-size:12px;font-weight:600;color:var(--muted);min-width:38px;text-align:right}
+.sym-count{font-size:11px;font-weight:500;color:var(--faint);min-width:30px;text-align:right}
+
+/* ── Winstreak card ── */
+.ws-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.ws-section{}
+.ws-section-label{font-size:11px;font-weight:700;letter-spacing:.7px;text-transform:uppercase;color:var(--muted);margin-bottom:10px}
+.ws-pair{display:flex;gap:8px}
+.ws-box{flex:1;background:var(--card-2);border:1px solid var(--line-soft);border-radius:10px;padding:10px 12px;text-align:center}
+.ws-box-label{font-size:10px;font-weight:700;letter-spacing:.6px;text-transform:uppercase;color:var(--faint);margin-bottom:4px}
+.ws-box-val{font-size:20px;font-weight:800;letter-spacing:-.3px}
+.ws-box-val.green{color:var(--green-val)}
+.ws-box-val.red{color:var(--red-val)}
+
+/* ── Chart wrap ── */
+.chart-area{position:relative;width:100%}
+.chart-area canvas{display:block;width:100%!important}
+.chart-empty{display:flex;align-items:center;justify-content:center;height:100%;color:var(--faint);font-size:13px;font-weight:500;letter-spacing:.3px;flex-direction:column;gap:8px}
+.chart-empty i{font-size:20px;opacity:.4}
+
+/* ── Net Daily P&L bar chart ── */
+.pnl-chart-wrap{height:200px}
+
+/* ── Monthly profit ── */
+.monthly-chart-wrap{height:160px}
+
+/* ── No account state ── */
+.no-account-state{display:flex;flex-direction:column;align-items:center;justify-content:center;padding:40px 20px;gap:12px;text-align:center}
+.no-account-state i{font-size:28px;color:var(--faint)}
+.no-account-state-title{font-size:15px;font-weight:700;color:var(--ink-2)}
+.no-account-state-sub{font-size:13px;color:var(--muted)}
+.no-account-btn{margin-top:4px;padding:10px 22px;border-radius:11px;font-size:13px;font-weight:700;background:var(--accent);color:#fff;border:none;cursor:pointer;transition:opacity .15s}
+.no-account-btn:hover{opacity:.88}
+
+/* ── Section divider ── */
+.perf-section-label{font-size:11px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--faint);padding:4px 0}
+
+/* ── Equity curve chart ── */
+.equity-chart-wrap{height:160px;margin-top:16px}
+
+/* ── Responsive ── */
+@media(max-width:768px){
+  .bal-stats{grid-template-columns:1fr 1fr;gap:10px}
+  .bal-stat{border-right:none;padding:0}
+  .risk-grid{grid-template-columns:1fr}
+  .risk-item:nth-child(odd){border-right:none}
 }
 </style>
 </head>
 <body>
-<div class="backdrop" id="backdrop"></div>
 <div class="app" id="app">
-
-  <!-- Sidebar -->
   <aside class="sidebar" id="sidebar"></aside>
-
-  <!-- Main -->
   <div class="main">
-    <header class="topbar"></header>
-
+    <header class="topbar" id="topbar"></header>
     <main class="content">
 
-      <!-- All dashboard content wrapped for the lock overlay -->
-      <div class="perf-content">
+      <div class="perf-content" id="perfContent">
 
-        <!-- Balance Card -->
-        <div class="balance-card">
-          <div class="balance-top">
-            <div>
-              <div class="balance-label">Trading Workspace</div>
-              <div class="balance-amount" id="accountBalance">$0.00</div>
-            </div>
-            <div class="balance-actions">
-              <button class="perf-btn" id="dashboardRefreshBtn" onclick="refreshDashboard(this)">
-                <i class="fas fa-sync-alt"></i> Refresh
-              </button>
-              <button class="perf-btn manage" onclick="WIN.showManageModal ? WIN.showManageModal() : null">
-                <i class="fas fa-cog"></i> Manage Accounts
-              </button>
-            </div>
-          </div>
-
-          <div class="account-details-grid">
-            <div>
-              <div class="account-detail-label">Account Number</div>
-              <div id="accountNumber" class="account-detail-value">—</div>
-            </div>
-            <div>
-              <div class="account-detail-label">Broker</div>
-              <div id="brokerName" class="account-detail-value">—</div>
-            </div>
-            <div>
-              <div class="account-detail-label">Last Synced</div>
-              <div id="syncedAt" class="account-detail-value">—</div>
-            </div>
+        <!-- ── No account state (shown when no account linked) ── -->
+        <div id="noAccountBanner" style="display:none" class="perf-card" style="text-align:center;padding:40px">
+          <div class="no-account-state">
+            <i class="fa-solid fa-chart-line"></i>
+            <div class="no-account-state-title">No trading account linked</div>
+            <div class="no-account-state-sub">Connect your broker account to view performance analytics</div>
+            <button class="no-account-btn" onclick="location.href='accounts.html'">Connect Account</button>
           </div>
         </div>
 
-        <!-- Stats Summary -->
-        <div class="dashboard-summary">
-          <div class="perf-stat-card">
-            <div class="p-stat-label">Average Win</div>
-            <div class="p-stat-value-row">
-              <div class="p-stat-value" id="avgWin">0.00</div>
-              <span class="p-stat-delta neutral" id="avgWinDelta"><i class="fas fa-minus"></i> 0.00</span>
-            </div>
-          </div>
+        <!-- ── Main performance content ── -->
+        <div id="perfMain">
 
-          <div class="perf-stat-card">
-            <div class="p-stat-label">Average Loss</div>
-            <div class="p-stat-value-row">
-              <div class="p-stat-value" id="avgLoss">0.00</div>
-              <span class="p-stat-delta neutral" id="avgLossDelta"><i class="fas fa-minus"></i> 0.00</span>
-            </div>
-          </div>
-
-          <div class="perf-stat-card">
-            <div class="p-stat-label">Trader Edge</div>
-            <div class="p-summary-split">
-              <div class="p-summary-metric">
-                <div class="p-metric-label">Win Rate</div>
-                <div class="p-metric-value-row">
-                  <span class="p-metric-value" id="winRate">0%</span>
-                  <span class="p-stat-delta neutral" id="winRateDelta"><i class="fas fa-minus"></i> 0%</span>
-                </div>
-              </div>
-              <div class="p-summary-metric">
-                <div class="p-metric-label">Risk Reward</div>
-                <div class="p-metric-value-row">
-                  <span class="p-metric-value" id="riskReward">0.00</span>
-                  <span class="p-stat-delta neutral" id="riskRewardDelta"><i class="fas fa-minus"></i> 0.00R</span>
-                </div>
+          <!-- Page header -->
+          <div class="perf-header">
+            <div class="perf-title">Performance</div>
+            <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
+              <div class="perf-range-badge" id="dateRangeBadge">All time</div>
+              <div class="perf-account-pill" id="accountPill">
+                <span class="dot-live"></span>
+                <span id="accountPillName">Loading...</span>
+                <i class="fa-solid fa-chevron-down" style="font-size:10px;color:var(--faint)"></i>
               </div>
             </div>
           </div>
-        </div>
 
-        <!-- Dashboard Matrix -->
-        <div class="dashboard-matrix">
+          <!-- Summary strip -->
+          <div class="perf-strip">
+            <div class="stat-tile">
+              <div class="stat-tile-label"><i class="fa-solid fa-scale-balanced"></i>Balance</div>
+              <div class="stat-tile-value" id="tileBalance">—</div>
+              <span class="stat-tile-badge badge-green" id="tileBalancePct" style="display:none"><i class="fa-solid fa-arrow-trend-up"></i> +142.99%</span>
+            </div>
+            <div class="stat-tile">
+              <div class="stat-tile-label"><i class="fa-solid fa-sack-dollar"></i>Net P&amp;L</div>
+              <div class="stat-tile-value" id="tileNetPnl">—</div>
+              <div class="stat-tile-sub" id="tileNetPnlSub"></div>
+            </div>
+            <div class="stat-tile">
+              <div class="stat-tile-label"><i class="fa-solid fa-bullseye"></i>Win Rate</div>
+              <div class="stat-tile-value" id="tileWinRate">—</div>
+              <div class="stat-tile-sub" id="tileWinRateSub"></div>
+            </div>
+            <div class="stat-tile">
+              <div class="stat-tile-label"><i class="fa-solid fa-arrows-left-right"></i>Total Trades</div>
+              <div class="stat-tile-value" id="tileTrades">—</div>
+              <div class="stat-tile-sub" id="tileTradesSub"></div>
+            </div>
+          </div>
 
-          <!-- Balance Chart -->
-          <div class="perf-chart-card dash-balance-panel">
-            <div class="p-chart-header">
-              <div class="p-chart-title-block">
-                <div class="p-chart-title">Balance</div>
-                <div class="p-chart-total-row">
-                  <div class="p-chart-total-value" id="balancePanelValue">0.00</div>
-                  <div class="p-status-chip" id="balancePanelStatus">
-                    <i class="fas fa-wallet"></i> Awaiting account sync
+          <!-- Row 1: Balance card + Risk card -->
+          <div class="perf-row perf-row-2">
+
+            <!-- Balance card -->
+            <div class="balance-card">
+              <div class="bal-top">
+                <div class="bal-main">
+                  <div class="bal-label">Current Balance</div>
+                  <div class="bal-amount" id="balAmount">$0.00</div>
+                  <div class="bal-gain">
+                    <span class="bal-pct" id="balGainPct">+0.00%</span>
+                    <span class="bal-abs" id="balAbsGain">+$0.00 Abs</span>
+                  </div>
+                </div>
+                <div style="text-align:right">
+                  <div style="font-size:11px;font-weight:600;color:rgba(200,210,255,.45);text-transform:uppercase;letter-spacing:.5px;margin-bottom:6px">Net P&amp;L</div>
+                  <div style="font-size:22px;font-weight:800;color:var(--green-val)" id="balNetPnl">+$0.00</div>
+                </div>
+              </div>
+              <div class="bal-stats">
+                <div class="bal-stat">
+                  <div class="bal-stat-label">Deposits</div>
+                  <div class="bal-stat-val green" id="balDeposits">$0.00</div>
+                </div>
+                <div class="bal-stat">
+                  <div class="bal-stat-label">Withdrawals</div>
+                  <div class="bal-stat-val red" id="balWithdrawals">$0.00</div>
+                </div>
+                <div class="bal-stat">
+                  <div class="bal-stat-label">Total Lots</div>
+                  <div class="bal-stat-val muted" id="balTotalLots">0.00</div>
+                </div>
+              </div>
+              <!-- Equity curve -->
+              <div class="equity-chart-wrap">
+                <canvas id="equityChart"></canvas>
+              </div>
+            </div>
+
+            <!-- Risk card -->
+            <div class="perf-card" style="padding:0;overflow:hidden">
+              <div style="padding:18px 20px 14px;border-bottom:1px solid var(--line)">
+                <div class="perf-card-title"><i class="fa-solid fa-shield-halved"></i>Risk Metrics</div>
+              </div>
+              <div class="risk-grid">
+                <div class="risk-item">
+                  <div class="risk-item-label">Max Balance DD</div>
+                  <div class="risk-item-val red" id="riskMaxBalDD">—</div>
+                  <div class="risk-item-sub" id="riskMaxBalDDPct"></div>
+                </div>
+                <div class="risk-item">
+                  <div class="risk-item-label">Highest Balance</div>
+                  <div class="risk-item-val" id="riskHighBal">—</div>
+                </div>
+                <div class="risk-item">
+                  <div class="risk-item-label">Current Equity</div>
+                  <div class="risk-item-val muted" id="riskEquity">—</div>
+                </div>
+                <div class="risk-item">
+                  <div class="risk-item-label">Profit Factor</div>
+                  <div class="risk-item-val green" id="riskProfitFactor">—</div>
+                </div>
+                <div class="risk-item">
+                  <div class="risk-item-label">Sharpe Ratio</div>
+                  <div class="risk-item-val" id="riskSharpe">—</div>
+                </div>
+                <div class="risk-item">
+                  <div class="risk-item-label">Expectancy</div>
+                  <div class="risk-item-val" id="riskExpectancy">—</div>
+                </div>
+                <div class="risk-item">
+                  <div class="risk-item-label">Std Deviation</div>
+                  <div class="risk-item-val muted" id="riskStdDev">—</div>
+                </div>
+                <div class="risk-item">
+                  <div class="risk-item-label">Commissions</div>
+                  <div class="risk-item-val red" id="riskCommissions">—</div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Row 2: Trade Stats + Winstreak + Symbols -->
+          <div class="perf-row perf-row-3">
+
+            <!-- Trade stats -->
+            <div class="perf-card">
+              <div class="perf-card-title"><i class="fa-solid fa-chart-simple"></i>Trade Statistics</div>
+              <div class="stat-list">
+                <div class="stat-row">
+                  <div class="stat-row-label">Win Rate</div>
+                  <div class="stat-row-val green" id="statWinRate">—</div>
+                </div>
+                <div class="stat-row">
+                  <div class="stat-row-label">Profit Factor</div>
+                  <div class="stat-row-val" id="statProfitFactor">—</div>
+                </div>
+                <div class="stat-row">
+                  <div class="stat-row-label">Avg Win / Avg Loss</div>
+                  <div class="stat-row-val">
+                    <div class="stat-row-dual">
+                      <span id="statAvgWin">—</span>
+                      <span class="sep">/</span>
+                      <span id="statAvgLoss">—</span>
+                    </div>
+                  </div>
+                </div>
+                <div class="stat-row">
+                  <div class="stat-row-label">Avg Trade Duration</div>
+                  <div class="stat-row-val accent" id="statAvgDuration">—</div>
+                </div>
+                <div class="stat-row">
+                  <div class="stat-row-label">Best Trade</div>
+                  <div class="stat-row-val green" id="statBestTrade">—</div>
+                </div>
+                <div class="stat-row">
+                  <div class="stat-row-label">Worst Trade</div>
+                  <div class="stat-row-val red" id="statWorstTrade">—</div>
+                </div>
+                <div class="stat-row">
+                  <div class="stat-row-label">Daily WR</div>
+                  <div class="stat-row-val" id="statDailyWR">—</div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Winstreak -->
+            <div class="perf-card">
+              <div class="perf-card-title"><i class="fa-solid fa-fire"></i>Winstreak</div>
+              <div class="ws-grid">
+                <div class="ws-section">
+                  <div class="ws-section-label">Days</div>
+                  <div class="ws-pair">
+                    <div class="ws-box">
+                      <div class="ws-box-label">Best</div>
+                      <div class="ws-box-val green" id="wsDaysBest">—</div>
+                    </div>
+                    <div class="ws-box">
+                      <div class="ws-box-label">Worst</div>
+                      <div class="ws-box-val red" id="wsDaysWorst">—</div>
+                    </div>
+                  </div>
+                </div>
+                <div class="ws-section">
+                  <div class="ws-section-label">Trades</div>
+                  <div class="ws-pair">
+                    <div class="ws-box">
+                      <div class="ws-box-label">Best</div>
+                      <div class="ws-box-val green" id="wsTradesBest">—</div>
+                    </div>
+                    <div class="ws-box">
+                      <div class="ws-box-label">Worst</div>
+                      <div class="ws-box-val red" id="wsTradesWorst">—</div>
+                    </div>
                   </div>
                 </div>
               </div>
-              <div class="p-chart-controls">
-                <div class="p-range-chip" id="balancePanelRange">
-                  <i class="fas fa-id-badge"></i> Linked trading account
-                </div>
+              <!-- Winstreak chart -->
+              <div style="margin-top:18px;height:80px;position:relative">
+                <canvas id="wsChart"></canvas>
               </div>
             </div>
-            <div class="p-chart-canvas-wrap">
-              <canvas id="performanceChart" style="max-height:300px;"></canvas>
-            </div>
-          </div>
 
-          <!-- Profit Chart -->
-          <div class="perf-chart-card dash-profit-panel">
-            <div class="p-chart-header">
-              <div class="p-chart-title-block">
-                <div class="p-chart-title">Profit</div>
-                <div class="p-chart-total-row">
-                  <div class="p-chart-total-value" id="profitPanelValue">0.00</div>
-                  <div class="p-status-chip" id="profitPanelStatus">
-                    <i class="fas fa-wave-square"></i> Awaiting closed trades
-                  </div>
-                </div>
-              </div>
-              <div class="p-chart-controls">
-                <div class="p-legend-inline">
-                  <div class="p-legend-item">
-                    <span class="p-legend-dot primary"></span>
-                    Equity Curve
-                  </div>
-                  <div class="p-legend-item">
-                    <span class="p-legend-dot secondary"></span>
-                    <span id="profitTradeCount">0 closed trades</span>
-                  </div>
-                </div>
-                <div class="p-range-chip" id="profitPanelRange">
-                  <i class="fas fa-calendar-alt"></i> All linked history
-                </div>
+            <!-- Symbols traded -->
+            <div class="perf-card">
+              <div class="perf-card-title"><i class="fa-solid fa-coins"></i>Symbols Traded</div>
+              <div class="sym-list" id="symList">
+                <div class="chart-empty" style="height:120px"><i class="fa-solid fa-circle-info"></i>No trade data</div>
               </div>
             </div>
-            <div class="p-chart-canvas-wrap">
-              <canvas id="profitPerformanceChart" style="max-height:300px;"></canvas>
-            </div>
           </div>
 
-          <!-- Account Analysis -->
-          <div class="perf-analysis dash-analysis-panel">
-            <div class="p-analysis-header">Account Analysis</div>
-            <div class="p-analysis-item">
-              <span class="p-analysis-label">Account Status</span>
-              <span class="p-analysis-value" style="color:var(--green-val);">Active</span>
-            </div>
-            <div class="p-analysis-item">
-              <span class="p-analysis-label">Total Trades</span>
-              <span class="p-analysis-value" id="totalTrades">0</span>
-            </div>
-            <div class="p-analysis-item">
-              <span class="p-analysis-label">Win Trades</span>
-              <span class="p-analysis-value" id="winTrades">0</span>
-            </div>
-            <div class="p-analysis-item">
-              <span class="p-analysis-label">Loss Trades</span>
-              <span class="p-analysis-value" id="lossTrades">0</span>
-            </div>
-            <div class="p-analysis-item">
-              <span class="p-analysis-label">Profit Factor</span>
-              <span class="p-analysis-value" id="profitFactor">0.00</span>
-            </div>
-            <div class="p-analysis-item">
-              <span class="p-analysis-label">Days Traded</span>
-              <span class="p-analysis-value" id="daysTraded">0</span>
-            </div>
-          </div>
-
-          <!-- Trading Symbols -->
-          <div class="perf-chart-card dash-symbols-panel" style="padding:1.2rem;">
-            <div class="p-chart-header">
-              <div class="p-chart-title-block">
-                <div class="p-chart-title">Trading Symbols</div>
-                <div class="p-chart-total-row">
-                  <div class="p-chart-total-value" id="symbolsUniqueCount">0</div>
-                  <div class="p-status-chip" id="symbolsTradeCount">
-                    <i class="fas fa-chart-pie"></i> 0 trades logged
-                  </div>
-                </div>
+          <!-- Row 3: Net Daily P&L (full width) -->
+          <div class="perf-card">
+            <div class="perf-card-title"><i class="fa-solid fa-calendar-days"></i>Net Daily P&amp;L</div>
+            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px">
+              <div style="font-size:22px;font-weight:800;letter-spacing:-.4px" id="pnlTotal">$0.00</div>
+              <div style="display:flex;gap:6px" id="pnlHighLow">
+                <span style="font-size:12px;font-weight:600;color:var(--green-val)" id="pnlHigh"></span>
+                <span style="font-size:12px;color:var(--faint)"></span>
+                <span style="font-size:12px;font-weight:600;color:var(--red-val)" id="pnlLow"></span>
               </div>
             </div>
-            <div class="symbols-chart-wrap">
-              <canvas id="symbolsChart" style="max-height:260px;"></canvas>
+            <div class="pnl-chart-wrap">
+              <canvas id="pnlChart"></canvas>
             </div>
-            <div id="symbolsLegend" style="display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:.5rem;margin-top:1rem;"></div>
           </div>
 
-          <!-- Calendar Returns -->
-          <div class="perf-chart-card dash-calendar-panel" style="padding:1.2rem;">
-            <div class="p-chart-header">
-              <div class="p-chart-title">Calendar Returns</div>
+          <!-- Row 4: Monthly profit + Trade count -->
+          <div class="perf-row" style="grid-template-columns:1fr 1fr">
+            <div class="perf-card">
+              <div class="perf-card-title"><i class="fa-solid fa-calendar-check"></i>Monthly Profit</div>
+              <div class="monthly-chart-wrap">
+                <canvas id="monthlyChart"></canvas>
+              </div>
             </div>
-            <div id="calendarReturnsContent"></div>
+            <div class="perf-card">
+              <div class="perf-card-title"><i class="fa-solid fa-list-ol"></i>Trade Count</div>
+              <div class="monthly-chart-wrap">
+                <canvas id="tradeCountChart"></canvas>
+              </div>
+            </div>
           </div>
 
-        </div>
+        </div><!-- /perfMain -->
       </div><!-- /perf-content -->
 
     </main>
-  </div>
-
-</div>
-
-<!-- Day Modal -->
-<div class="cal-modal" id="calDayModal">
-  <div class="cal-modal-card">
-    <div class="cal-modal-header">
-      <div class="cal-modal-title" id="calDayTitle">Day</div>
-      <button class="cal-modal-close" onclick="closeCalDayModal()"><i class="fas fa-times"></i></button>
-    </div>
-    <div class="cal-modal-stat">
-      <div>
-        <div style="font-size:.75rem;color:var(--muted);margin-bottom:.25rem;">Net P&L</div>
-        <div id="calDayPnl" style="font-size:1.1rem;font-weight:700;">-</div>
-      </div>
-      <div>
-        <div style="font-size:.75rem;color:var(--muted);margin-bottom:.25rem;">Trades</div>
-        <div id="calDayTrades" style="font-size:1.1rem;font-weight:700;">0</div>
-      </div>
-    </div>
-    <div id="calDayList" class="cal-modal-list"></div>
   </div>
 </div>
 
@@ -900,433 +449,311 @@
 <script>
 WIN.initShell({ activePage: 'performance' });
 
-// ── State ──
-let perfAccounts = [];
-let perfSelectedId = null;
-let perfCachedTrades = [];
-let perfCalMonth = new Date().getMonth();
-let perfCalYear  = new Date().getFullYear();
-window.accountCurrency = 'USD';
+/* ─── chart defaults ─── */
+Chart.defaults.color = '#8a93a9';
+Chart.defaults.font.family = 'Inter';
 
-// ── Bootstrap ──
-(async function init() {
-  const userObj = JSON.parse(localStorage.getItem('win_user') || 'null');
-  if (!userObj?.id) return;
+/* ─── helpers ─── */
+const fmt = (n, cur='USD') => {
+  if (n == null || isNaN(n)) return '—';
+  return new Intl.NumberFormat('en-US', { style:'currency', currency: cur, minimumFractionDigits:2, maximumFractionDigits:2 }).format(n);
+};
+const fmtPct = n => (n == null ? '—' : (n >= 0 ? '+' : '') + n.toFixed(2) + '%');
+const el = id => document.getElementById(id);
 
-  try {
-    const res = await fetch(`/api/linked-accounts?user_id=${encodeURIComponent(userObj.id)}`);
-    if (!res.ok) return;
-    const { accounts } = await res.json();
-    if (!accounts || accounts.length === 0) return;
+/* ─── chart instances ─── */
+let equityChart, pnlChart, monthlyChart, tradeCountChart, wsChart;
 
-    perfAccounts = accounts.map(a => {
-      const bc = a.broker_clients || {};
-      return {
-        id:        a.id,
-        clientId:  bc.id || a.id,
-        name:      bc.name || '—',
-        balance:   bc.balance || 0,
-        currency:  bc.account_currency || 'USD',
-        synced_at: bc.synced_at || null,
-      };
-    });
-
-    // Restore selection
-    const storedId = localStorage.getItem('win_selected_account');
-    const selected = storedId ? perfAccounts.find((_,i) => String(i) === storedId) : null;
-    perfSelectedId = selected ? selected.id : perfAccounts[0]?.id;
-
-    displayAccountInfo(perfAccounts.find(a => a.id === perfSelectedId) || perfAccounts[0]);
-  } catch (e) {
-    console.warn('Performance data load error:', e);
-  }
-
-  // Initialise empty charts
-  resetCharts();
-  calculateCalendarReturns([]);
-})();
-
-function displayAccountInfo(account) {
-  if (!account) return;
-  window.accountCurrency = account.currency;
-
-  const fmt = v => `${account.currency} ${Number(v).toFixed(2)}`;
-
-  const balEl = document.getElementById('accountBalance');
-  if (balEl) balEl.textContent = fmt(account.balance);
-
-  const bpvEl = document.getElementById('balancePanelValue');
-  if (bpvEl) bpvEl.textContent = fmt(account.balance);
-
-  const bpsEl = document.getElementById('balancePanelStatus');
-  if (bpsEl) { bpsEl.className = 'p-status-chip'; bpsEl.innerHTML = '<i class="fas fa-wallet"></i> Live balance'; }
-
-  const bprEl = document.getElementById('balancePanelRange');
-  if (bprEl) bprEl.innerHTML = `<i class="fas fa-id-badge"></i> Account ${account.name}`;
-
-  const numEl = document.getElementById('accountNumber');
-  if (numEl) numEl.textContent = account.name || '—';
-
-  const brokerEl = document.getElementById('brokerName');
-  if (brokerEl) brokerEl.textContent = account.name || '—';
-
-  const syncEl = document.getElementById('syncedAt');
-  if (syncEl) syncEl.textContent = account.synced_at ? timeAgo(account.synced_at) : '—';
-}
-
-function timeAgo(dateStr) {
-  if (!dateStr) return '—';
-  const diff = Date.now() - new Date(dateStr).getTime();
-  const mins = Math.floor(diff / 60000);
-  if (mins < 2)  return 'just now';
-  if (mins < 60) return `${mins}m ago`;
-  const hrs = Math.floor(mins / 60);
-  if (hrs < 24)  return `${hrs}h ago`;
-  return `${Math.floor(hrs / 24)}d ago`;
-}
-
-async function refreshDashboard(btn) {
-  if (btn) { btn.disabled = true; btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Syncing...'; }
-  const userObj = JSON.parse(localStorage.getItem('win_user') || 'null');
-  if (!userObj?.id) { if (btn) { btn.disabled = false; btn.innerHTML = '<i class="fas fa-sync-alt"></i> Refresh'; } return; }
-  try {
-    const res = await fetch(`/api/linked-accounts?user_id=${encodeURIComponent(userObj.id)}`);
-    if (!res.ok) throw new Error('fetch failed');
-    const { accounts } = await res.json();
-    if (accounts && accounts.length > 0) {
-      perfAccounts = accounts.map(a => {
-        const bc = a.broker_clients || {};
-        return { id: a.id, clientId: bc.id || a.id, name: bc.name || '—', balance: bc.balance || 0, currency: bc.account_currency || 'USD', synced_at: bc.synced_at || null };
-      });
-      const active = perfAccounts.find(a => a.id === perfSelectedId) || perfAccounts[0];
-      displayAccountInfo(active);
-    }
-    if (btn) { btn.innerHTML = '<i class="fas fa-check"></i> Synced'; setTimeout(() => { btn.disabled = false; btn.innerHTML = '<i class="fas fa-sync-alt"></i> Refresh'; }, 1500); }
-  } catch (e) {
-    if (btn) { btn.disabled = false; btn.innerHTML = '<i class="fas fa-sync-alt"></i> Refresh'; }
-  }
-}
-
-// ── Charts ──
-
-function resetCharts() {
-  updateEquityCharts([]);
-  updateSymbolsChart([]);
-  resetStats();
-}
-
-function resetStats() {
-  const currency = window.accountCurrency || 'USD';
-  setText('avgWin', `${currency} 0.00`);
-  setText('avgLoss', `${currency} 0.00`);
-  setText('winRate', '0%');
-  setText('riskReward', '0.00');
-  setDelta('avgWinDelta',    `+${currency} 0.00`, 'positive', 'fa-arrow-up');
-  setDelta('avgLossDelta',   `-${currency} 0.00`, 'negative', 'fa-arrow-down');
-  setDelta('winRateDelta',   '0%',    'neutral', 'fa-minus');
-  setDelta('riskRewardDelta','0.00R', 'neutral', 'fa-minus');
-  setText('totalTrades',  '0');
-  setText('winTrades',    '0');
-  setText('lossTrades',   '0');
-  setText('profitFactor', '0.00');
-  setText('daysTraded',   '0');
-}
-
-function setText(id, val) { const el = document.getElementById(id); if (el) el.textContent = val; }
-function setDelta(id, text, tone, icon) {
-  const el = document.getElementById(id);
-  if (!el) return;
-  el.className = `p-stat-delta ${tone}`;
-  el.innerHTML = `<i class="fas ${icon}"></i> ${text}`;
-}
-
-function buildEquityChart(canvasId, instanceKey, trades) {
-  const canvas = document.getElementById(canvasId);
-  if (!canvas) return;
-
-  if (window[instanceKey]) { window[instanceKey].destroy(); window[instanceKey] = null; }
-
-  const ctx = canvas.getContext('2d');
-  const accentColor = '#5b74ff';
-  const accentRgb   = '91, 116, 255';
-
-  if (!trades.length) {
-    const grad = ctx.createLinearGradient(0, 0, 0, canvas.height || 300);
-    grad.addColorStop(0, `rgba(${accentRgb}, 0.18)`);
-    grad.addColorStop(1, `rgba(${accentRgb}, 0)`);
-    window[instanceKey] = new Chart(ctx, {
-      type: 'line',
-      data: { labels: ['No data'], datasets: [{ label: 'Cumulative P&L', data: [0], borderColor: accentColor, backgroundColor: grad, tension: .45, fill: true, pointRadius: 0, borderWidth: 2 }] },
-      options: { responsive: true, maintainAspectRatio: true, plugins: { legend: { display: false }, tooltip: { enabled: false } }, scales: { x: { display: true, grid: { display: false }, ticks: { color: '#9aa6d1', font: { size: 11 } }, border: { display: false } }, y: { display: true, grid: { color: 'rgba(154,166,209,.08)', drawTicks: false }, ticks: { color: '#9aa6d1', font: { size: 11 } }, border: { display: false } } } }
-    });
-    return;
-  }
-
-  let running = 0;
-  const labels = [], data = [], meta = [];
-  trades.forEach((t, i) => {
-    const profit = parseFloat(t.profit || 0);
-    running += profit;
-    labels.push(i + 1);
-    data.push(parseFloat(running.toFixed(2)));
-    meta.push({ tradeNum: i + 1, date: new Date(t.close_time).toLocaleDateString(), symbol: t.symbol || '', profit });
-  });
-
-  const grad = ctx.createLinearGradient(0, 0, 0, canvas.height || 300);
-  grad.addColorStop(0, `rgba(${accentRgb}, 0.32)`);
-  grad.addColorStop(1, `rgba(${accentRgb}, 0.03)`);
-
-  window[instanceKey] = new Chart(ctx, {
-    type: 'line',
-    data: { labels, datasets: [{ label: 'Cumulative P&L', data, borderColor: accentColor, backgroundColor: grad, tension: .42, fill: true, pointRadius: data.length <= 50 ? 2 : 0, pointHoverRadius: 5, pointBackgroundColor: accentColor, pointBorderColor: '#0b1023', pointBorderWidth: 1.5, borderWidth: 2.5 }] },
-    options: {
-      responsive: true, maintainAspectRatio: true,
-      plugins: {
-        legend: { display: false },
-        tooltip: { enabled: true, mode: 'nearest', intersect: false, backgroundColor: 'rgba(12,8,8,.96)', titleColor: '#9aa6d1', bodyColor: '#f8fafc', borderColor: `rgba(${accentRgb},.24)`, borderWidth: 1, padding: 14, displayColors: false,
-          callbacks: {
-            title: items => { const m = meta[items[0].dataIndex]; return `Trade #${m.tradeNum} - ${m.date}`; },
-            label: context => { const m = meta[context.dataIndex]; const cur = window.accountCurrency || 'USD'; const sign = m.profit >= 0 ? '+' : ''; const lines = []; if (m.symbol) lines.push(`Symbol: ${m.symbol}`); lines.push(`Trade P&L: ${sign}${cur} ${parseFloat(m.profit).toFixed(2)}`); lines.push(`Cumulative: ${cur} ${context.parsed.y.toFixed(2)}`); return lines; }
-          }
-        }
-      },
-      scales: {
-        x: { display: true, grid: { display: false }, ticks: { color: '#9aa6d1', maxRotation: 0, font: { size: 11 }, maxTicksLimit: 8, callback: function(val) { return `#${this.getLabelForValue(val)}`; } }, border: { display: false } },
-        y: { display: true, grid: { color: 'rgba(154,166,209,.08)', drawTicks: false }, ticks: { color: '#9aa6d1', callback: v => `${window.accountCurrency || 'USD'} ${v}`, font: { size: 11 } }, border: { display: false } }
+function mkEquityChart(labels, data) {
+  const ctx = el('equityChart');
+  if (!ctx) return;
+  if (equityChart) equityChart.destroy();
+  equityChart = new Chart(ctx, {
+    type:'line',
+    data:{
+      labels,
+      datasets:[{
+        data,
+        borderColor:'rgba(91,116,255,.85)',
+        backgroundColor:'rgba(91,116,255,.10)',
+        fill:true,
+        tension:.42,
+        pointRadius:0,
+        borderWidth:2
+      }]
+    },
+    options:{
+      responsive:true,maintainAspectRatio:false,
+      plugins:{legend:{display:false},tooltip:{
+        callbacks:{label:ctx=>' '+fmt(ctx.parsed.y)},
+        backgroundColor:'#0c0f18',borderColor:'#1b2233',borderWidth:1,titleColor:'#c7d0e4',bodyColor:'#f2f5fc'
+      }},
+      scales:{
+        x:{display:false},
+        y:{display:false,beginAtZero:false}
       }
     }
   });
 }
 
-function updateEquityCharts(trades) {
-  const cur = window.accountCurrency || 'USD';
-  const profitEl  = document.getElementById('profitPanelValue');
-  const countEl   = document.getElementById('profitTradeCount');
-  const rangeEl   = document.getElementById('profitPanelRange');
-  const statusEl  = document.getElementById('profitPanelStatus');
-  const balStatEl = document.getElementById('balancePanelStatus');
-
-  if (!trades.length) {
-    if (profitEl)  profitEl.textContent = `${cur} 0.00`;
-    if (countEl)   countEl.textContent = '0 closed trades';
-    if (rangeEl)   rangeEl.innerHTML = '<i class="fas fa-calendar-alt"></i> All linked history';
-    if (statusEl)  { statusEl.className = 'p-status-chip'; statusEl.innerHTML = '<i class="fas fa-wave-square"></i> Awaiting closed trades'; }
-    if (balStatEl) { balStatEl.className = 'p-status-chip'; balStatEl.innerHTML = '<i class="fas fa-wallet"></i> Awaiting account sync'; }
-  } else {
-    const netPnl = trades.reduce((s, t) => s + parseFloat(t.profit || 0), 0);
-    const sign  = netPnl >= 0 ? '+' : '';
-    const tone  = netPnl > 0 ? 'positive' : netPnl < 0 ? 'negative' : '';
-    const icon  = netPnl > 0 ? 'fa-arrow-trend-up' : netPnl < 0 ? 'fa-arrow-trend-down' : 'fa-wave-square';
-    const label = netPnl > 0 ? 'Positive run' : netPnl < 0 ? 'Net drawdown' : 'Flat performance';
-    const tradeLabel = `${trades.length} closed trade${trades.length === 1 ? '' : 's'}`;
-    const fmtDate = v => new Date(v).toLocaleDateString(undefined, { month: 'short', year: 'numeric' });
-    const from = fmtDate(trades[0].close_time);
-    const to   = fmtDate(trades[trades.length - 1].close_time);
-
-    if (profitEl)  profitEl.textContent = `${sign}${cur} ${Math.abs(netPnl).toFixed(2)}`;
-    if (countEl)   countEl.textContent = tradeLabel;
-    if (rangeEl)   rangeEl.innerHTML = `<i class="fas fa-calendar-alt"></i> ${from} - ${to}`;
-    if (statusEl)  { statusEl.className = `p-status-chip ${tone}`; statusEl.innerHTML = `<i class="fas ${icon}"></i> ${label}`; }
-    if (balStatEl) { balStatEl.className = 'p-status-chip'; balStatEl.innerHTML = `<i class="fas fa-wallet"></i> ${tradeLabel} synced`; }
-  }
-
-  buildEquityChart('performanceChart',       'perfChartInstance',       trades);
-  buildEquityChart('profitPerformanceChart', 'profitChartInstance', trades);
+function mkPnlChart(labels, data) {
+  const ctx = el('pnlChart');
+  if (!ctx) return;
+  if (pnlChart) pnlChart.destroy();
+  const colors = data.map(v => v >= 0 ? 'rgba(53,215,155,.75)' : 'rgba(255,107,129,.7)');
+  pnlChart = new Chart(ctx, {
+    type:'bar',
+    data:{labels,datasets:[{data,backgroundColor:colors,borderRadius:3,borderSkipped:false}]},
+    options:{
+      responsive:true,maintainAspectRatio:false,
+      plugins:{legend:{display:false},tooltip:{
+        callbacks:{label:ctx=>' '+fmt(ctx.parsed.y)},
+        backgroundColor:'#0c0f18',borderColor:'#1b2233',borderWidth:1,titleColor:'#c7d0e4',bodyColor:'#f2f5fc'
+      }},
+      scales:{
+        x:{ticks:{maxTicksLimit:8,font:{size:11}},grid:{display:false}},
+        y:{ticks:{font:{size:11},callback:v=>fmt(v)},grid:{color:'rgba(27,34,51,.8)'}}
+      }
+    }
+  });
 }
 
-function updateSymbolsChart(trades) {
-  const canvas  = document.getElementById('symbolsChart');
-  const uqEl    = document.getElementById('symbolsUniqueCount');
-  const tcEl    = document.getElementById('symbolsTradeCount');
-  const legEl   = document.getElementById('symbolsLegend');
+function mkMonthlyChart(labels, data) {
+  const ctx = el('monthlyChart');
+  if (!ctx) return;
+  if (monthlyChart) monthlyChart.destroy();
+  const colors = data.map(v => v >= 0 ? 'rgba(53,215,155,.7)' : 'rgba(255,107,129,.65)');
+  monthlyChart = new Chart(ctx, {
+    type:'bar',
+    data:{labels,datasets:[{data,backgroundColor:colors,borderRadius:4,borderSkipped:false}]},
+    options:{
+      responsive:true,maintainAspectRatio:false,
+      plugins:{legend:{display:false},tooltip:{callbacks:{label:ctx=>' '+fmt(ctx.parsed.y)},backgroundColor:'#0c0f18',borderColor:'#1b2233',borderWidth:1,titleColor:'#c7d0e4',bodyColor:'#f2f5fc'}},
+      scales:{
+        x:{ticks:{font:{size:10}},grid:{display:false}},
+        y:{ticks:{font:{size:10},callback:v=>fmt(v)},grid:{color:'rgba(27,34,51,.8)'}}
+      }
+    }
+  });
+}
 
-  if (!canvas) return;
+function mkTradeCountChart(labels, data) {
+  const ctx = el('tradeCountChart');
+  if (!ctx) return;
+  if (tradeCountChart) tradeCountChart.destroy();
+  tradeCountChart = new Chart(ctx, {
+    type:'bar',
+    data:{labels,datasets:[{data,backgroundColor:'rgba(91,116,255,.65)',borderRadius:4,borderSkipped:false}]},
+    options:{
+      responsive:true,maintainAspectRatio:false,
+      plugins:{legend:{display:false},tooltip:{backgroundColor:'#0c0f18',borderColor:'#1b2233',borderWidth:1,titleColor:'#c7d0e4',bodyColor:'#f2f5fc'}},
+      scales:{
+        x:{ticks:{font:{size:10}},grid:{display:false}},
+        y:{ticks:{font:{size:10}},grid:{color:'rgba(27,34,51,.8)'}}
+      }
+    }
+  });
+}
 
-  if (!trades.length) {
-    if (window.symbolsChartInstance) { window.symbolsChartInstance.destroy(); window.symbolsChartInstance = null; }
-    if (uqEl) uqEl.textContent = '0';
-    if (tcEl) { tcEl.className = 'p-status-chip'; tcEl.innerHTML = '<i class="fas fa-chart-pie"></i> 0 trades logged'; }
-    if (legEl) legEl.innerHTML = '<div style="font-size:.875rem;color:var(--muted);">No trade data available</div>';
+function mkWsChart(data) {
+  const ctx = el('wsChart');
+  if (!ctx) return;
+  if (wsChart) wsChart.destroy();
+  const colors = data.map(v => v >= 0 ? 'rgba(53,215,155,.7)' : 'rgba(255,107,129,.65)');
+  wsChart = new Chart(ctx, {
+    type:'bar',
+    data:{labels:data.map((_,i)=>i+1),datasets:[{data,backgroundColor:colors,borderRadius:2,borderSkipped:false}]},
+    options:{
+      responsive:true,maintainAspectRatio:false,
+      plugins:{legend:{display:false},tooltip:{display:false}},
+      scales:{x:{display:false},y:{display:false}}
+    }
+  });
+}
+
+/* ─── Render empty state charts ─── */
+function renderEmptyCharts() {
+  const months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  const emptyVals = new Array(12).fill(0);
+  mkEquityChart(months, emptyVals);
+  mkPnlChart(months, emptyVals);
+  mkMonthlyChart(months, emptyVals);
+  mkTradeCountChart(months, emptyVals);
+  mkWsChart(new Array(10).fill(0));
+}
+
+/* ─── Render symbols ─── */
+function renderSymbols(symbols) {
+  const list = el('symList');
+  if (!list) return;
+  if (!symbols || symbols.length === 0) {
+    list.innerHTML = '<div class="chart-empty" style="height:120px"><i class="fa-solid fa-circle-info"></i>No trade data</div>';
     return;
   }
-
-  const symbolCounts = {};
-  trades.forEach(t => { const s = t.symbol || 'Unknown'; symbolCounts[s] = (symbolCounts[s] || 0) + 1; });
-  const sorted = Object.entries(symbolCounts).sort((a,b) => b[1] - a[1]).slice(0, 8);
-  const labels = sorted.map(([s]) => s);
-  const data   = sorted.map(([,c]) => c);
-  const total  = data.reduce((s,c) => s + c, 0);
-
-  if (uqEl) uqEl.textContent = String(labels.length);
-  if (tcEl) { tcEl.className = 'p-status-chip'; tcEl.innerHTML = `<i class="fas fa-chart-pie"></i> ${total} trades logged`; }
-
-  const colors = ['#5b74ff','#35d79b','#7b61ff','#f59e0b','#3b82f6','#ec4899','#14b8a6','#f97316'];
-
-  if (window.symbolsChartInstance) { window.symbolsChartInstance.destroy(); }
-  const ctx = canvas.getContext('2d');
-  window.symbolsChartInstance = new Chart(ctx, {
-    type: 'doughnut',
-    data: { labels, datasets: [{ data, backgroundColor: colors.slice(0, labels.length), borderColor: '#060810', borderWidth: 2 }] },
-    options: { responsive: true, maintainAspectRatio: true, plugins: { legend: { display: false }, tooltip: { enabled: true, backgroundColor: 'rgba(6,8,16,.95)', titleColor: '#f8fafc', bodyColor: '#f8fafc', borderColor: 'rgba(125,133,255,.2)', borderWidth: 1, padding: 12, callbacks: { label: c => `${c.label}: ${c.parsed} trades (${((c.parsed/total)*100).toFixed(1)}%)` } } } }
-  });
-
-  if (legEl) {
-    legEl.innerHTML = sorted.map(([s, c], i) => `
-      <div style="display:flex;align-items:center;gap:.5rem;padding:.5rem;background:var(--card);border-radius:6px;">
-        <div style="width:12px;height:12px;border-radius:2px;background:${colors[i]};flex-shrink:0;"></div>
-        <div style="flex:1;min-width:0;">
-          <div style="font-size:.875rem;font-weight:600;color:#fff;">${s}</div>
-          <div style="font-size:.75rem;color:var(--muted);">${c} trades (${((c/total)*100).toFixed(1)}%)</div>
-        </div>
-      </div>`).join('');
-  }
+  const max = Math.max(...symbols.map(s => s.pct));
+  list.innerHTML = symbols.map(s => `
+    <div class="sym-row">
+      <div class="sym-name">${s.symbol}</div>
+      <div class="sym-bar-wrap"><div class="sym-bar" style="width:${(s.pct/max*100).toFixed(1)}%"></div></div>
+      <div class="sym-pct">${s.pct.toFixed(1)}%</div>
+      <div class="sym-count">${s.count}</div>
+    </div>
+  `).join('');
 }
 
-function calculateCalendarReturns(trades) {
-  const inputTrades = Array.isArray(trades) ? trades : [];
-  const monthTrades = inputTrades.filter(t => {
-    const d = new Date(t.close_time);
-    return d.getMonth() === perfCalMonth && d.getFullYear() === perfCalYear;
-  });
+/* ─── Populate stats ─── */
+function renderStats(data) {
+  const account = data.account;
+  const balance = account.balance || 0;
+  const currency = account.account_currency || 'USD';
+  const stats = data.stats || {};
 
-  const currency = window.accountCurrency || 'USD';
-  const monthNames = ['January','February','March','April','May','June','July','August','September','October','November','December'];
-  const daysInMonth = new Date(perfCalYear, perfCalMonth + 1, 0).getDate();
-  const firstDay = new Date(perfCalYear, perfCalMonth, 1).getDay();
+  /* Summary tiles */
+  el('tileBalance').textContent = fmt(balance, currency);
+  el('tileBalancePct').style.display = '';
+  el('tileBalancePct').innerHTML = `<i class="fa-solid fa-arrow-trend-up"></i> ${fmtPct(stats.gainPct || 0)}`;
+  el('tileNetPnl').textContent = fmt(stats.netPnl || 0, currency);
+  el('tileNetPnlSub').textContent = stats.netPnl >= 0 ? 'Profitable' : 'Loss';
+  el('tileWinRate').textContent = stats.winRate != null ? stats.winRate.toFixed(1) + '%' : '—';
+  el('tileWinRateSub').textContent = 'of closed trades';
+  el('tileTrades').textContent = stats.totalTrades || '—';
+  el('tileTradesSub').textContent = 'closed positions';
 
-  const dailyStats = {};
-  for (let d = 1; d <= daysInMonth; d++) dailyStats[d] = { profit: 0, count: 0 };
-  monthTrades.forEach(t => {
-    const d = new Date(t.close_time).getDate();
-    dailyStats[d].profit += parseFloat(t.profit || 0);
-    dailyStats[d].count++;
-  });
+  /* Account pill */
+  el('accountPillName').textContent = account.name || account.id;
 
-  let monthTotal = 0, bestDay = { day: '', value: -Infinity }, worstDay = { day: '', value: Infinity };
-  for (let d = 1; d <= daysInMonth; d++) {
-    const p = dailyStats[d].profit;
-    monthTotal += p;
-    if (p > bestDay.value  && dailyStats[d].count > 0) bestDay  = { day: d, value: p };
-    if (p < worstDay.value && dailyStats[d].count > 0) worstDay = { day: d, value: p };
+  /* Balance card */
+  el('balAmount').textContent = fmt(balance, currency);
+  el('balGainPct').textContent = fmtPct(stats.gainPct || 0);
+  el('balAbsGain').textContent = `${stats.absGainPct != null ? fmtPct(stats.absGainPct) : ''} Abs`;
+  el('balNetPnl').textContent = (stats.netPnl >= 0 ? '+' : '') + fmt(stats.netPnl || 0, currency);
+  el('balDeposits').textContent = fmt(stats.deposits || 0, currency);
+  el('balWithdrawals').textContent = fmt(stats.withdrawals || 0, currency);
+  el('balTotalLots').textContent = (stats.totalLots || 0).toFixed(2);
+
+  /* Risk */
+  el('riskMaxBalDD').textContent = stats.maxBalDD != null ? fmt(stats.maxBalDD, currency) : '—';
+  el('riskMaxBalDDPct').textContent = stats.maxBalDDPct != null ? `(${stats.maxBalDDPct.toFixed(2)}%)` : '';
+  el('riskHighBal').textContent = fmt(stats.highestBalance || 0, currency);
+  el('riskEquity').textContent = fmt(stats.currentEquity || 0, currency);
+  el('riskProfitFactor').textContent = stats.profitFactor != null ? stats.profitFactor.toFixed(2) : '—';
+  el('riskSharpe').textContent = stats.sharpeRatio != null ? stats.sharpeRatio.toFixed(2) : '—';
+  el('riskExpectancy').textContent = stats.expectancy != null ? fmt(stats.expectancy, currency) : '—';
+  el('riskStdDev').textContent = stats.stdDev != null ? fmt(stats.stdDev, currency) : '—';
+  el('riskCommissions').textContent = stats.commissions != null ? fmt(stats.commissions, currency) : '—';
+
+  /* Trade stats */
+  el('statWinRate').textContent = stats.winRate != null ? stats.winRate.toFixed(1) + '%' : '—';
+  el('statProfitFactor').textContent = stats.profitFactor != null ? stats.profitFactor.toFixed(2) : '—';
+  el('statAvgWin').textContent = stats.avgWin != null ? fmt(stats.avgWin, currency) : '—';
+  el('statAvgLoss').textContent = stats.avgLoss != null ? fmt(stats.avgLoss, currency) : '—';
+  el('statAvgDuration').textContent = stats.avgDuration || '—';
+  el('statBestTrade').textContent = stats.bestTrade != null ? fmt(stats.bestTrade, currency) : '—';
+  el('statWorstTrade').textContent = stats.worstTrade != null ? fmt(stats.worstTrade, currency) : '—';
+  el('statDailyWR').textContent = stats.dailyWR != null ? stats.dailyWR.toFixed(1) + '%' : '—';
+
+  /* Winstreak */
+  el('wsDaysBest').textContent = stats.wsDaysBest != null ? stats.wsDaysBest : '—';
+  el('wsDaysWorst').textContent = stats.wsDaysWorst != null ? stats.wsDaysWorst : '—';
+  el('wsTradesBest').textContent = stats.wsTradesBest != null ? stats.wsTradesBest : '—';
+  el('wsTradesWorst').textContent = stats.wsTradesWorst != null ? stats.wsTradesWorst : '—';
+
+  /* Net Daily P&L */
+  el('pnlTotal').textContent = fmt(stats.netPnl || 0, currency);
+
+  /* Charts */
+  const eqLabels = (data.equity || []).map(p => p.date);
+  const eqData   = (data.equity || []).map(p => p.balance);
+  if (eqLabels.length > 1) mkEquityChart(eqLabels, eqData);
+  else renderEmptyCharts();
+
+  const dailyLabels = (data.dailyPnl || []).map(p => p.date);
+  const dailyData   = (data.dailyPnl || []).map(p => p.pnl);
+  if (dailyLabels.length > 0) mkPnlChart(dailyLabels, dailyData);
+
+  const monthLabels = (data.monthly || []).map(m => m.label);
+  const monthData   = (data.monthly || []).map(m => m.profit);
+  if (monthLabels.length > 0) {
+    mkMonthlyChart(monthLabels, monthData);
+    mkTradeCountChart(monthLabels, (data.monthly || []).map(m => m.count || 0));
   }
 
-  const today = new Date();
-  const isThisMonth = today.getMonth() === perfCalMonth && today.getFullYear() === perfCalYear;
-  const todayDate = isThisMonth ? today.getDate() : -1;
+  if (stats.wsHistory) mkWsChart(stats.wsHistory);
 
-  const currSym = currency === 'ZAR' ? 'R' : currency === 'USD' ? '$' : currency === 'EUR' ? '€' : currency === 'GBP' ? '£' : currency;
+  renderSymbols(data.symbols || []);
+}
 
-  let daysHtml = '';
-  for (let i = 0; i < firstDay; i++) daysHtml += '<div></div>';
+/* ─── Load account data ─── */
+async function loadPerformance() {
+  const raw = localStorage.getItem('win_user');
+  if (!raw) return;
+  const user = JSON.parse(raw);
+  const userId = user.id;
 
-  for (let d = 1; d <= daysInMonth; d++) {
-    const s = dailyStats[d];
-    const isFuture = isThisMonth && d > todayDate;
-    const isToday  = d === todayDate;
-    let bg, border, textCol;
-    if (isFuture || s.count === 0) {
-      bg = 'rgba(148,163,184,.05)'; border = 'rgba(148,163,184,.2)'; textCol = 'var(--muted)';
-    } else if (s.profit >= 0) {
-      const int = Math.min(Math.abs(s.profit) / 500, 1);
-      bg = `rgba(53,215,155,${.1+int*.2})`; border = `rgba(53,215,155,${.2+int*.3})`; textCol = 'var(--green-val)';
-    } else {
-      const int = Math.min(Math.abs(s.profit) / 500, 1);
-      bg = `rgba(251,113,133,${.1+int*.2})`; border = `rgba(251,113,133,${.2+int*.3})`; textCol = '#fb7185';
+  try {
+    const res = await fetch(`/api/linked-accounts?user_id=${userId}`);
+    const json = await res.json();
+    const accounts = json.broker_clients || [];
+
+    if (!accounts.length) {
+      el('noAccountBanner').style.display = '';
+      el('perfMain').style.display = 'none';
+      return;
     }
-    const todayStyle = isToday ? 'border:2px solid var(--accent)!important;' : '';
-    const futureStyle = isFuture ? 'opacity:.4;' : '';
-    daysHtml += `
-      <div class="cal-day-cell" data-day="${d}" style="background:${bg};border:1px solid ${border};${todayStyle}${futureStyle}">
-        <div class="cal-day-num">${d}</div>
-        <div class="cal-day-val" style="color:${textCol};">${isFuture || s.count === 0 ? '-' : (s.profit >= 0 ? '+' : '') + currSym + ' ' + Math.abs(s.profit).toFixed(0)}</div>
-        <div class="cal-day-meta">${isFuture ? '' : s.count > 0 ? s.count + ' trd' : 'No'}</div>
-      </div>`;
+
+    /* Use selected account or first */
+    const selectedId = localStorage.getItem('win_selected_account');
+    const account = accounts.find(a => String(a.id) === String(selectedId)) || accounts[0];
+
+    /* Show mock stats (real stats require trade history API) */
+    const mockStats = {
+      gainPct: 0,
+      absGainPct: 0,
+      netPnl: 0,
+      totalTrades: 0,
+      winRate: null,
+      profitFactor: null,
+      sharpeRatio: null,
+      expectancy: null,
+      stdDev: null,
+      commissions: null,
+      maxBalDD: null,
+      maxBalDDPct: null,
+      highestBalance: account.balance,
+      currentEquity: 0,
+      deposits: 0,
+      withdrawals: 0,
+      totalLots: 0,
+      avgWin: null,
+      avgLoss: null,
+      avgDuration: null,
+      bestTrade: null,
+      worstTrade: null,
+      dailyWR: null,
+      wsDaysBest: null,
+      wsDaysWorst: null,
+      wsTradesBest: null,
+      wsTradesWorst: null
+    };
+
+    renderStats({
+      account,
+      stats: mockStats,
+      equity: [],
+      dailyPnl: [],
+      monthly: [],
+      symbols: []
+    });
+
+    renderEmptyCharts();
+
+  } catch (e) {
+    console.error('Performance load error:', e);
+    renderEmptyCharts();
   }
-
-  const html = `
-    <div class="cal-summary-bar">
-      <div>
-        <div class="cal-nav">
-          <button class="cal-nav-btn" onclick="prevCalMonth()"><i class="fas fa-chevron-left"></i></button>
-          <div class="cal-month-title">${monthNames[perfCalMonth]} ${perfCalYear}</div>
-          <button class="cal-nav-btn" onclick="nextCalMonth()"><i class="fas fa-chevron-right"></i></button>
-        </div>
-        <div style="font-size:.85rem;color:var(--muted);margin-bottom:.25rem;">Month Total</div>
-        <div style="font-size:1.75rem;font-weight:700;color:${monthTotal >= 0 ? 'var(--green-val)' : '#fb7185'};">${monthTotal >= 0 ? '+' : ''}${monthTotal.toFixed(0)} ${currency}</div>
-      </div>
-      ${bestDay.value !== -Infinity ? `<div style="text-align:right;"><div style="font-size:.85rem;color:var(--muted);margin-bottom:.25rem;">Best Day</div><div style="font-size:1.1rem;font-weight:600;color:#fff;">Day ${bestDay.day}: ${bestDay.value >= 0 ? '+' : ''}${bestDay.value.toFixed(0)} ${currency}</div></div>` : ''}
-      ${worstDay.value !== Infinity ? `<div style="text-align:right;"><div style="font-size:.85rem;color:var(--muted);margin-bottom:.25rem;">Worst Day</div><div style="font-size:1.1rem;font-weight:600;color:#fb7185;">Day ${worstDay.day}: ${worstDay.value.toFixed(0)} ${currency}</div></div>` : ''}
-    </div>
-    <div class="cal-weekdays">
-      ${['Sun','Mon','Tue','Wed','Thu','Fri','Sat'].map(d => `<div style="text-align:center;font-size:.75rem;font-weight:600;color:var(--muted);padding:.5rem;">${d}</div>`).join('')}
-    </div>
-    <div class="cal-days">${daysHtml}</div>`;
-
-  const container = document.getElementById('calendarReturnsContent');
-  if (container) container.innerHTML = html;
-
-  window.calendarDailyStats = dailyStats;
 }
 
-function prevCalMonth() {
-  perfCalMonth--;
-  if (perfCalMonth < 0) { perfCalMonth = 11; perfCalYear--; }
-  calculateCalendarReturns(perfCachedTrades);
-}
-
-function nextCalMonth() {
-  perfCalMonth++;
-  if (perfCalMonth > 11) { perfCalMonth = 0; perfCalYear++; }
-  calculateCalendarReturns(perfCachedTrades);
-}
-
-// Day modal
-document.addEventListener('click', e => {
-  const cell = e.target.closest('.cal-day-cell');
-  if (cell && cell.dataset.day) openCalDayModal(cell.dataset.day);
-});
-
-function openCalDayModal(day) {
-  const modal   = document.getElementById('calDayModal');
-  const titleEl = document.getElementById('calDayTitle');
-  const pnlEl   = document.getElementById('calDayPnl');
-  const tradesEl= document.getElementById('calDayTrades');
-  const listEl  = document.getElementById('calDayList');
-  if (!modal) return;
-
-  const monthNames = ['January','February','March','April','May','June','July','August','September','October','November','December'];
-  const currency = window.accountCurrency || 'USD';
-  const stats = window.calendarDailyStats?.[day] || { profit: 0, count: 0 };
-
-  titleEl.textContent = `${monthNames[perfCalMonth]} ${day}, ${perfCalYear}`;
-  pnlEl.textContent = stats.count > 0 ? `${stats.profit >= 0 ? '+' : ''}${stats.profit.toFixed(2)} ${currency}` : 'No trades';
-  pnlEl.style.color = stats.count > 0 ? (stats.profit >= 0 ? 'var(--green-val)' : '#fb7185') : 'var(--muted)';
-  tradesEl.textContent = stats.count || 0;
-
-  const dayTrades = (perfCachedTrades || []).filter(t => {
-    const td = new Date(t.close_time);
-    return td.getFullYear() === perfCalYear && td.getMonth() === perfCalMonth && td.getDate() === Number(day);
-  });
-
-  listEl.innerHTML = dayTrades.length === 0
-    ? '<div style="font-size:.85rem;color:var(--muted);">No trades recorded for this day.</div>'
-    : dayTrades.slice(0, 8).map(t => {
-        const profit = parseFloat(t.profit || 0);
-        const time = t.close_time ? new Date(t.close_time).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : '--:--';
-        return `<div class="cal-modal-item"><div>${t.symbol || 'Trade'} · ${time}</div><div style="color:${profit >= 0 ? 'var(--green-val)' : '#fb7185'};font-weight:600;">${profit >= 0 ? '+' : ''}${profit.toFixed(2)} ${currency}</div></div>`;
-      }).join('');
-
-  modal.classList.add('active');
-}
-
-function closeCalDayModal() {
-  const modal = document.getElementById('calDayModal');
-  if (modal) modal.classList.remove('active');
-}
-
-document.addEventListener('keydown', e => {
-  if (e.key === 'Escape') closeCalDayModal();
-});
+loadPerformance();
 </script>
 </body>
 </html>
