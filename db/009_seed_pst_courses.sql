@@ -14,12 +14,12 @@ begin
   select id into win_id from public.communities where slug = 'win';
 
   -- ── Course: PST Basic Forex ─────────────────────────────────
-  insert into public.courses (id, community_id, title, description, thumbnail_url, sort_order, published)
+  insert into public.courses (id, community_id, title, description, thumbnail_url, sort_order, published, level)
   values (
     gen_random_uuid(), win_id,
     'PST Basic Forex Course',
     'Build a solid foundation in forex trading. Covers timeframes, trading sessions, market structure, liquidity, premium & discount zones, order blocks, and how to put it all together into a working strategy.',
-    null, 4, true
+    null, 4, true, 'beginner'
   ) returning id into course_bf;
 
   insert into public.course_chapters (course_id, chapter_num, title, description, video_url, sort_order) values
@@ -35,12 +35,12 @@ begin
     (course_bf, '10', 'Putting Everything Together', 'Full strategy walkthrough combining all concepts',  'https://youtu.be/ZJiw9EKoHsM', 10);
 
   -- ── Course: PST Advance Forex ───────────────────────────────
-  insert into public.courses (id, community_id, title, description, thumbnail_url, sort_order, published)
+  insert into public.courses (id, community_id, title, description, thumbnail_url, sort_order, published, level)
   values (
     gen_random_uuid(), win_id,
     'PST Advance Forex Course',
     'Take your forex trading to the next level. Deep dives into fractal timeframes, liquidity sweeps, fair value gaps, inverse FVGs, precise TP/SL placement, and full strategy execution.',
-    null, 5, true
+    null, 5, true, 'intermediate'
   ) returning id into course_af;
 
   insert into public.course_chapters (course_id, chapter_num, title, description, video_url, sort_order) values
@@ -54,12 +54,12 @@ begin
     (course_af, '8', 'Bonus Strategy',             'Bonus trade setup and strategy walkthrough',        'https://youtu.be/ZT89EheOmXo', 8);
 
   -- ── Course: PST Basic Synthetic ─────────────────────────────
-  insert into public.courses (id, community_id, title, description, thumbnail_url, sort_order, published)
+  insert into public.courses (id, community_id, title, description, thumbnail_url, sort_order, published, level)
   values (
     gen_random_uuid(), win_id,
     'PST Basic Synthetic Course',
     'Get started with synthetic indices trading. Learn how to use a broker platform, read timeframes, identify market structure, support & resistance, and execute your first synthetic trades.',
-    null, 6, true
+    null, 6, true, 'beginner'
   ) returning id into course_bs;
 
   insert into public.course_chapters (course_id, chapter_num, title, description, video_url, sort_order) values
@@ -74,12 +74,12 @@ begin
     (course_bs, '9', 'Putting Everything Together', 'Full strategy walkthrough for synthetics',          'https://youtu.be/_tODeeTmLk8', 9);
 
   -- ── Course: PST Advance Synthetic ───────────────────────────
-  insert into public.courses (id, community_id, title, description, thumbnail_url, sort_order, published)
+  insert into public.courses (id, community_id, title, description, thumbnail_url, sort_order, published, level)
   values (
     gen_random_uuid(), win_id,
     'PST Advance Synthetic Course',
     'Advanced synthetic indices strategies. Master order blocks, FVGs, IFVGs, liquidity sweeps, market structure shifts, Fibonacci levels, and precise entries & exits on volatility indices.',
-    null, 7, true
+    null, 7, true, 'intermediate'
   ) returning id into course_as;
 
   insert into public.course_chapters (course_id, chapter_num, title, description, video_url, sort_order) values

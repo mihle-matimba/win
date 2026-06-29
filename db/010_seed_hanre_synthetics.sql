@@ -12,12 +12,12 @@ declare
 begin
   select id into win_id from public.communities where slug = 'win';
 
-  insert into public.courses (id, community_id, title, description, thumbnail_url, sort_order, published)
+  insert into public.courses (id, community_id, title, description, thumbnail_url, sort_order, published, level)
   values (
     gen_random_uuid(), win_id,
     'Hanré''s Synthetics Course',
     'Explore the world of synthetic indices trading with Hanré. From the basics of volatility indices to advanced strategies — learn how to trade synthetics with confidence.',
-    null, 3, true
+    null, 3, true, 'intermediate'
   ) returning id into course_synth;
 
   insert into public.course_chapters (course_id, chapter_num, title, description, video_url, sort_order) values

@@ -263,6 +263,35 @@
 .c-skeleton .skel-line.w40{width:40%}
 @keyframes shimmer{0%{background-position:200% 0}100%{background-position:-200% 0}}
 
+/* ── Level sections ── */
+.c-section{margin-bottom:36px}
+.c-section-head{display:flex;align-items:center;gap:10px;margin-bottom:16px}
+.c-section-head h2{font-size:18px;font-weight:700;letter-spacing:-.3px}
+.c-section-count{
+  font-size:11px;font-weight:600;color:var(--muted);
+  background:var(--card);border:1px solid var(--line);
+  padding:3px 9px;border-radius:99px;
+}
+.c-section-dot{
+  width:10px;height:10px;border-radius:50%;flex-shrink:0;
+}
+.c-section-dot.beginner{background:var(--green-val)}
+.c-section-dot.intermediate{background:var(--accent)}
+.c-section-dot.advanced{background:var(--purple-val)}
+.c-section-dot.continue{background:#f59e0b}
+
+/* Continue button */
+.c-continue-btn{
+  display:flex;align-items:center;justify-content:center;gap:6px;
+  padding:9px 16px;border-radius:10px;
+  background:var(--accent);color:#fff;
+  border:none;font:600 13px 'Inter';
+  cursor:pointer;transition:opacity .15s;
+  width:100%;margin-top:10px;
+}
+.c-continue-btn:hover{opacity:.85}
+.c-continue-btn svg{width:14px;height:14px}
+
 /* ── Responsive ── */
 @media(max-width:900px){
   .dv-layout{grid-template-columns:1fr}
@@ -306,10 +335,12 @@
             <div class="c-stat"><div class="num" id="statProgress">0%</div><div class="lbl">Complete</div></div>
           </div>
         </div>
-        <div class="c-grid" id="courseGrid">
-          <div class="c-skeleton"><div class="skel-banner"></div><div class="skel-body"><div class="skel-line w80"></div><div class="skel-line w60"></div><div class="skel-line w40"></div></div></div>
-          <div class="c-skeleton"><div class="skel-banner"></div><div class="skel-body"><div class="skel-line w80"></div><div class="skel-line w60"></div><div class="skel-line w40"></div></div></div>
-          <div class="c-skeleton"><div class="skel-banner"></div><div class="skel-body"><div class="skel-line w80"></div><div class="skel-line w60"></div><div class="skel-line w40"></div></div></div>
+        <div id="courseGrid">
+          <div class="c-grid">
+            <div class="c-skeleton"><div class="skel-banner"></div><div class="skel-body"><div class="skel-line w80"></div><div class="skel-line w60"></div><div class="skel-line w40"></div></div></div>
+            <div class="c-skeleton"><div class="skel-banner"></div><div class="skel-body"><div class="skel-line w80"></div><div class="skel-line w60"></div><div class="skel-line w40"></div></div></div>
+            <div class="c-skeleton"><div class="skel-banner"></div><div class="skel-body"><div class="skel-line w80"></div><div class="skel-line w60"></div><div class="skel-line w40"></div></div></div>
+          </div>
         </div>
       </div>
 
@@ -393,16 +424,22 @@ let courses = [];
 let chapters = {};   // { courseId: [...chapters] }
 let progress = {};   // { chapterId: true }
 let openCourseId = null;
-let userId = null;   // set after auth is wired up
+
+/* Pull userId from stored session */
+const _userObj = JSON.parse(localStorage.getItem('win_user') || 'null');
+let userId = _userObj?.id || null;
 
 /* ================================================================
-   Course visuals — gradient + icon + level per sort_order
+   Course visuals — keyed by level from DB
    ================================================================ */
-const COURSE_THEMES = [
-  { gradient:'linear-gradient(135deg,#0a1628 0%,#142952 40%,#2a5aad 100%)', icon:'\u{1F4C8}', level:'beginner',     color:'var(--green-val)',  numBg:'rgba(53,215,155,.12)' },
-  { gradient:'linear-gradient(135deg,#140a28 0%,#2d1452 40%,#6b3fad 100%)', icon:'\u{1F4C9}', level:'intermediate', color:'var(--accent)',     numBg:'var(--accent-soft)' },
-  { gradient:'linear-gradient(135deg,#1a1a06 0%,#3d3510 40%,#ad8a2a 100%)', icon:'⚡',    level:'advanced',     color:'var(--purple-val)', numBg:'var(--purple-soft)' },
-];
+const LEVEL_THEMES = {
+  beginner:     { gradient:'linear-gradient(135deg,#0a1628 0%,#142952 40%,#2a5aad 100%)', icon:'\u{1F4C8}' },
+  intermediate: { gradient:'linear-gradient(135deg,#140a28 0%,#2d1452 40%,#6b3fad 100%)', icon:'\u{1F4C9}' },
+  advanced:     { gradient:'linear-gradient(135deg,#1a1a06 0%,#3d3510 40%,#ad8a2a 100%)', icon:'⚡' },
+};
+function getTheme(level) {
+  return LEVEL_THEMES[(level || 'beginner').toLowerCase()] || LEVEL_THEMES.beginner;
+}
 
 /* ================================================================
    Fetch data from API
@@ -430,7 +467,48 @@ async function loadData() {
 }
 
 /* ================================================================
-   Render grid view
+   Render a single course card
+   ================================================================ */
+function renderCard(c) {
+  const lvl = (c.level || 'beginner').toLowerCase();
+  const theme = getTheme(lvl);
+  const chs = chapters[c.id] || [];
+  const done = chs.filter(ch => progress[ch.id]).length;
+  const pct = chs.length ? Math.round((done / chs.length) * 100) : 0;
+  const inProgress = done > 0 && done < chs.length;
+  const lvlLabel = lvl.charAt(0).toUpperCase() + lvl.slice(1);
+  return `
+    <div class="c-card" onclick="openDetail('${c.id}')">
+      <div class="c-banner">
+        <div class="grad" style="background:${theme.gradient}"></div>
+        ${c.thumbnail_url ? `<img class="thumb" src="${esc(c.thumbnail_url)}" alt="${esc(c.title)}" loading="lazy">` : `<span class="icon">${theme.icon}</span>`}
+        <span class="c-badge ${lvl}">${lvlLabel}</span>
+        <span class="c-count">${chs.length} chapter${chs.length !== 1 ? 's' : ''}</span>
+      </div>
+      <div class="c-body">
+        <h3>${esc(c.title)}</h3>
+        <p class="desc">${esc(c.description)}</p>
+        ${chs.length ? `
+        <div class="c-progress">
+          <div class="c-progress-bar"><div class="c-progress-fill" style="width:${pct}%"></div></div>
+          <div class="c-progress-text"><span>${done} / ${chs.length} completed</span><span class="pct">${pct}%</span></div>
+        </div>` : ''}
+        ${inProgress ? `
+        <button class="c-continue-btn" onclick="event.stopPropagation();continueFrom('${c.id}')">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+          Continue
+        </button>` : ''}
+        <div class="c-meta">
+          <span class="mi"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>${chs.length} lessons</span>
+          <span class="mi"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 3h6a4 4 0 014 4v14a3 3 0 00-3-3H2z"/><path d="M22 3h-6a4 4 0 00-4 4v14a3 3 0 013-3h7z"/></svg>${lvlLabel}</span>
+          <span class="free">FREE</span>
+        </div>
+      </div>
+    </div>`;
+}
+
+/* ================================================================
+   Render grid view — grouped by level, continue section at top
    ================================================================ */
 function renderGrid() {
   const grid = document.getElementById('courseGrid');
@@ -451,47 +529,70 @@ function renderGrid() {
   document.getElementById('statLessons').textContent = totalChapters;
   document.getElementById('statProgress').textContent = totalChapters ? Math.round((totalDone / totalChapters) * 100) + '%' : '0%';
 
-  grid.innerHTML = courses.map((c, i) => {
-    const theme = COURSE_THEMES[i % COURSE_THEMES.length];
+  /* In-progress courses */
+  const inProgress = courses.filter(c => {
     const chs = chapters[c.id] || [];
     const done = chs.filter(ch => progress[ch.id]).length;
-    const pct = chs.length ? Math.round((done / chs.length) * 100) : 0;
-    return `
-      <div class="c-card" onclick="openDetail('${c.id}')">
-        <div class="c-banner">
-          <div class="grad" style="background:${theme.gradient}"></div>
-          ${c.thumbnail_url ? `<img class="thumb" src="${esc(c.thumbnail_url)}" alt="${esc(c.title)}" loading="lazy">` : `<span class="icon">${theme.icon}</span>`}
-          <span class="c-badge ${theme.level}">${theme.level}</span>
-          <span class="c-count">${chs.length} chapter${chs.length !== 1 ? 's' : ''}</span>
-        </div>
-        <div class="c-body">
-          <h3>${esc(c.title)}</h3>
-          <p class="desc">${esc(c.description)}</p>
-          ${chs.length ? `
-          <div class="c-progress">
-            <div class="c-progress-bar"><div class="c-progress-fill" style="width:${pct}%"></div></div>
-            <div class="c-progress-text"><span>${done} / ${chs.length} completed</span><span class="pct">${pct}%</span></div>
-          </div>` : ''}
-          <div class="c-meta">
-            <span class="mi"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>${chs.length} lessons</span>
-            <span class="mi"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 3h6a4 4 0 014 4v14a3 3 0 00-3-3H2z"/><path d="M22 3h-6a4 4 0 00-4 4v14a3 3 0 013-3h7z"/></svg>${theme.level.charAt(0).toUpperCase() + theme.level.slice(1)}</span>
-            <span class="free">FREE</span>
-          </div>
-        </div>
-      </div>`;
-  }).join('');
+    return done > 0 && done < chs.length;
+  });
+
+  /* Group by level */
+  const LEVEL_ORDER = ['beginner', 'intermediate', 'advanced'];
+  const grouped = {};
+  LEVEL_ORDER.forEach(l => { grouped[l] = []; });
+  courses.forEach(c => {
+    const lvl = (c.level || 'beginner').toLowerCase();
+    (grouped[lvl] || (grouped[lvl] = [])).push(c);
+  });
+
+  let html = '';
+
+  /* Continue learning section */
+  if (inProgress.length) {
+    html += `<div class="c-section">
+      <div class="c-section-head">
+        <div class="c-section-dot continue"></div>
+        <h2>Continue Learning</h2>
+        <span class="c-section-count">${inProgress.length} in progress</span>
+      </div>
+      <div class="c-grid">${inProgress.map(c => renderCard(c)).join('')}</div>
+    </div>`;
+  }
+
+  /* Level groups */
+  LEVEL_ORDER.forEach(lvl => {
+    const arr = grouped[lvl];
+    if (!arr || !arr.length) return;
+    const label = lvl.charAt(0).toUpperCase() + lvl.slice(1);
+    html += `<div class="c-section">
+      <div class="c-section-head">
+        <div class="c-section-dot ${lvl}"></div>
+        <h2>${label}</h2>
+        <span class="c-section-count">${arr.length} course${arr.length !== 1 ? 's' : ''}</span>
+      </div>
+      <div class="c-grid">${arr.map(c => renderCard(c)).join('')}</div>
+    </div>`;
+  });
+
+  grid.innerHTML = html;
 }
 
 /* ================================================================
    Open course detail view
    ================================================================ */
-function openDetail(courseId) {
+function continueFrom(courseId) {
+  const chs = chapters[courseId] || [];
+  const firstIncomplete = chs.find(ch => !progress[ch.id]);
+  openDetail(courseId, firstIncomplete?.id);
+}
+
+function openDetail(courseId, startChapterId) {
   const course = courses.find(c => c.id === courseId);
   if (!course) return;
 
   openCourseId = courseId;
-  const idx = courses.indexOf(course);
-  const theme = COURSE_THEMES[idx % COURSE_THEMES.length];
+  const lvl = (course.level || 'beginner').toLowerCase();
+  const theme = getTheme(lvl);
   const chs = chapters[courseId] || [];
   const done = chs.filter(ch => progress[ch.id]).length;
   const pct = chs.length ? Math.round((done / chs.length) * 100) : 0;
@@ -500,7 +601,7 @@ function openDetail(courseId) {
   document.getElementById('dvTitle').textContent = course.title;
   document.getElementById('dvMeta').innerHTML = `
     <span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>${chs.length} lessons</span>
-    <span class="c-badge ${theme.level}" style="position:static">${theme.level}</span>
+    <span class="c-badge ${lvl}" style="position:static">${lvl.charAt(0).toUpperCase() + lvl.slice(1)}</span>
     <span style="color:var(--green-val);font-weight:700">FREE</span>`;
 
   document.getElementById('dvDesc').textContent = course.description || '';
@@ -534,7 +635,8 @@ function openDetail(courseId) {
   }).join('');
 
   setVideoPlaceholder();
-  if (chs.length) playChapter(chs[0].id, courseId);
+  const playId = startChapterId || chs[0]?.id;
+  if (playId) playChapter(playId, courseId);
 
   document.getElementById('gridView').style.display = 'none';
   document.getElementById('detailView').classList.add('open');
