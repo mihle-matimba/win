@@ -78,8 +78,8 @@ const TOPBAR_HTML = `
   <div class="acct" id="acctMenu">
     <button class="acct-trigger" id="acctTrigger" aria-expanded="false">
       <span class="acct-tx">
-        <span class="r2"><span class="acct-name" id="acctBroker">VT Markets (Pty) Ltd</span><span class="acct-num" id="acctNum">#54845698</span></span>
-        <span class="r3"><span class="mut" id="acctSynced">Synced 1 hour ago</span></span>
+        <span class="r2"><span class="acct-name" id="acctBroker">No accounts</span><span class="acct-num" id="acctNum"></span></span>
+        <span class="r3"><span class="mut" id="acctSynced"></span></span>
       </span>
       <svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="m6 9 6 6 6-6"/></svg>
     </button>
@@ -89,11 +89,7 @@ const TOPBAR_HTML = `
   <button class="tb-btn" id="refresh" aria-label="Refresh"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12a9 9 0 0 1 9-9 9 9 0 0 1 6.7 3L21 8"/><path d="M21 3v5h-5M21 12a9 9 0 0 1-9 9 9 9 0 0 1-6.7-3L3 16"/><path d="M3 21v-5h5"/></svg></button>
   <div class="tb-avatar-wrap" id="tbAvatarWrap"></div>`;
 
-const ACCOUNTS = [
-  { name:'Test Account', nickname:'', num:'#54845698', broker:'VT Markets (Pty) Ltd', synced:'Synced 1 hour ago' },
-  { name:'Main Live',    nickname:'', num:'#88213004', broker:'VT Markets (Pty) Ltd', synced:'Synced 5 min ago' },
-  { name:'Practice',     nickname:'', num:'#10029384', broker:'MetaQuotes Demo',      synced:'Synced just now' },
-];
+const ACCOUNTS = [];
 
 /* Fallback broker list — overridden by community.allowed_brokers once loaded */
 const BROKERS_FALLBACK = [
@@ -274,17 +270,27 @@ function initAccountMenu() {
   const manageIcon = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"/><circle cx="12" cy="12" r="3"/></svg>';
 
   function renderOptions() {
-    drop.innerHTML = '<div class="dm-label">Switch account</div>' + ACCOUNTS.map((a, i) => `
-      <button class="acct-opt${i === selected ? ' sel' : ''}" data-i="${i}">
-        <span class="ao-tx">
-          <span class="ao-name">${a.broker}<span class="ao-num">${a.num}</span></span>
-          <span class="ao-meta">${a.synced}</span>
-        </span>
-        ${checkIcon}
-      </button>`).join('') +
+    const accountRows = ACCOUNTS.length
+      ? '<div class="dm-label">Switch account</div>' + ACCOUNTS.map((a, i) => `
+          <button class="acct-opt${i === selected ? ' sel' : ''}" data-i="${i}">
+            <span class="ao-tx">
+              <span class="ao-name">${a.broker}<span class="ao-num">${a.num}</span></span>
+              <span class="ao-meta">${a.synced}</span>
+            </span>
+            ${checkIcon}
+          </button>`).join('')
+      : '<div class="dm-no-accounts">No connected accounts</div>';
+    drop.innerHTML = accountRows +
       `<button class="acct-manage-btn" id="manageAcctsBtn">${manageIcon}<span>Manage accounts</span></button>`;
   }
   function applyAccount(i) {
+    if (!ACCOUNTS.length) {
+      document.getElementById('acctBroker').textContent = 'No accounts';
+      document.getElementById('acctNum').textContent = '';
+      const synced = document.getElementById('acctSynced');
+      if (synced) synced.textContent = '';
+      return;
+    }
     const a = ACCOUNTS[i];
     document.getElementById('acctBroker').textContent = a.broker;
     document.getElementById('acctNum').textContent = a.num;
