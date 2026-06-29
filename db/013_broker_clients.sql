@@ -67,16 +67,22 @@ create table if not exists public.linked_accounts (
   constraint linked_accounts_pkey primary key (id)
 ) tablespace pg_default;
 
--- Add the FK on user_id if the table existed before but lacked it
+-- Add the FK on user_id if the table existed before but lacked it.
+-- First purge any rows whose user_id doesn't exist in auth.users
+-- (orphaned data from before the FK existed).
 do $$ begin
   if not exists (
     select 1 from information_schema.table_constraints tc
     join information_schema.constraint_column_usage cu on cu.constraint_name = tc.constraint_name
-    where tc.table_schema = 'public'
-      and tc.table_name   = 'linked_accounts'
+    where tc.table_schema  = 'public'
+      and tc.table_name    = 'linked_accounts'
       and tc.constraint_type = 'FOREIGN KEY'
-      and cu.column_name = 'user_id'
+      and cu.column_name   = 'user_id'
   ) then
+    -- Remove orphaned rows so the FK can be added cleanly
+    delete from public.linked_accounts
+    where user_id not in (select id from auth.users);
+
     alter table public.linked_accounts
       add constraint linked_accounts_user_id_fkey
       foreign key (user_id) references auth.users (id) on delete cascade;
