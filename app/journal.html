@@ -223,7 +223,9 @@
 WIN.initShell({ activePage: 'journal' });
 
 /* ── helpers ── */
-const fmt$ = v => { const s = v < 0 ? '-$' : '$'; return s + Math.abs(v).toLocaleString('en-US', { minimumFractionDigits:2, maximumFractionDigits:2 }); };
+const CUR_SYM={'USD':'$','EUR':'€','GBP':'£','ZAR':'R','JPY':'¥','AUD':'A$','CAD':'C$','CHF':'Fr','NZD':'NZ$','SGD':'S$','HKD':'HK$','NOK':'kr','SEK':'kr','DKK':'kr','PLN':'zł','INR':'₹','BRL':'R$','MXN':'MX$','TRY':'₺','RUB':'₽','KRW':'₩'};
+let _currency = 'USD';
+const fmt$ = v => { const sym = CUR_SYM[_currency] || (_currency + ' '); const abs = Math.abs(v).toLocaleString('en-US', { minimumFractionDigits:2, maximumFractionDigits:2 }); return (v < 0 ? '-' : '') + sym + abs; };
 const fmtDate = iso => { if (!iso) return '—'; const d = new Date(iso); return d.toLocaleString('en-US', { month:'short', day:'numeric', year:'numeric', hour:'numeric', minute:'2-digit' }); };
 const fmtPrice = v => v != null ? parseFloat(v).toString() : '—';
 const symColor = s => /XAU|BTC|ETH|LTC|SOL|XRP|DOGE/i.test(s||'') ? 'amber' : 'blue';
@@ -377,7 +379,7 @@ async function loadPage(accountId, page) {
 }
 
 /* ── resolve broker_clients.id from selected account index ── */
-let _resolvedAccounts = []; // broker_clients.id per index
+let _resolvedAccounts = []; // { id, currency } per index
 
 async function resolveAccountId() {
   const raw = localStorage.getItem('win_user');
@@ -388,14 +390,14 @@ async function resolveAccountId() {
     const json = await res.json();
     const rows = json.accounts || json.broker_clients || [];
     _resolvedAccounts = rows.map(r => {
-      /* linked-accounts returns { id, broker_clients: { id, ... } } */
-      if (r.broker_clients && r.broker_clients.id) return r.broker_clients.id;
-      /* fallback: the row itself may be a broker_clients record */
-      return r.id;
+      const bc = r.broker_clients || r;
+      return { id: bc.id, currency: bc.account_currency || 'USD' };
     });
   } catch { _resolvedAccounts = []; }
   const idx = +(localStorage.getItem('win_selected_account') || 0);
-  return _resolvedAccounts[idx] ?? _resolvedAccounts[0] ?? null;
+  const acct = _resolvedAccounts[idx] ?? _resolvedAccounts[0] ?? null;
+  if (acct) _currency = acct.currency;
+  return acct ? acct.id : null;
 }
 
 async function init() {
@@ -410,7 +412,9 @@ setInterval(async () => {
   if (cur !== _lastIdx) {
     _lastIdx = cur;
     const idx = +(cur || 0);
-    activeAccountId = _resolvedAccounts[idx] ?? _resolvedAccounts[0] ?? null;
+    const acct = _resolvedAccounts[idx] ?? _resolvedAccounts[0] ?? null;
+    if (acct) { activeAccountId = acct.id; _currency = acct.currency; }
+    else activeAccountId = null;
     jPage = 0; selectedIdx = -1; currentTrade = -1;
     loadPage(activeAccountId, 0);
   }
