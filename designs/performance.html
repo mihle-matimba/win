@@ -122,13 +122,11 @@
 .stat-row-dual span:last-child{color:var(--red-val)}
 
 /* ── Symbols table ── */
-.sym-list{display:flex;flex-direction:column;gap:8px}
-.sym-row{display:flex;align-items:center;gap:12px}
-.sym-name{font-size:13px;font-weight:700;color:var(--ink);min-width:72px}
-.sym-bar-wrap{flex:1;height:6px;background:var(--line);border-radius:4px;overflow:hidden}
-.sym-bar{height:100%;border-radius:4px;background:var(--accent);transition:width .4s ease}
+.sym-list{display:flex;flex-direction:column;gap:7px}
+.sym-row{display:flex;align-items:center;gap:8px}
+.sym-name{font-size:12px;font-weight:700;color:var(--ink);flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .sym-pct{font-size:12px;font-weight:600;color:var(--muted);min-width:38px;text-align:right}
-.sym-count{font-size:11px;font-weight:500;color:var(--faint);min-width:30px;text-align:right}
+.sym-count{font-size:11px;font-weight:500;color:var(--faint);min-width:24px;text-align:right}
 
 /* ── Winstreak card ── */
 .ws-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
@@ -507,9 +505,10 @@
             <!-- Symbols traded -->
             <div class="perf-card">
               <div class="perf-card-title"><i class="fa-solid fa-coins"></i>Symbols Traded</div>
-              <div class="sym-list" id="symList">
-                <div class="chart-empty" style="height:120px"><i class="fa-solid fa-circle-info"></i>No trade data</div>
+              <div style="position:relative;height:160px;margin-bottom:12px">
+                <canvas id="symPieChart"></canvas>
               </div>
+              <div class="sym-list" id="symList"></div>
             </div>
           </div>
 
@@ -695,28 +694,49 @@ function revealContent() {
   document.getElementById('perfMain').classList.add('visible');
 }
 
-/* ─── Render symbols ─── */
+/* ─── Symbols pie chart ─── */
+const SYM_PALETTE = [
+  '#5b74ff','#35d79b','#ff6b81','#f7b731','#a29bfe',
+  '#fd79a8','#00cec9','#e17055','#74b9ff','#55efc4'
+];
+let symPieChart;
+
 function renderSymbols(symbols) {
   const list = el('symList');
-  if (!list) return;
+  const ctx  = el('symPieChart');
+  if (!list || !ctx) return;
+
+  if (symPieChart) { symPieChart.destroy(); symPieChart = null; }
+
   if (!symbols || symbols.length === 0) {
-    /* Show placeholder bars at 0 width so it looks like an empty chart */
-    const placeholders = ['—','—','—','—','—'];
-    list.innerHTML = placeholders.map(() => `
-      <div class="sym-row">
-        <div class="sym-name" style="color:var(--faint)">—</div>
-        <div class="sym-bar-wrap"><div class="sym-bar" style="width:0%"></div></div>
-        <div class="sym-pct" style="color:var(--faint)">0%</div>
-        <div class="sym-count" style="color:var(--faint)">0</div>
-      </div>
-    `).join('');
+    list.innerHTML = '<div style="font-size:12px;color:var(--faint);text-align:center;padding:8px 0">No trade data</div>';
     return;
   }
-  const max = Math.max(...symbols.map(s => s.pct));
-  list.innerHTML = symbols.map(s => `
+
+  const labels = symbols.map(s => s.symbol);
+  const counts = symbols.map(s => s.count);
+  const colors = symbols.map((_, i) => SYM_PALETTE[i % SYM_PALETTE.length]);
+
+  symPieChart = new Chart(ctx, {
+    type: 'doughnut',
+    data: { labels, datasets: [{ data: counts, backgroundColor: colors, borderColor: '#0c0f18', borderWidth: 2, hoverOffset: 6 }] },
+    options: {
+      responsive: true, maintainAspectRatio: false, cutout: '62%',
+      plugins: {
+        legend: { display: false },
+        tooltip: {
+          callbacks: { label: c => ` ${c.label}: ${c.parsed} trades (${symbols[c.dataIndex].pct.toFixed(1)}%)` },
+          backgroundColor: '#0c0f18', borderColor: '#1b2233', borderWidth: 1,
+          titleColor: '#c7d0e4', bodyColor: '#f2f5fc'
+        }
+      }
+    }
+  });
+
+  list.innerHTML = symbols.map((s, i) => `
     <div class="sym-row">
+      <span style="width:8px;height:8px;border-radius:50%;background:${colors[i]};flex:0 0 8px;display:inline-block"></span>
       <div class="sym-name">${s.symbol}</div>
-      <div class="sym-bar-wrap"><div class="sym-bar" style="width:${(s.pct/max*100).toFixed(1)}%"></div></div>
       <div class="sym-pct">${s.pct.toFixed(1)}%</div>
       <div class="sym-count">${s.count}</div>
     </div>

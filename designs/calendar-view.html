@@ -304,7 +304,7 @@ function renderCal(){
         cell.className="day click "+(win?"win":"loss");
         const pct=(v/base*100).toFixed(2)+'%';
         cell.innerHTML='<div class="n">'+c.d+'</div><div class="mid"><div class="v"></div><div class="p">'+pct+'</div></div>';
-        cell.querySelector('.v').textContent=(v<0?"-$":"$")+Math.abs(v).toFixed(2);
+        cell.querySelector('.v').textContent=fmt$(v);
         wsum+=v;whas=true;
       }else{cell.className="day flat click"+(isToday?" today":"");cell.innerHTML='<div class="big">'+c.d+'</div>';}
       const dd=c.d;cell.addEventListener('click',()=>openModal(cy,cm,dd));
@@ -368,14 +368,14 @@ function replayEntrance(){
     node.forEach(n=>{n.style.animation='none';void n.offsetWidth;n.style.animation='';});
   });
 }
-function countUp(el,target,prefix,duration){
+function countUp(el,target,duration){
   const start=performance.now(),from=0;
   function tick(now){
     const t=Math.min(1,(now-start)/duration);
     const eased=1-Math.pow(1-t,3);
     const val=from+(target-from)*eased;
-    el.textContent=prefix+Math.abs(val).toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2});
-    if(t<1)requestAnimationFrame(tick);else el.textContent=prefix+Math.abs(target).toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2});
+    el.textContent=fmt$(val);
+    if(t<1)requestAnimationFrame(tick);else el.textContent=fmt$(target);
   }
   requestAnimationFrame(tick);
 }
@@ -385,7 +385,7 @@ function openModal(y,m,d){
   const wrap=document.getElementById('mPnlWrap');wrap.classList.toggle('pos',pos);
   const pnlEl=document.getElementById('mPnl');
   pnlEl.classList.remove('pos','neg');pnlEl.classList.add(s.pnl>0?'pos':s.pnl<0?'neg':'');
-  countUp(pnlEl,s.pnl,s.pnl<0?'-':'',520);
+  countUp(pnlEl,s.pnl,520);
   const up='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M22 7 13.5 15.5l-5-5L2 17"/><path d="M16 7h6v6"/></svg>';
   const down='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M22 17 13.5 8.5l-5 5L2 7"/><path d="M16 17h6v-6"/></svg>';
   const pctEl=document.getElementById('mPct');pctEl.innerHTML=(pos?up:down)+'<span>'+s.pct+'</span>';
@@ -403,7 +403,7 @@ function openModal(y,m,d){
   document.getElementById('mFees').textContent=fmt$(s.fees);
   const wr=document.getElementById('mWR');wr.textContent=s.winrate+'%';wr.className='mv '+(s.winrate>=50?'pos':'neg');
   const pf=document.getElementById('mPF');pf.textContent=s.pf;pf.className='mv '+(typeof s.pf==='number'&&s.pf>1?'pos':'neu');
-  const ex=document.getElementById('mExp');ex.textContent=fmtN(s.exp);ex.className='mv '+(s.exp>0?'pos':s.exp<0?'neg':'neu');
+  const ex=document.getElementById('mExp');ex.textContent=fmt$(s.exp);ex.className='mv '+(s.exp>0?'pos':s.exp<0?'neg':'neu');
   modal.classList.add('show');
   document.body.style.overflow='hidden';
   replayEntrance();
