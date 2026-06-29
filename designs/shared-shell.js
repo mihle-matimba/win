@@ -17,7 +17,7 @@ const SIDEBAR_HTML = `
       <svg class="grp-chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="m6 9 6 6 6-6"/></svg>
     </button>
     <div class="nav-group" id="dashGroup">
-      <a class="nav-sub" data-page="performance" href="calendar-view.html"><span class="dot"></span><span>Performance</span></a>
+      <a class="nav-sub" data-page="performance" href="performance.html"><span class="dot"></span><span>Performance</span></a>
       <a class="nav-sub" data-page="calendar" href="calendar-view.html"><span class="dot"></span><span>Calendar</span></a>
       <a class="nav-sub" data-page="journal" href="journal.html"><span class="dot"></span><span>Journal</span></a>
     </div>
@@ -737,7 +737,41 @@ function initAccountMenu(activePage) {
   addEventListener('keydown', e => { if (e.key === 'Escape' && overlay.classList.contains('show')) closeManageModal(); });
 
   // ── Account gate (lock pages until a trading account is linked) ──
-  const GATED_PAGES = ['calendar', 'journal', 'courses'];
+  const GATED_PAGES = ['calendar', 'journal', 'courses', 'performance'];
+
+  const PAGE_LOCK_SELECTORS = {
+    calendar:    ['.cal', '.th-card'],
+    journal:     ['.j-layout'],
+    courses:     ['#gridView'],
+    performance: ['.perf-content']
+  };
+
+  const lockSvg = '<svg class="lock-icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>';
+
+  function applyPageLocks(page) {
+    const sels = PAGE_LOCK_SELECTORS[page] || [];
+    sels.forEach(sel => {
+      const el = document.querySelector(sel);
+      if (!el || el.classList.contains('has-lock')) return;
+      el.classList.add('has-lock');
+      const overlay = document.createElement('div');
+      overlay.className = 'card-lock';
+      overlay.innerHTML = lockSvg + '<button class="lock-unlock-btn">Unlock</button>';
+      el.appendChild(overlay);
+      overlay.querySelector('.lock-unlock-btn').onclick = () => showAccountGate();
+    });
+  }
+
+  function removePageLocks() {
+    document.querySelectorAll('.has-lock').forEach(el => {
+      el.classList.remove('has-lock');
+      const lk = el.querySelector('.card-lock');
+      if (lk) lk.remove();
+    });
+    networksLocked = false;
+    // Re-render channels to restore stripped href/target/rel attrs and remove lock icons
+    loadChannels();
+  }
 
   const PAGE_LOCK_SELECTORS = {
     calendar: ['.cal', '.th-card'],
