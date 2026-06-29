@@ -1,13 +1,12 @@
 -- ============================================================
 -- 013: Broker clients, linked accounts, and transactions
--- Run in Supabase SQL editor
--- Safe to re-run: handles existing tables and renames old column.
+-- Run in Supabase SQL editor — safe to re-run from any state
 -- ============================================================
 
 -- ── 1. broker_clients ────────────────────────────────────────
 
 create table if not exists public.broker_clients (
-  id                   bigint                      not null,
+  id                   bigint not null,
   name                 character varying(255),
   email                character varying(255),
   country              character varying(100),
@@ -33,7 +32,6 @@ create table if not exists public.broker_clients (
   last_trade           timestamp without time zone,
   registration         timestamp without time zone,
   synced_at            timestamp without time zone default now(),
-
   constraint broker_clients_pkey primary key (id)
 ) tablespace pg_default;
 
@@ -45,51 +43,21 @@ alter table public.broker_clients enable row level security;
 
 
 -- ── 2. linked_accounts ───────────────────────────────────────
--- If the table already existed with column named "uuid", rename it to user_id.
+-- Drop entirely and recreate clean — any prior rows were invalid anyway.
 
-do $$ begin
-  if exists (
-    select 1 from information_schema.columns
-    where table_schema = 'public'
-      and table_name   = 'linked_accounts'
-      and column_name  = 'uuid'
-  ) then
-    alter table public.linked_accounts rename column "uuid" to user_id;
-  end if;
-end $$;
+drop table if exists public.linked_accounts cascade;
 
--- Create fresh if it doesn't exist yet
-create table if not exists public.linked_accounts (
+create table public.linked_accounts (
   user_id   uuid   not null references auth.users (id) on delete cascade,
   id        bigint not null references public.broker_clients (id) on delete cascade,
   synced_at timestamp without time zone default now(),
-
   constraint linked_accounts_pkey primary key (id)
 ) tablespace pg_default;
-
--- Ensure user_id FK exists and points to auth.users.
--- Drop and recreate so this block is always idempotent.
-alter table public.linked_accounts
-  drop constraint if exists linked_accounts_user_id_fkey;
-
--- Purge any orphaned rows before adding the FK
-delete from public.linked_accounts
-where user_id not in (select id from auth.users);
-
-alter table public.linked_accounts
-  add constraint linked_accounts_user_id_fkey
-  foreign key (user_id) references auth.users (id) on delete cascade;
 
 create index if not exists idx_linked_accounts_user_id on public.linked_accounts using btree (user_id);
 create index if not exists idx_linked_accounts_id      on public.linked_accounts using btree (id);
 
 alter table public.linked_accounts enable row level security;
-
--- Drop policies before recreating (avoids "already exists" errors on re-run)
-drop policy if exists "linked_accounts_select" on public.linked_accounts;
-drop policy if exists "linked_accounts_insert" on public.linked_accounts;
-drop policy if exists "linked_accounts_delete" on public.linked_accounts;
-drop policy if exists "broker_clients_read_own" on public.broker_clients;
 
 create policy "linked_accounts_select" on public.linked_accounts
   for select using (auth.uid() = user_id);
@@ -100,7 +68,8 @@ create policy "linked_accounts_insert" on public.linked_accounts
 create policy "linked_accounts_delete" on public.linked_accounts
   for delete using (auth.uid() = user_id);
 
--- Users can read broker_client rows they have linked
+drop policy if exists "broker_clients_read_own" on public.broker_clients;
+
 create policy "broker_clients_read_own" on public.broker_clients
   for select using (
     exists (
@@ -113,7 +82,9 @@ create policy "broker_clients_read_own" on public.broker_clients
 
 -- ── 3. transactions ──────────────────────────────────────────
 
-create table if not exists public.transactions (
+drop table if exists public.transactions cascade;
+
+create table public.transactions (
   order_id             bigint not null,
   account_id           bigint,
   symbol               character varying(50),
@@ -129,7 +100,6 @@ create table if not exists public.transactions (
   rebates              numeric(18,2),
   synced_at            timestamp without time zone default now(),
   notional_volume_usd  numeric(18,2),
-
   constraint transactions_pkey         primary key (order_id),
   constraint transactions_account_fkey foreign key (account_id) references public.broker_clients (id)
 ) tablespace pg_default;
@@ -139,8 +109,6 @@ create index if not exists idx_transactions_open_time  on public.transactions us
 create index if not exists idx_transactions_synced_at  on public.transactions using btree (synced_at desc);
 
 alter table public.transactions enable row level security;
-
-drop policy if exists "transactions_read_own" on public.transactions;
 
 create policy "transactions_read_own" on public.transactions
   for select using (
