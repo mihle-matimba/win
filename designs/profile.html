@@ -1,0 +1,447 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>WIN · Profile</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="global.css">
+<style>
+.pf-wrap{max-width:720px;padding:32px clamp(16px,3vw,32px);display:flex;flex-direction:column;gap:0}
+.pf-page-title{font-size:26px;font-weight:800;letter-spacing:-.5px;margin-bottom:28px}
+
+.pf-section{
+  background:var(--card);border:1px solid var(--line);border-radius:var(--radius);
+  padding:28px 28px 24px;margin-bottom:18px;
+}
+.pf-section-title{font-size:13px;font-weight:700;letter-spacing:.6px;text-transform:uppercase;
+  color:var(--muted);margin-bottom:20px}
+
+/* ── Avatar ── */
+.pf-avatar-row{display:flex;align-items:center;gap:24px}
+.pf-avatar-wrap{
+  position:relative;width:88px;height:88px;border-radius:50%;flex:0 0 88px;
+  background:var(--card-2);border:2px solid var(--line);overflow:hidden;cursor:pointer;
+}
+.pf-avatar-wrap img,.pf-avatar-init{
+  width:100%;height:100%;object-fit:cover;display:flex;align-items:center;justify-content:center;
+  font-size:30px;font-weight:800;color:var(--ink-2)
+}
+.pf-avatar-init{background:linear-gradient(135deg,var(--accent-soft),rgba(91,116,255,.06))}
+.pf-avatar-overlay{
+  position:absolute;inset:0;background:rgba(0,0,0,.55);border-radius:50%;
+  display:flex;align-items:center;justify-content:center;
+  opacity:0;transition:opacity .18s
+}
+.pf-avatar-wrap:hover .pf-avatar-overlay{opacity:1}
+.pf-avatar-overlay svg{width:22px;height:22px;color:#fff}
+.pf-avatar-meta{display:flex;flex-direction:column;gap:8px}
+.pf-upload-btn{
+  padding:9px 20px;border-radius:10px;font-size:13px;font-weight:600;
+  background:var(--card-2);border:1px solid var(--line);color:var(--ink-2);
+  transition:border-color .15s,color .15s;cursor:pointer;
+}
+.pf-upload-btn:hover{border-color:var(--accent);color:#fff}
+.pf-hint{font-size:12px;color:var(--faint);margin:0}
+.pf-upload-progress{font-size:12px;color:var(--muted);min-height:16px}
+
+/* ── Form fields ── */
+.pf-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:18px}
+@media(max-width:520px){.pf-grid{grid-template-columns:1fr}}
+.pf-field{display:flex;flex-direction:column;gap:6px}
+.pf-label{font-size:12px;font-weight:600;color:var(--muted);letter-spacing:.3px}
+.pf-input{
+  background:var(--card-2);border:1px solid var(--line);border-radius:11px;
+  color:var(--ink);font:500 14px 'Inter';padding:12px 14px;outline:none;
+  transition:border-color .15s,background .15s
+}
+.pf-input:focus{border-color:rgba(91,116,255,.6);background:rgba(91,116,255,.06)}
+.pf-input[readonly]{opacity:.55;cursor:default}
+.pf-input::placeholder{color:var(--faint)}
+
+/* ── Buttons ── */
+.pf-save-btn{
+  padding:11px 24px;border-radius:11px;font-size:14px;font-weight:700;
+  background:var(--accent);color:#fff;border:none;cursor:pointer;
+  transition:opacity .15s;box-shadow:0 4px 20px -6px var(--accent-glow)
+}
+.pf-save-btn:hover{opacity:.88}
+.pf-save-btn:disabled{opacity:.45;cursor:not-allowed}
+.pf-ghost-btn{
+  padding:10px 22px;border-radius:11px;font-size:13px;font-weight:600;
+  background:transparent;border:1px solid var(--line);color:var(--ink-2);cursor:pointer;
+  transition:border-color .15s,color .15s
+}
+.pf-ghost-btn:hover{border-color:var(--accent);color:#fff}
+.pf-ghost-btn:disabled{opacity:.45;cursor:not-allowed}
+
+/* ── Status messages ── */
+.pf-msg{font-size:12px;min-height:18px;margin-top:10px}
+.pf-msg.ok{color:var(--green-val)}
+.pf-msg.err{color:var(--red-val)}
+
+/* ── Email read-only ── */
+.pf-email-val{
+  font-size:15px;font-weight:600;color:var(--ink);
+  background:var(--card-2);border:1px solid var(--line-soft);border-radius:11px;
+  padding:12px 14px;margin-bottom:12px;
+}
+.pf-note{font-size:13px;color:var(--muted);line-height:1.6}
+.pf-note a{color:var(--accent);text-decoration:underline;text-underline-offset:3px}
+.pf-note a:hover{opacity:.8}
+
+/* ── Linked accounts ── */
+.pf-acct-list{display:flex;flex-direction:column;gap:10px;margin-bottom:16px}
+.pf-acct-row{
+  display:flex;align-items:center;gap:14px;
+  background:var(--card-2);border:1px solid var(--line-soft);border-radius:12px;padding:14px 16px
+}
+.pf-acct-icon{
+  width:38px;height:38px;border-radius:10px;
+  background:var(--accent-soft);border:1px solid rgba(91,116,255,.25);
+  display:flex;align-items:center;justify-content:center;flex:0 0 38px;
+  font-size:16px;font-weight:800;color:var(--accent)
+}
+.pf-acct-info{flex:1;min-width:0}
+.pf-acct-name{font-size:14px;font-weight:700;color:var(--ink)}
+.pf-acct-meta{font-size:12px;color:var(--muted);margin-top:2px}
+.pf-acct-remove{
+  width:32px;height:32px;border-radius:8px;border:1px solid var(--line);
+  display:flex;align-items:center;justify-content:center;
+  color:var(--muted);transition:color .15s,border-color .15s,background .15s;flex:0 0 32px
+}
+.pf-acct-remove:hover{color:var(--red-val);border-color:var(--red-val);background:var(--red-soft)}
+.pf-acct-remove svg{width:15px;height:15px;pointer-events:none}
+.pf-acct-empty{font-size:14px;color:var(--muted);font-style:italic;padding:4px 0 14px}
+.pf-divider{height:1px;background:var(--line-soft);margin:4px 0 16px}
+</style>
+</head>
+<body>
+<div class="backdrop" id="backdrop"></div>
+<div class="app" id="app">
+
+  <aside class="sidebar" id="sidebar"></aside>
+
+  <div class="main">
+    <header class="topbar"></header>
+
+    <main class="content">
+      <div class="pf-wrap">
+
+        <h1 class="pf-page-title">Profile</h1>
+
+        <!-- ── Profile Photo ── -->
+        <div class="pf-section">
+          <div class="pf-section-title">Profile Photo</div>
+          <div class="pf-avatar-row">
+            <div class="pf-avatar-wrap" id="pfAvatarWrap" title="Click to upload photo" onclick="document.getElementById('pfFileInput').click()">
+              <div class="pf-avatar-init" id="pfAvatarInit">?</div>
+              <div class="pf-avatar-overlay">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
+              </div>
+            </div>
+            <input type="file" id="pfFileInput" accept="image/jpeg,image/png,image/gif,image/webp" style="display:none">
+            <div class="pf-avatar-meta">
+              <button class="pf-upload-btn" onclick="document.getElementById('pfFileInput').click()">Upload photo</button>
+              <p class="pf-hint">JPG, PNG, GIF or WebP · Max 5 MB</p>
+              <div class="pf-upload-progress" id="pfUploadMsg"></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- ── Personal Info ── -->
+        <div class="pf-section">
+          <div class="pf-section-title">Personal Information</div>
+          <div class="pf-grid">
+            <div class="pf-field">
+              <label class="pf-label" for="pfFirstName">First Name</label>
+              <input class="pf-input" id="pfFirstName" type="text" placeholder="First name" autocomplete="given-name">
+            </div>
+            <div class="pf-field">
+              <label class="pf-label" for="pfLastName">Last Name</label>
+              <input class="pf-input" id="pfLastName" type="text" placeholder="Last name" autocomplete="family-name">
+            </div>
+          </div>
+          <button class="pf-save-btn" id="pfSaveBtn">Save changes</button>
+          <div class="pf-msg" id="pfNameMsg"></div>
+        </div>
+
+        <!-- ── Password ── -->
+        <div class="pf-section">
+          <div class="pf-section-title">Password</div>
+          <p class="pf-note" style="margin-bottom:16px">We'll send a password reset link to your registered email address.</p>
+          <button class="pf-ghost-btn" id="pfResetBtn">Send reset email</button>
+          <div class="pf-msg" id="pfPwMsg"></div>
+        </div>
+
+        <!-- ── Email ── -->
+        <div class="pf-section">
+          <div class="pf-section-title">Email Address</div>
+          <div class="pf-email-val" id="pfEmailVal">—</div>
+          <p class="pf-note">To change your email address, please <a href="mailto:support@mdmtraders.com">contact support</a>.</p>
+        </div>
+
+        <!-- ── Linked Accounts ── -->
+        <div class="pf-section">
+          <div class="pf-section-title">Linked Accounts</div>
+          <div class="pf-acct-list" id="pfAcctList">
+            <div class="pf-acct-empty">Loading accounts…</div>
+          </div>
+          <div class="pf-divider"></div>
+          <button class="pf-ghost-btn" id="pfAddAcctBtn">
+            <svg style="width:15px;height:15px;vertical-align:middle;margin-right:6px" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M12 5v14M5 12h14"/></svg>
+            Add account
+          </button>
+        </div>
+
+      </div>
+    </main>
+  </div>
+</div>
+
+<script src="shared-shell.js"></script>
+<script>
+WIN.initShell({ activePage: 'profile' });
+
+const userObj  = JSON.parse(localStorage.getItem('win_user') || 'null');
+const userId   = userObj?.id || null;
+
+/* ── Populate fields from localStorage immediately ── */
+function applyUser(u) {
+  const fullName = u?.user_metadata?.full_name || u?.full_name || '';
+  const email    = u?.email || '';
+  const avatar   = u?.user_metadata?.avatar_url || u?.avatar_url || '';
+
+  const parts = fullName.trim().split(/\s+/);
+  document.getElementById('pfFirstName').value = parts[0] || '';
+  document.getElementById('pfLastName').value  = parts.slice(1).join(' ') || '';
+  document.getElementById('pfEmailVal').textContent = email || '—';
+
+  const wrap = document.getElementById('pfAvatarWrap');
+  const init = document.getElementById('pfAvatarInit');
+  const firstChar = (parts[0] || email || '?').charAt(0).toUpperCase();
+
+  if (avatar) {
+    // replace init div with img
+    const img = document.createElement('img');
+    img.src = avatar;
+    img.alt = fullName || 'Avatar';
+    img.style.cssText = 'width:100%;height:100%;object-fit:cover;border-radius:50%';
+    img.onerror = () => { img.remove(); init.style.display = 'flex'; };
+    if (init.parentNode) init.parentNode.insertBefore(img, init);
+    init.style.display = 'none';
+  } else {
+    init.textContent = firstChar;
+    init.style.display = 'flex';
+  }
+}
+
+if (userObj) applyUser(userObj);
+
+/* ── Fetch fresh profile from server ── */
+async function fetchProfile() {
+  if (!userId) return;
+  try {
+    const res  = await fetch(`/api/profile?user_id=${encodeURIComponent(userId)}`);
+    if (!res.ok) return;
+    const { user } = await res.json();
+    // Merge into stored user and refresh
+    const stored = JSON.parse(localStorage.getItem('win_user') || '{}');
+    stored.user_metadata = { ...(stored.user_metadata || {}), full_name: user.full_name, avatar_url: user.avatar_url };
+    localStorage.setItem('win_user', JSON.stringify(stored));
+    applyUser(stored);
+  } catch { /* silent */ }
+}
+fetchProfile();
+
+/* ── Save name ── */
+document.getElementById('pfSaveBtn').onclick = async () => {
+  const firstName = document.getElementById('pfFirstName').value.trim();
+  const lastName  = document.getElementById('pfLastName').value.trim();
+  const fullName  = [firstName, lastName].filter(Boolean).join(' ');
+  const msg       = document.getElementById('pfNameMsg');
+
+  if (!firstName) { msg.textContent = 'First name is required.'; msg.className = 'pf-msg err'; return; }
+  if (!userId)    { msg.textContent = 'Not signed in.'; msg.className = 'pf-msg err'; return; }
+
+  const btn = document.getElementById('pfSaveBtn');
+  btn.disabled = true; btn.textContent = 'Saving…';
+  msg.textContent = ''; msg.className = 'pf-msg';
+
+  try {
+    const res  = await fetch('/api/profile', {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ action: 'update-name', user_id: userId, full_name: fullName })
+    });
+    const json = await res.json();
+    if (!res.ok) {
+      msg.textContent = json.error || 'Failed to update name.'; msg.className = 'pf-msg err';
+    } else {
+      const stored = JSON.parse(localStorage.getItem('win_user') || '{}');
+      stored.user_metadata = { ...(stored.user_metadata || {}), full_name: json.user.full_name };
+      localStorage.setItem('win_user', JSON.stringify(stored));
+      msg.textContent = 'Name updated successfully.'; msg.className = 'pf-msg ok';
+    }
+  } catch {
+    msg.textContent = 'Network error. Please try again.'; msg.className = 'pf-msg err';
+  }
+  btn.disabled = false; btn.textContent = 'Save changes';
+};
+
+/* ── Password reset ── */
+document.getElementById('pfResetBtn').onclick = async () => {
+  const email = userObj?.email;
+  const msg   = document.getElementById('pfPwMsg');
+  if (!email) { msg.textContent = 'No email on file.'; msg.className = 'pf-msg err'; return; }
+
+  const btn = document.getElementById('pfResetBtn');
+  btn.disabled = true; btn.textContent = 'Sending…';
+  msg.textContent = ''; msg.className = 'pf-msg';
+
+  try {
+    const res  = await fetch('/api/auth', {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ action: 'reset-password', email })
+    });
+    const json = await res.json();
+    if (!res.ok) {
+      msg.textContent = json.error || 'Failed to send reset email.'; msg.className = 'pf-msg err';
+    } else {
+      msg.textContent = `Reset email sent to ${email}`; msg.className = 'pf-msg ok';
+      btn.textContent = 'Email sent'; btn.disabled = true;
+      return; // keep button disabled on success
+    }
+  } catch {
+    msg.textContent = 'Network error. Please try again.'; msg.className = 'pf-msg err';
+  }
+  btn.disabled = false; btn.textContent = 'Send reset email';
+};
+
+/* ── Avatar upload ── */
+document.getElementById('pfFileInput').addEventListener('change', async e => {
+  const file = e.target.files[0];
+  if (!file || !userId) return;
+
+  const MAX = 5 * 1024 * 1024;
+  const uploadMsg = document.getElementById('pfUploadMsg');
+
+  if (file.size > MAX) {
+    uploadMsg.textContent = 'File too large. Max 5 MB.';
+    uploadMsg.style.color = 'var(--red-val)';
+    return;
+  }
+
+  uploadMsg.textContent = 'Uploading…';
+  uploadMsg.style.color = 'var(--muted)';
+
+  try {
+    const arrayBuf = await file.arrayBuffer();
+    const base64   = btoa(String.fromCharCode(...new Uint8Array(arrayBuf)));
+    const ext      = file.name.split('.').pop() || 'jpg';
+
+    const res  = await fetch('/api/profile', {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        action: 'upload-avatar', user_id: userId,
+        file_base64: base64, file_type: file.type, file_name: `avatar.${ext}`
+      })
+    });
+    const json = await res.json();
+
+    if (!res.ok) {
+      uploadMsg.textContent = json.error || 'Upload failed.';
+      uploadMsg.style.color = 'var(--red-val)';
+    } else {
+      const stored = JSON.parse(localStorage.getItem('win_user') || '{}');
+      stored.user_metadata = { ...(stored.user_metadata || {}), avatar_url: json.user.avatar_url };
+      localStorage.setItem('win_user', JSON.stringify(stored));
+      applyUser(stored);
+      uploadMsg.textContent = 'Photo updated!';
+      uploadMsg.style.color = 'var(--green-val)';
+    }
+  } catch {
+    uploadMsg.textContent = 'Upload failed. Please try again.';
+    uploadMsg.style.color = 'var(--red-val)';
+  }
+
+  e.target.value = '';
+});
+
+/* ── Linked accounts ── */
+const trashSvg = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>';
+
+async function loadLinkedAccountsPanel() {
+  const list = document.getElementById('pfAcctList');
+  if (!userId) { list.innerHTML = '<div class="pf-acct-empty">Sign in to see linked accounts.</div>'; return; }
+
+  try {
+    const res  = await fetch(`/api/linked-accounts?user_id=${encodeURIComponent(userId)}`);
+    const json = await res.json();
+    const accounts = json.accounts || [];
+
+    if (!accounts.length) {
+      list.innerHTML = '<div class="pf-acct-empty">No linked accounts yet.</div>';
+      return;
+    }
+
+    list.innerHTML = accounts.map(row => {
+      const bc      = row.broker_clients || {};
+      const name    = bc.name || 'Account';
+      const num     = '#' + row.id;
+      const balance = bc.account_currency
+        ? `${bc.account_currency} ${Number(bc.balance || 0).toLocaleString(undefined, {minimumFractionDigits:2, maximumFractionDigits:2})}`
+        : '';
+      const initial = name.charAt(0).toUpperCase();
+      return `
+        <div class="pf-acct-row" data-id="${row.id}">
+          <div class="pf-acct-icon">${initial}</div>
+          <div class="pf-acct-info">
+            <div class="pf-acct-name">${name} <span style="font-size:12px;color:var(--muted);font-weight:500">${num}</span></div>
+            ${balance ? `<div class="pf-acct-meta">${balance}</div>` : ''}
+          </div>
+          <button class="pf-acct-remove" title="Remove account" data-remove="${row.id}">${trashSvg}</button>
+        </div>`;
+    }).join('');
+
+    list.querySelectorAll('[data-remove]').forEach(btn => {
+      btn.onclick = async () => {
+        const accountId = btn.dataset.remove;
+        btn.disabled = true;
+        try {
+          await fetch('/api/link-account', {
+            method: 'DELETE', headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ user_id: userId, account_id: accountId })
+          });
+        } catch { /* ignore */ }
+        btn.closest('.pf-acct-row').remove();
+        if (!list.querySelector('.pf-acct-row')) {
+          list.innerHTML = '<div class="pf-acct-empty">No linked accounts yet.</div>';
+        }
+      };
+    });
+  } catch {
+    list.innerHTML = '<div class="pf-acct-empty">Could not load accounts.</div>';
+  }
+}
+
+loadLinkedAccountsPanel();
+
+/* ── Add account — trigger manage accounts modal via shared-shell ── */
+document.getElementById('pfAddAcctBtn').onclick = () => {
+  const manageBtn = document.querySelector('#manageAcctsBtn');
+  if (manageBtn) { manageBtn.click(); return; }
+  // Fallback: open the acct dropdown then click manage
+  const trigger = document.getElementById('acctTrigger');
+  if (trigger) {
+    trigger.click();
+    setTimeout(() => {
+      const mb = document.querySelector('#manageAcctsBtn');
+      if (mb) mb.click();
+    }, 80);
+  }
+};
+</script>
+</body>
+</html>

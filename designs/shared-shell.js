@@ -64,10 +64,10 @@ const SIDEBAR_HTML = `
     </div>
   </nav>
   <div class="side-foot">
-    <div class="side-user">
+    <a class="side-user" href="profile.html" title="View profile">
       <div class="side-avatar-wrap" id="sideAvatarWrap"></div>
       <div class="meta"><div class="nm" id="sideUserName"></div><div class="em" id="sideUserEmail"></div></div>
-    </div>
+    </a>
     <a class="signout"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9"/></svg><span>Sign Out</span></a>
   </div>`;
 
@@ -86,7 +86,7 @@ const TOPBAR_HTML = `
   </div>
   <div class="tb-spacer"></div>
   <button class="tb-btn" id="refresh" aria-label="Refresh"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12a9 9 0 0 1 9-9 9 9 0 0 1 6.7 3L21 8"/><path d="M21 3v5h-5M21 12a9 9 0 0 1-9 9 9 9 0 0 1-6.7-3L3 16"/><path d="M3 21v-5h5"/></svg></button>
-  <div class="tb-avatar-wrap" id="tbAvatarWrap"></div>`;
+  <a class="tb-avatar-wrap" id="tbAvatarWrap" href="profile.html" title="View profile"></a>`;
 
 const ACCOUNTS = [];
 
