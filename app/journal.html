@@ -250,6 +250,7 @@ let TRADES = [];
 let jTotal = 0, jPage = 0, jPerPage = 16;
 let selectedIdx = -1, currentTrade = -1;
 let activeAccountId = null;
+let _userId = null;
 
 /* ── map DB row → trade object ── */
 function mapRow(r, localIdx) {
@@ -401,6 +402,8 @@ async function resolveAccountId() {
 }
 
 async function init() {
+  const raw = localStorage.getItem('win_user');
+  if (raw) { try { _userId = JSON.parse(raw).id; } catch {} }
   activeAccountId = await resolveAccountId();
   loadPage(activeAccountId, 0);
 }
@@ -430,11 +433,11 @@ jPag.addEventListener('click', e => {
 function selectTrade(gi) {
   selectedIdx = gi; currentTrade = gi;
   renderTable();
-  showDetail(gi);
   openTradeDrawer();
+  showDetail(gi);
 }
 
-function showDetail(gi) {
+async function showDetail(gi) {
   const localIdx = gi - jPage * jPerPage;
   const t = TRADES[localIdx];
   if (!t) return;
@@ -465,10 +468,45 @@ function showDetail(gi) {
   const starsEl = document.getElementById('tdStars');
   starsEl.innerHTML = [1,2,3,4,5].map(s => starSVG(s <= t.stars)).join('');
   starsEl.querySelectorAll('svg').forEach((svg, si) => {
-    svg.addEventListener('click', () => { t.stars = (t.stars===si+1)?0:si+1; showDetail(gi); renderTable(); });
+    svg.addEventListener('click', () => {
+      t.stars = (t.stars === si + 1) ? 0 : si + 1;
+      saveJournalEntry(t);
+      showDetail(gi);
+      renderTable();
+    });
   });
 
-  const totalOnPage = TRADES.length;
+  /* load saved notes + stars from DB (first open only — avoid flicker on star click) */
+  if (t._journalLoaded !== gi) {
+    t._journalLoaded = gi;
+    await loadJournalEntry(t);
+    /* re-render stars after load */
+    starsEl.innerHTML = [1,2,3,4,5].map(s => starSVG(s <= t.stars)).join('');
+    starsEl.querySelectorAll('svg').forEach((svg, si) => {
+      svg.addEventListener('click', () => {
+        t.stars = (t.stars === si + 1) ? 0 : si + 1;
+        saveJournalEntry(t);
+        showDetail(gi);
+        renderTable();
+      });
+    });
+    renderTable();
+  }
+
+  /* notes textarea */
+  const notesEl = document.getElementById('tdNotes');
+  notesEl.value = t.notes || '';
+  const saveBtn = document.querySelector('.td-save');
+  /* remove old listener then re-attach */
+  const newSaveBtn = saveBtn.cloneNode(true);
+  saveBtn.parentNode.replaceChild(newSaveBtn, saveBtn);
+  newSaveBtn.textContent = 'Save Notes';
+  newSaveBtn.disabled = false;
+  newSaveBtn.addEventListener('click', () => {
+    t.notes = notesEl.value;
+    saveJournalEntry(t);
+  });
+
   const isFirst = gi === 0;
   const isLast  = gi === jTotal - 1;
   document.getElementById('dPrev').disabled = isFirst;
@@ -489,6 +527,45 @@ addEventListener('keydown', e => {
   if (e.key === 'ArrowLeft'  && currentTrade > 0)          goToTrade(currentTrade - 1);
   if (e.key === 'ArrowRight' && currentTrade < jTotal - 1) goToTrade(currentTrade + 1);
 });
+
+/* ── journal entry save / load ── */
+async function loadJournalEntry(trade) {
+  if (!_userId || !activeAccountId || !trade._id) return;
+  try {
+    const params = new URLSearchParams({ user_id: _userId, account_id: activeAccountId, order_id: trade._id });
+    const res  = await fetch(`/api/journal-entry?${params}`);
+    const json = await res.json();
+    if (json.entry) {
+      trade.stars = json.entry.stars ?? 0;
+      trade.notes = json.entry.notes ?? '';
+    } else {
+      trade.stars = trade.stars || 0;
+      trade.notes = trade.notes || '';
+    }
+  } catch { /* non-fatal */ }
+}
+
+async function saveJournalEntry(trade) {
+  if (!_userId || !activeAccountId || !trade._id) return;
+  const saveBtn = document.querySelector('.td-save');
+  if (saveBtn) { saveBtn.textContent = 'Saving…'; saveBtn.disabled = true; }
+  try {
+    await fetch('/api/journal-entry', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        user_id: _userId,
+        account_id: activeAccountId,
+        order_id: trade._id,
+        stars: trade.stars,
+        notes: trade.notes,
+      }),
+    });
+    if (saveBtn) { saveBtn.textContent = 'Saved ✓'; setTimeout(() => { if (saveBtn) { saveBtn.textContent = 'Save Notes'; saveBtn.disabled = false; } }, 1500); }
+  } catch {
+    if (saveBtn) { saveBtn.textContent = 'Save Notes'; saveBtn.disabled = false; }
+  }
+}
 
 /* ── drawers ── */
 const tradeDrawer  = document.getElementById('tradeDrawer');
