@@ -709,11 +709,10 @@ function initAccountMenu(activePage) {
       <div class="gate-card">
         <img class="gate-logo" src="https://ffxlryusmstnfjedleds.supabase.co/storage/v1/object/public/Assets/WIN.png" alt="WIN">
         <p class="gate-desc">To enjoy the WIN platform for free, please connect your brokerage account.</p>
-        ${signupUrl ? `
-        <a class="gate-btn gate-broker-btn" href="${signupUrl}" target="_blank" rel="noopener">
-          <span>Create Account</span>
-          ${externalIcon}
-        </a>` : ''}
+        ${signupUrl
+          ? `<a class="gate-btn gate-broker-btn" href="${signupUrl}" target="_blank" rel="noopener"><span>Create Account</span>${externalIcon}</a>`
+          : `<button class="gate-btn gate-broker-btn" disabled>Create Account</button>`
+        }
         <p class="gate-support">Struggling to create an account? <a href="mailto:support@mdmtraders.com">Contact support</a></p>
         <div class="gate-divider"><span>Already have an account?</span></div>
         <div class="gate-search-row">
