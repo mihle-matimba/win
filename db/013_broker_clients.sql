@@ -1,11 +1,10 @@
 -- ============================================================
 -- 013: Broker clients, linked accounts, and transactions
 -- Run in Supabase SQL editor
+-- Safe to re-run: handles existing tables and renames old column.
 -- ============================================================
 
 -- ── 1. broker_clients ────────────────────────────────────────
--- Stores all broker-side client accounts synced from the IB portal.
--- id = the broker's account number (bigint, not a UUID).
 
 create table if not exists public.broker_clients (
   id                   bigint                      not null,
@@ -42,17 +41,24 @@ create index if not exists idx_broker_clients_country      on public.broker_clie
 create index if not exists idx_broker_clients_type         on public.broker_clients using btree (type);
 create index if not exists idx_broker_clients_registration on public.broker_clients using btree (registration desc);
 
--- RLS: only the service role (server-side sync script) can write;
---      linked-account holders can read their own record (enforced via linked_accounts).
 alter table public.broker_clients enable row level security;
-
--- Service role bypasses RLS by default, so no insert/update policy needed.
--- Read access is granted through the linked_accounts join below.
 
 
 -- ── 2. linked_accounts ───────────────────────────────────────
--- Maps a WIN user (auth.users) to one or more broker accounts.
+-- If the table already existed with column named "uuid", rename it to user_id.
 
+do $$ begin
+  if exists (
+    select 1 from information_schema.columns
+    where table_schema = 'public'
+      and table_name   = 'linked_accounts'
+      and column_name  = 'uuid'
+  ) then
+    alter table public.linked_accounts rename column "uuid" to user_id;
+  end if;
+end $$;
+
+-- Create fresh if it doesn't exist yet
 create table if not exists public.linked_accounts (
   user_id   uuid   not null references auth.users (id) on delete cascade,
   id        bigint not null references public.broker_clients (id) on delete cascade,
@@ -61,12 +67,33 @@ create table if not exists public.linked_accounts (
   constraint linked_accounts_pkey primary key (id)
 ) tablespace pg_default;
 
+-- Add the FK on user_id if the table existed before but lacked it
+do $$ begin
+  if not exists (
+    select 1 from information_schema.table_constraints tc
+    join information_schema.constraint_column_usage cu on cu.constraint_name = tc.constraint_name
+    where tc.table_schema = 'public'
+      and tc.table_name   = 'linked_accounts'
+      and tc.constraint_type = 'FOREIGN KEY'
+      and cu.column_name = 'user_id'
+  ) then
+    alter table public.linked_accounts
+      add constraint linked_accounts_user_id_fkey
+      foreign key (user_id) references auth.users (id) on delete cascade;
+  end if;
+end $$;
+
 create index if not exists idx_linked_accounts_user_id on public.linked_accounts using btree (user_id);
 create index if not exists idx_linked_accounts_id      on public.linked_accounts using btree (id);
 
 alter table public.linked_accounts enable row level security;
 
--- Users can see and manage only their own linked accounts.
+-- Drop policies before recreating (avoids "already exists" errors on re-run)
+drop policy if exists "linked_accounts_select" on public.linked_accounts;
+drop policy if exists "linked_accounts_insert" on public.linked_accounts;
+drop policy if exists "linked_accounts_delete" on public.linked_accounts;
+drop policy if exists "broker_clients_read_own" on public.broker_clients;
+
 create policy "linked_accounts_select" on public.linked_accounts
   for select using (auth.uid() = user_id);
 
@@ -76,22 +103,21 @@ create policy "linked_accounts_insert" on public.linked_accounts
 create policy "linked_accounts_delete" on public.linked_accounts
   for delete using (auth.uid() = user_id);
 
--- Allow a user to read a broker_client row only if they have a linked_accounts row for it.
+-- Users can read broker_client rows they have linked
 create policy "broker_clients_read_own" on public.broker_clients
   for select using (
     exists (
       select 1 from public.linked_accounts la
-      where la.id = broker_clients.id
+      where la.id      = broker_clients.id
         and la.user_id = auth.uid()
     )
   );
 
 
 -- ── 3. transactions ──────────────────────────────────────────
--- Individual trade records synced from the broker, keyed by order_id.
 
 create table if not exists public.transactions (
-  order_id             bigint                      not null,
+  order_id             bigint not null,
   account_id           bigint,
   symbol               character varying(50),
   type                 character varying(20),
@@ -117,12 +143,13 @@ create index if not exists idx_transactions_synced_at  on public.transactions us
 
 alter table public.transactions enable row level security;
 
--- Users can read transactions for accounts they have linked.
+drop policy if exists "transactions_read_own" on public.transactions;
+
 create policy "transactions_read_own" on public.transactions
   for select using (
     exists (
       select 1 from public.linked_accounts la
-      where la.id = transactions.account_id
+      where la.id      = transactions.account_id
         and la.user_id = auth.uid()
     )
   );
