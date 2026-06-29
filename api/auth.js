@@ -62,19 +62,6 @@ module.exports = async (req, res) => {
       return res.status(200).json({ success: true });
     }
 
-    // ── Google OAuth ──
-    if (action === 'google') {
-      const { data, error } = await supabase.auth.signInWithOAuth({
-        provider: 'google',
-        options: {
-          redirectTo: `${req.headers.origin || 'https://win-trading.vercel.app'}/designs/courses`,
-        },
-      });
-
-      if (error) return res.status(400).json({ error: error.message });
-      return res.status(200).json({ url: data.url });
-    }
-
     return res.status(400).json({ error: 'Invalid action' });
   } catch (err) {
     return res.status(500).json({ error: err.message });
