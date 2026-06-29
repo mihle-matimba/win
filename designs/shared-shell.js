@@ -66,8 +66,8 @@ const SIDEBAR_HTML = `
   </nav>
   <div class="side-foot">
     <div class="side-user">
-      <img class="side-avatar" alt="" src="https://i.pravatar.cc/80?img=12">
-      <div class="meta"><div class="nm">Yuveshnee</div><div class="em">support@mdmtraders.com</div></div>
+      <div class="side-avatar-wrap" id="sideAvatarWrap"></div>
+      <div class="meta"><div class="nm" id="sideUserName"></div><div class="em" id="sideUserEmail"></div></div>
     </div>
     <a class="signout"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9"/></svg><span>Sign Out</span></a>
   </div>`;
@@ -87,7 +87,7 @@ const TOPBAR_HTML = `
   </div>
   <div class="tb-spacer"></div>
   <button class="tb-btn" id="refresh" aria-label="Refresh"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12a9 9 0 0 1 9-9 9 9 0 0 1 6.7 3L21 8"/><path d="M21 3v5h-5M21 12a9 9 0 0 1-9 9 9 9 0 0 1-6.7-3L3 16"/><path d="M3 21v-5h5"/></svg></button>
-  <img class="tb-avatar" alt="" src="https://i.pravatar.cc/80?img=12">`;
+  <div class="tb-avatar-wrap" id="tbAvatarWrap"></div>`;
 
 const ACCOUNTS = [
   { name:'Test Account', nickname:'', num:'#54845698', broker:'VT Markets (Pty) Ltd', synced:'Synced 1 hour ago' },
@@ -123,9 +123,18 @@ async function loadCommunity() {
     const res = await fetch(`/api/community?${param}`);
     if (!res.ok) throw new Error();
     const { community } = await res.json();
+
     communityBrokers = Array.isArray(community?.allowed_brokers) && community.allowed_brokers.length
       ? community.allowed_brokers
       : BROKERS_FALLBACK;
+
+    // Update community logo in sidebar
+    if (community?.logo_url) {
+      const brandLogo = document.getElementById('brandLogo');
+      if (brandLogo) { brandLogo.src = community.logo_url; brandLogo.style.display = ''; }
+      const logoFallback = document.getElementById('logoFallback');
+      if (logoFallback) logoFallback.style.display = 'none';
+    }
   } catch {
     communityBrokers = BROKERS_FALLBACK;
   }
@@ -133,6 +142,35 @@ async function loadCommunity() {
   const modal = document.getElementById('manageAccountsModal');
   if (modal && modal.classList.contains('show') && modal.querySelector('.ma-loading')) {
     modal.dispatchEvent(new CustomEvent('community-loaded'));
+  }
+}
+
+function applyUserInfo() {
+  const userObj = JSON.parse(localStorage.getItem('win_user') || 'null');
+  const email    = userObj?.email || '';
+  const name     = userObj?.user_metadata?.full_name || '';
+  const avatar   = userObj?.user_metadata?.avatar_url || '';
+  const firstName = (name || email).split(/[\s@]/)[0] || '?';
+  const initial  = firstName.charAt(0).toUpperCase();
+
+  // ── Sidebar avatar + name + email ──
+  const avatarWrap = document.getElementById('sideAvatarWrap');
+  if (avatarWrap) {
+    avatarWrap.innerHTML = avatar
+      ? `<img class="side-avatar" alt="${firstName}" src="${avatar}">`
+      : `<div class="side-avatar-init">${initial}</div>`;
+  }
+  const sideEmail = document.getElementById('sideUserEmail');
+  if (sideEmail) sideEmail.textContent = email;
+  const sideName = document.getElementById('sideUserName');
+  if (sideName) sideName.textContent = firstName;
+
+  // ── Topbar avatar ──
+  const tbWrap = document.getElementById('tbAvatarWrap');
+  if (tbWrap) {
+    tbWrap.innerHTML = avatar
+      ? `<img class="tb-avatar" alt="${firstName}" src="${avatar}">`
+      : `<div class="tb-avatar-init">${initial}</div>`;
   }
 }
 
@@ -144,6 +182,7 @@ function initShell({ activePage = '' } = {}) {
 
   loadChannels();
   loadCommunity();
+  applyUserInfo();
   initAccountMenu();
 
   // logo fallback
@@ -351,11 +390,19 @@ function initAccountMenu() {
             ? `<div class="ma-loading">Loading brokers…</div>`
             : (communityBrokers.length === 0
                 ? `<div class="ma-loading">No brokers configured for your community.</div>`
-                : communityBrokers.map(b => `
-                    <button class="ma-broker${addBroker === b ? ' sel' : ''}" data-broker="${b}">
-                      <span class="ma-broker-icon">${b.charAt(0)}</span>
-                      <span>${b}</span>
-                    </button>`).join('')
+                : communityBrokers.map(b => {
+                    const bName = typeof b === 'string' ? b : b.name;
+                    const bLogo = typeof b === 'string' ? null : b.logo_url;
+                    return `
+                    <button class="ma-broker${addBroker === bName ? ' sel' : ''}" data-broker="${bName}">
+                      <span class="ma-broker-icon">
+                        ${bLogo
+                          ? `<img src="${bLogo}" alt="${bName}" class="ma-broker-logo">`
+                          : bName.charAt(0)}
+                      </span>
+                      <span>${bName}</span>
+                    </button>`;
+                  }).join('')
               )
           }
         </div>

@@ -51,7 +51,7 @@ create index idx_communities_domain on public.communities (domain);
 
 -- Seed your initial communities
 insert into public.communities (name, slug, domain, support_email, email_from, email_from_name, allowed_brokers) values
-  ('WIN',     'win',     null, 'support@win.com',           'noreply@win.com',           'WIN',     '["VT Markets (Pty) Ltd","MetaQuotes Demo","IC Markets","Exness","XM Global","FXCM","Pepperstone","OANDA","IG Markets","FP Markets"]'::jsonb),
-  ('MDM',     'mdm',     null, 'support@mdmtraders.com',    'noreply@mdmtraders.com',    'MDM Traders',    '["VT Markets (Pty) Ltd","MetaQuotes Demo"]'::jsonb),
-  ('NextGen', 'nextgen', null, 'support@nextgentrading.com','noreply@nextgentrading.com','NextGen Trading', '["IC Markets","Exness"]'::jsonb),
-  ('FestX',   'festx',   null, 'support@festx.io',          'noreply@festx.io',          'FestX',   '["VT Markets (Pty) Ltd","IC Markets","Pepperstone"]'::jsonb);
+  ('WIN',     'win',     null, 'support@win.com',           'noreply@win.com',           'WIN',     '[{"name":"JP Markets (Pty) Ltd","logo_url":null}]'::jsonb),
+  ('MDM',     'mdm',     null, 'support@mdmtraders.com',    'noreply@mdmtraders.com',    'MDM Traders',    '[{"name":"VT Markets (Pty) Ltd","logo_url":null},{"name":"MetaQuotes Demo","logo_url":null}]'::jsonb),
+  ('NextGen', 'nextgen', null, 'support@nextgentrading.com','noreply@nextgentrading.com','NextGen Trading', '[{"name":"IC Markets","logo_url":null},{"name":"Exness","logo_url":null}]'::jsonb),
+  ('FestX',   'festx',   null, 'support@festx.io',          'noreply@festx.io',          'FestX',   '[{"name":"VT Markets (Pty) Ltd","logo_url":null},{"name":"IC Markets","logo_url":null},{"name":"Pepperstone","logo_url":null}]'::jsonb);
