@@ -17,7 +17,7 @@ module.exports = async (req, res) => {
   const from = pageNum * perPage;
   const to = from + perPage - 1;
 
-  const BALANCE_TYPES = ['balance', 'deposit', 'withdrawal', 'credit'];
+  const BALANCE_WORDS = ['balance', 'deposit', 'withdrawal', 'credit'];
 
   let q = supabase
     .from('transactions')
@@ -26,13 +26,13 @@ module.exports = async (req, res) => {
     .order('open_time', { ascending: false })
     .range(from, to);
 
-  if (tab === 'balance') {
-    /* balance operations tab: only deposit/withdrawal/balance/credit rows */
-    q = q.in('type', BALANCE_TYPES);
-  } else {
-    /* trades tab: exclude balance operation types */
-    q = q.not('type', 'in', `(${BALANCE_TYPES.join(',')})`);
-  }
+  /* exclude any row where type OR symbol matches a balance operation word */
+  q = q.not('type', 'ilike', '%deposit%')
+       .not('type', 'ilike', '%withdrawal%')
+       .not('type', 'ilike', '%balance%')
+       .not('type', 'ilike', '%credit%')
+       .not('symbol', 'ilike', '%deposit%')
+       .not('symbol', 'ilike', '%withdrawal%');
 
   if (symbol) q = q.ilike('symbol', `%${symbol}%`);
   if (type)   q = q.ilike('type', type);
