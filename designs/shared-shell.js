@@ -300,6 +300,14 @@ function initShell({ activePage = '' } = {}) {
     if (group && group.classList.contains('nav-group')) group.classList.add('closed');
   });
 
+  // dashboard group is expanded by default
+  const dashTrigger = document.getElementById('dashTrigger');
+  const dashGroup   = document.getElementById('dashGroup');
+  if (dashTrigger && dashGroup) {
+    dashTrigger.setAttribute('aria-expanded', 'true');
+    dashGroup.classList.remove('closed');
+  }
+
   // highlight active page (and its parent group trigger, if any) + expand that group
   document.querySelectorAll('[data-page]').forEach(el => {
     if (el.dataset.page === activePage) {
