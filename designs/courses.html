@@ -1,686 +1,517 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>WIN — Trading Courses</title>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>WIN · Courses</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Space+Grotesk:wght@500;600;700;800&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="global.css">
 <style>
-  :root{
-    --bg:#0a0a0b;
-    --bg-soft:#101012;
-    --card:#141417;
-    --card-2:#18181c;
-    --card-3:#1c1c21;
-    --line:rgba(255,255,255,.08);
-    --line-2:rgba(255,255,255,.14);
-    --txt:#f5f6f8;
-    --muted:#9b9ca3;
-    --muted-2:#6f7077;
-    --blue:#2f7bff;
-    --blue-hover:#4a8dff;
-    --blue-glow:rgba(47,123,255,.35);
-    --green:#2ecc71;
-    --purple:#a259ff;
-    --orange:#ff8c42;
-    --radius:14px;
-  }
-  *{margin:0;padding:0;box-sizing:border-box}
-  html{scroll-behavior:smooth}
-  body{
-    background:var(--bg);color:var(--txt);
-    font-family:'Inter',system-ui,sans-serif;
-    -webkit-font-smoothing:antialiased;
-    overflow-x:hidden;min-height:100vh;
-    display:flex;flex-direction:column;
-  }
-  a{color:inherit;text-decoration:none}
-  ::selection{background:var(--blue);color:#fff}
+/* ── Courses page styles ── */
 
-  /* ---------- nav ---------- */
-  header{
-    position:sticky;top:0;z-index:50;
-    background:rgba(10,10,11,.78);backdrop-filter:blur(14px);
-    border-bottom:1px solid var(--line);
-  }
-  .wrap{max-width:1140px;margin:0 auto;padding:0 24px}
-  .nav{display:flex;align-items:center;justify-content:space-between;height:68px}
-  .logo-img{height:36px;width:auto}
-  .nav-links{display:flex;gap:36px;font:500 14px 'Inter',sans-serif;color:var(--muted)}
-  .nav-links a{transition:color .15s}
-  .nav-links a:hover{color:#fff}
-  .nav-links a.active{color:#fff}
+.c-header{
+  display:flex;align-items:flex-start;justify-content:space-between;gap:16px;
+  margin-bottom:8px;
+}
+.c-header h1{font-size:26px;font-weight:800;letter-spacing:-.5px;line-height:1.2}
+.c-header .sub{font-size:14px;color:var(--muted);margin-top:4px}
+.c-stats{display:flex;gap:20px}
+.c-stat{
+  background:var(--card);border:1px solid var(--line);border-radius:12px;
+  padding:14px 20px;text-align:center;min-width:90px;
+}
+.c-stat .num{font-size:22px;font-weight:800;letter-spacing:-.5px;color:#fff}
+.c-stat .lbl{font-size:11px;color:var(--muted);margin-top:2px;font-weight:600}
 
-  /* ---------- buttons ---------- */
-  .btn{
-    display:inline-flex;align-items:center;gap:8px;
-    font:600 14px/1 'Inter',sans-serif;
-    padding:13px 24px;border-radius:999px;border:none;cursor:pointer;
-    transition:transform .15s ease, box-shadow .2s ease, background .2s ease;
-  }
-  .btn:active{transform:scale(.97)}
-  .btn-blue{background:var(--blue);color:#fff;box-shadow:0 0 24px var(--blue-glow)}
-  .btn-blue:hover{background:var(--blue-hover);box-shadow:0 0 36px var(--blue-glow)}
-  .btn-white{background:#fff;color:#0a0a0b}
-  .btn-white:hover{background:#e8e8ec}
+/* course grid */
+.c-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:18px}
 
-  /* ---------- hero ---------- */
-  .hero{
-    position:relative;text-align:center;padding:100px 0 60px;
-    background:
-      radial-gradient(600px 320px at 50% -60px, rgba(47,123,255,.14), transparent 70%),
-      var(--bg);
-  }
-  .hero::before{
-    content:"";position:absolute;inset:0;pointer-events:none;
-    background-image:linear-gradient(var(--line) 1px,transparent 1px),linear-gradient(90deg,var(--line) 1px,transparent 1px);
-    background-size:90px 90px;
-    mask-image:radial-gradient(700px 420px at 50% 0,black 30%,transparent 75%);
-    opacity:.35;
-  }
-  .hero .pill{
-    display:inline-flex;align-items:center;gap:8px;
-    font:600 12.5px 'Inter';padding:9px 22px;border-radius:99px;
-    color:#fff;margin-bottom:22px;position:relative;
-    border:1.5px solid transparent;
-    background:
-      linear-gradient(#121215,#121215) padding-box,
-      linear-gradient(115deg,rgba(255,255,255,.95),rgba(167,139,250,.7) 30%,rgba(47,123,255,.45) 55%,rgba(255,255,255,.08) 80%) border-box;
-    box-shadow:0 0 18px rgba(122,92,255,.25),0 0 40px rgba(47,123,255,.12);
-  }
-  .hero .pill .icon{font-size:14px}
-  .hero h1{
-    font:800 clamp(36px,5.6vw,64px)/1.08 'Space Grotesk',sans-serif;
-    letter-spacing:-2px;position:relative;
-    background:linear-gradient(90deg,#ffffff 8%,#d9dade 42%,#8c8d95 75%,#5d5e66 100%);
-    -webkit-background-clip:text;background-clip:text;color:transparent;
-  }
-  .hero p{
-    max-width:540px;margin:18px auto 0;color:var(--muted);
-    font-size:16px;line-height:1.65;position:relative;
-  }
+/* course card */
+.c-card{
+  background:var(--card);border:1px solid var(--line);border-radius:var(--radius);
+  overflow:hidden;cursor:pointer;
+  transition:transform .2s ease, box-shadow .2s ease, border-color .2s ease;
+}
+.c-card:hover{
+  transform:translateY(-3px);
+  box-shadow:0 16px 48px -16px rgba(0,0,0,.5);
+  border-color:rgba(255,255,255,.12);
+}
+.c-banner{
+  height:160px;position:relative;overflow:hidden;
+  display:flex;align-items:center;justify-content:center;
+}
+.c-banner .grad{position:absolute;inset:0}
+.c-banner .icon{position:relative;font-size:42px;filter:drop-shadow(0 4px 16px rgba(0,0,0,.4))}
+.c-badge{
+  position:absolute;top:12px;left:12px;
+  font-size:10px;font-weight:700;padding:4px 10px;border-radius:99px;
+  text-transform:uppercase;letter-spacing:.4px;
+}
+.c-badge.beginner{background:rgba(53,215,155,.14);color:var(--green-val);border:1px solid rgba(53,215,155,.3)}
+.c-badge.intermediate{background:var(--accent-soft);color:var(--accent);border:1px solid rgba(91,116,255,.3)}
+.c-badge.advanced{background:var(--purple-soft);color:var(--purple-val);border:1px solid rgba(168,130,255,.3)}
+.c-count{
+  position:absolute;top:12px;right:12px;
+  font-size:11px;font-weight:600;padding:5px 12px;border-radius:99px;
+  background:rgba(0,0,0,.5);backdrop-filter:blur(8px);
+  border:1px solid rgba(255,255,255,.12);color:#fff;
+}
 
-  /* ---------- course stats ---------- */
-  .course-stats{
-    display:flex;justify-content:center;gap:48px;
-    margin-top:40px;position:relative;
-  }
-  .course-stats .stat{text-align:center}
-  .course-stats .stat .num{font:800 28px 'Space Grotesk';letter-spacing:-1px;color:#fff}
-  .course-stats .stat .lbl{font-size:12.5px;color:var(--muted);margin-top:4px}
+.c-body{padding:20px}
+.c-body h3{font-size:17px;font-weight:700;letter-spacing:-.3px;margin-bottom:6px}
+.c-body .desc{font-size:13px;color:var(--muted);line-height:1.55;margin-bottom:16px;
+  display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
 
-  /* ---------- courses grid ---------- */
-  .courses-section{padding:60px 0 80px}
-  .courses-grid{
-    display:grid;grid-template-columns:repeat(auto-fill,minmax(340px,1fr));
-    gap:24px;margin-top:40px;
-  }
+/* progress bar */
+.c-progress{margin-bottom:14px}
+.c-progress-bar{
+  height:6px;border-radius:99px;background:var(--line);overflow:hidden;
+}
+.c-progress-fill{
+  height:100%;border-radius:99px;
+  background:linear-gradient(90deg,var(--accent),var(--green-val));
+  transition:width .4s ease;
+}
+.c-progress-text{
+  display:flex;justify-content:space-between;align-items:center;
+  font-size:11px;font-weight:600;color:var(--muted);margin-top:6px;
+}
+.c-progress-text .pct{color:var(--green-val)}
 
-  /* ---------- course card ---------- */
-  .course-card{
-    background:var(--card);border:1px solid var(--line);border-radius:18px;
-    overflow:hidden;transition:transform .25s ease, box-shadow .25s ease, border-color .25s ease;
-    display:flex;flex-direction:column;
-  }
-  .course-card:hover{
-    transform:translateY(-4px);
-    box-shadow:0 20px 60px rgba(0,0,0,.4);
-    border-color:rgba(255,255,255,.12);
-  }
-  .card-banner{
-    height:200px;position:relative;overflow:hidden;
-    display:flex;align-items:center;justify-content:center;
-  }
-  .card-banner .gradient{position:absolute;inset:0}
-  .card-banner .banner-icon{
-    position:relative;font-size:48px;
-    filter:drop-shadow(0 4px 20px rgba(0,0,0,.4));
-  }
-  .card-banner .chapter-count{
-    position:absolute;top:16px;right:16px;
-    font:600 12px 'Inter';padding:6px 14px;border-radius:99px;
-    background:rgba(0,0,0,.5);backdrop-filter:blur(8px);
-    border:1px solid rgba(255,255,255,.12);color:#fff;
-  }
-  .card-banner .level-badge{
-    position:absolute;top:16px;left:16px;
-    font:700 10px 'Inter';padding:5px 12px;border-radius:99px;
-    text-transform:uppercase;letter-spacing:.5px;
-  }
-  .level-beginner{background:rgba(46,204,113,.15);color:var(--green);border:1px solid rgba(46,204,113,.3)}
-  .level-intermediate{background:rgba(47,123,255,.15);color:var(--blue);border:1px solid rgba(47,123,255,.3)}
-  .level-advanced{background:rgba(162,89,255,.15);color:var(--purple);border:1px solid rgba(162,89,255,.3)}
+.c-meta{
+  display:flex;align-items:center;gap:14px;
+  font-size:12px;color:var(--faint);
+  padding-top:14px;border-top:1px solid var(--line);
+}
+.c-meta .mi{display:flex;align-items:center;gap:4px}
+.c-meta .mi svg{width:13px;height:13px}
+.c-meta .free{margin-left:auto;color:var(--green-val);font-weight:700}
 
-  .card-body{padding:24px 24px 20px;flex:1;display:flex;flex-direction:column}
-  .card-body h3{
-    font:700 20px 'Space Grotesk';letter-spacing:-.4px;
-    margin-bottom:8px;
-  }
-  .card-body .desc{
-    font-size:13.5px;color:var(--muted);line-height:1.6;
-    margin-bottom:20px;flex:1;
-  }
-  .card-meta{
-    display:flex;align-items:center;gap:16px;
-    font-size:12px;color:var(--muted-2);
-    padding-top:16px;border-top:1px solid var(--line);
-  }
-  .card-meta .meta-item{display:flex;align-items:center;gap:5px}
+/* ── Course detail panel ── */
+.c-detail{
+  background:var(--card);border:1px solid var(--line);border-radius:var(--radius);
+  overflow:hidden;display:none;
+}
+.c-detail.open{display:block}
+.c-detail-head{
+  padding:24px 24px 18px;
+  border-bottom:1px solid var(--line);
+  display:flex;align-items:flex-start;justify-content:space-between;gap:16px;
+}
+.c-detail-head h2{font-size:22px;font-weight:800;letter-spacing:-.4px}
+.c-detail-head .info{font-size:13px;color:var(--muted);margin-top:4px}
+.c-detail-head .close-btn{
+  width:36px;height:36px;border-radius:10px;flex-shrink:0;
+  background:var(--card-2);border:1px solid var(--line);
+  display:flex;align-items:center;justify-content:center;
+  cursor:pointer;color:var(--muted);transition:color .15s,border-color .15s;
+}
+.c-detail-head .close-btn:hover{color:#fff;border-color:var(--accent)}
+.c-detail-head .close-btn svg{width:16px;height:16px}
 
-  /* ---------- course detail (expanded) ---------- */
-  .course-detail{
-    background:var(--card);border:1px solid var(--line);border-radius:18px;
-    margin-top:24px;overflow:hidden;
-    display:none;
-  }
-  .course-detail.open{display:block}
-  .detail-header{
-    padding:32px 32px 24px;
-    border-bottom:1px solid var(--line);
-    display:flex;align-items:flex-start;justify-content:space-between;gap:20px;
-  }
-  .detail-header h2{
-    font:700 28px 'Space Grotesk';letter-spacing:-.6px;
-  }
-  .detail-header .close-btn{
-    width:40px;height:40px;border-radius:50%;
-    background:var(--card-2);border:1px solid var(--line-2);
-    display:flex;align-items:center;justify-content:center;
-    cursor:pointer;font-size:18px;color:var(--muted);
-    transition:color .2s, border-color .2s;flex-shrink:0;
-  }
-  .detail-header .close-btn:hover{color:#fff;border-color:var(--blue)}
+/* chapter progress bar in detail */
+.c-detail-progress{padding:0 24px 16px}
+.c-detail-progress .c-progress-bar{height:4px}
 
-  .chapters-list{padding:8px 0}
-  .chapter{
-    display:flex;align-items:center;gap:16px;
-    padding:16px 32px;
-    transition:background .15s;
-    cursor:pointer;
-    text-decoration:none;
-    color:inherit;
-  }
-  .chapter:hover{background:rgba(255,255,255,.03)}
-  .chapter .ch-num{
-    width:38px;height:38px;border-radius:10px;flex-shrink:0;
-    display:flex;align-items:center;justify-content:center;
-    font:700 13px 'Inter';
-  }
-  .chapter .ch-info{flex:1;min-width:0}
-  .chapter .ch-title{font:600 14px 'Inter';color:var(--txt)}
-  .chapter .ch-sub{font-size:12px;color:var(--muted-2);margin-top:2px}
-  .chapter .ch-play{
-    width:34px;height:34px;border-radius:50%;flex-shrink:0;
-    background:rgba(47,123,255,.12);border:1px solid rgba(47,123,255,.25);
-    display:flex;align-items:center;justify-content:center;
-    transition:background .2s, transform .2s;
-  }
-  .chapter .ch-play svg{width:12px;height:12px}
-  .chapter:hover .ch-play{
-    background:rgba(47,123,255,.25);transform:scale(1.08);
-  }
+/* chapter list */
+.ch-list{padding:4px 0}
+.ch{
+  display:flex;align-items:center;gap:14px;
+  padding:14px 24px;
+  transition:background .12s;
+  cursor:pointer;text-decoration:none;color:inherit;
+  position:relative;
+}
+.ch:hover{background:rgba(255,255,255,.025)}
+.ch.completed{opacity:.7}
+.ch.completed .ch-title{text-decoration:line-through;text-decoration-color:var(--faint)}
+.ch-num{
+  width:36px;height:36px;border-radius:10px;flex-shrink:0;
+  display:flex;align-items:center;justify-content:center;
+  font-size:12px;font-weight:700;
+}
+.ch-info{flex:1;min-width:0}
+.ch-title{font-size:13.5px;font-weight:600;color:var(--ink)}
+.ch-sub{font-size:11.5px;color:var(--faint);margin-top:1px}
+.ch-actions{display:flex;align-items:center;gap:8px}
 
-  /* ---------- footer ---------- */
-  footer{
-    border-top:1px solid var(--line);background:var(--bg);margin-top:auto;
-  }
-  .foot{
-    max-width:1140px;margin:0 auto;padding:18px 24px;
-    display:flex;align-items:center;justify-content:space-between;
-    font-size:12px;color:var(--muted-2);
-  }
-  .socials{display:flex;gap:10px}
-  .soc{
-    width:34px;height:34px;border-radius:50%;background:var(--card);border:1px solid var(--line);
-    display:flex;align-items:center;justify-content:center;font-size:13px;color:var(--muted);
-    transition:color .2s,border-color .2s;
-  }
-  .soc:hover{color:#fff;border-color:var(--blue)}
+.ch-check{
+  width:28px;height:28px;border-radius:8px;flex-shrink:0;
+  border:1.5px solid var(--line);background:transparent;
+  display:flex;align-items:center;justify-content:center;
+  cursor:pointer;transition:all .15s;color:transparent;
+}
+.ch-check:hover{border-color:var(--green-val);background:var(--green-soft)}
+.ch-check.done{
+  border-color:var(--green-val);background:var(--green-soft);color:var(--green-val);
+}
+.ch-check svg{width:14px;height:14px}
 
-  /* ---------- reveal animation ---------- */
-  .reveal{opacity:0;transform:translateY(20px);animation:in .8s ease forwards}
-  .d1{animation-delay:.05s}.d2{animation-delay:.15s}.d3{animation-delay:.25s}
-  .d4{animation-delay:.35s}.d5{animation-delay:.45s}.d6{animation-delay:.55s}
-  @keyframes in{to{opacity:1;transform:none}}
-  @media(prefers-reduced-motion:reduce){
-    .reveal{opacity:1;transform:none;animation:none}
-  }
+.ch-play{
+  width:32px;height:32px;border-radius:50%;flex-shrink:0;
+  background:var(--accent-soft);border:1px solid rgba(91,116,255,.25);
+  display:flex;align-items:center;justify-content:center;
+  transition:background .15s,transform .15s;
+}
+.ch-play svg{width:12px;height:12px}
+.ch:hover .ch-play{background:rgba(91,116,255,.25);transform:scale(1.06)}
 
-  /* ---------- responsive ---------- */
-  @media(max-width:680px){
-    .nav-links{display:none}
-    .courses-grid{grid-template-columns:1fr}
-    .course-stats{gap:28px}
-    .course-stats .stat .num{font-size:22px}
-    .detail-header{padding:24px 20px 20px}
-    .chapter{padding:14px 20px}
-    .card-banner{height:170px}
-    .foot{flex-direction:column;gap:12px}
-  }
+/* ── Empty state ── */
+.c-empty{
+  text-align:center;padding:80px 24px;
+}
+.c-empty .icon{font-size:48px;margin-bottom:16px;opacity:.4}
+.c-empty h3{font-size:18px;font-weight:700;margin-bottom:6px}
+.c-empty p{font-size:14px;color:var(--muted)}
 
-  /* ---------- toast ---------- */
-  .toast{
-    position:fixed;bottom:calc(28px + env(safe-area-inset-bottom));left:50%;transform:translate(-50%,80px);
-    background:#1a1a1f;border:1px solid rgba(47,123,255,.5);color:#fff;
-    font:500 13.5px 'Inter';padding:13px 22px;border-radius:99px;z-index:9999;
-    opacity:0;transition:transform .35s cubic-bezier(.2,.8,.2,1),opacity .35s;
-    box-shadow:0 12px 40px rgba(0,0,0,.5);width:max-content;max-width:90vw;text-align:center;
-  }
-  .toast.show{transform:translate(-50%,0);opacity:1}
+/* ── Loading skeleton ── */
+.c-skeleton{
+  background:var(--card);border:1px solid var(--line);border-radius:var(--radius);
+  overflow:hidden;
+}
+.c-skeleton .skel-banner{height:160px;background:linear-gradient(90deg,var(--card-2) 25%,var(--line) 50%,var(--card-2) 75%);
+  background-size:200% 100%;animation:shimmer 1.5s infinite}
+.c-skeleton .skel-body{padding:20px}
+.c-skeleton .skel-line{height:14px;border-radius:6px;
+  background:linear-gradient(90deg,var(--card-2) 25%,var(--line) 50%,var(--card-2) 75%);
+  background-size:200% 100%;animation:shimmer 1.5s infinite;margin-bottom:10px}
+.c-skeleton .skel-line.w60{width:60%}
+.c-skeleton .skel-line.w80{width:80%}
+.c-skeleton .skel-line.w40{width:40%}
+@keyframes shimmer{0%{background-position:200% 0}100%{background-position:-200% 0}}
+
+/* ── Responsive ── */
+@media(max-width:680px){
+  .c-grid{grid-template-columns:1fr}
+  .c-header{flex-direction:column}
+  .c-stats{gap:12px}
+  .c-stat{padding:10px 14px;min-width:70px}
+  .c-stat .num{font-size:18px}
+  .c-detail-head{padding:18px 16px 14px}
+  .ch{padding:12px 16px}
+}
 </style>
 </head>
 <body>
+<div class="backdrop" id="backdrop"></div>
+<div class="app" id="app">
 
-<header>
-  <div class="wrap">
-    <div class="nav">
-      <a href="../homepage"><img src="../WIN.png" alt="WIN" class="logo-img"></a>
-      <nav class="nav-links">
-        <a href="../homepage">Home</a>
-        <a href="courses" class="active">Courses</a>
-        <a href="homepage#community">Community</a>
-        <a href="homepage#contact">Contact</a>
-      </nav>
-      <a href="../homepage" class="btn btn-white" style="font-size:13px;padding:10px 20px">Back to Home</a>
-    </div>
-  </div>
-</header>
+  <aside class="sidebar" id="sidebar"></aside>
 
-<!-- ========== HERO ========== -->
-<section class="hero">
-  <div class="wrap">
-    <div class="pill reveal d1"><span class="icon">&#127891;</span> FREE Trading Education</div>
-    <h1 class="reveal d2">Master the Markets<br>One Lesson at a Time</h1>
-    <p class="reveal d3">From absolute beginner to advanced strategies &mdash; structured video courses designed to turn you into a confident, profitable trader.</p>
+  <div class="main">
+    <header class="topbar"></header>
 
-    <div class="course-stats reveal d4">
-      <div class="stat">
-        <div class="num">3</div>
-        <div class="lbl">Courses</div>
-      </div>
-      <div class="stat">
-        <div class="num">25</div>
-        <div class="lbl">Video Lessons</div>
-      </div>
-      <div class="stat">
-        <div class="num">100%</div>
-        <div class="lbl">Free Access</div>
-      </div>
-    </div>
-  </div>
-</section>
+    <main class="content">
 
-<!-- ========== COURSES GRID ========== -->
-<section class="courses-section">
-  <div class="wrap">
-
-    <!-- Course 1: Introduction to WIN Trading -->
-    <div class="courses-grid reveal d5">
-
-      <div class="course-card" onclick="toggleCourse('intro')">
-        <div class="card-banner">
-          <div class="gradient" style="background:linear-gradient(135deg,#0d1b3e 0%,#1a3a6e 40%,#2f7bff 100%)"></div>
-          <span class="banner-icon">&#128200;</span>
-          <span class="chapter-count">12 chapters</span>
-          <span class="level-badge level-beginner">Beginner</span>
-        </div>
-        <div class="card-body">
-          <h3>Introduction to WIN Trading</h3>
-          <p class="desc">Start your trading journey here. Learn the fundamentals of forex &mdash; from registering with a broker to understanding pips, leverage, lot sizes, and how to use MT5 &amp; TradingView.</p>
-          <div class="card-meta">
-            <div class="meta-item">
-              <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
-              12 lessons
-            </div>
-            <div class="meta-item">
-              <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M2 3h6a4 4 0 014 4v14a3 3 0 00-3-3H2z"/><path d="M22 3h-6a4 4 0 00-4 4v14a3 3 0 013-3h7z"/></svg>
-              Beginner
-            </div>
-            <div class="meta-item" style="margin-left:auto;color:var(--green);font-weight:600">
-              FREE
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <!-- Course 2: Hanre's Forex Course -->
-      <div class="course-card" onclick="toggleCourse('forex')">
-        <div class="card-banner">
-          <div class="gradient" style="background:linear-gradient(135deg,#1a0d3e 0%,#3a1a6e 40%,#a259ff 100%)"></div>
-          <span class="banner-icon">&#128201;</span>
-          <span class="chapter-count">11 chapters</span>
-          <span class="level-badge level-intermediate">Intermediate</span>
-        </div>
-        <div class="card-body">
-          <h3>Hanr&eacute;'s Forex Course</h3>
-          <p class="desc">Take your trading to the next level with technical analysis. Master candlestick patterns, trendlines, support &amp; resistance, order blocks, fair value gaps, and Fibonacci retracements.</p>
-          <div class="card-meta">
-            <div class="meta-item">
-              <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
-              11 lessons
-            </div>
-            <div class="meta-item">
-              <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M2 3h6a4 4 0 014 4v14a3 3 0 00-3-3H2z"/><path d="M22 3h-6a4 4 0 00-4 4v14a3 3 0 013-3h7z"/></svg>
-              Intermediate
-            </div>
-            <div class="meta-item" style="margin-left:auto;color:var(--green);font-weight:600">
-              FREE
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <!-- Course 3: Hanre's Synthetics Course -->
-      <div class="course-card" onclick="toggleCourse('synth')">
-        <div class="card-banner">
-          <div class="gradient" style="background:linear-gradient(135deg,#1a2d0d 0%,#2e6e1a 40%,#ff8c42 100%)"></div>
-          <span class="banner-icon">&#9889;</span>
-          <span class="chapter-count">2 chapters</span>
-          <span class="level-badge level-advanced">Advanced</span>
-        </div>
-        <div class="card-body">
-          <h3>Hanr&eacute;'s Synthetics Course</h3>
-          <p class="desc">Explore the world of synthetic indices trading. From the basics to advanced strategies &mdash; learn how to trade volatility indices with confidence.</p>
-          <div class="card-meta">
-            <div class="meta-item">
-              <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
-              2 lessons
-            </div>
-            <div class="meta-item">
-              <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M2 3h6a4 4 0 014 4v14a3 3 0 00-3-3H2z"/><path d="M22 3h-6a4 4 0 00-4 4v14a3 3 0 013-3h7z"/></svg>
-              Advanced
-            </div>
-            <div class="meta-item" style="margin-left:auto;color:var(--green);font-weight:600">
-              FREE
-            </div>
-          </div>
-        </div>
-      </div>
-
-    </div>
-
-    <!-- ===== COURSE DETAIL: Introduction to WIN Trading ===== -->
-    <div class="course-detail" id="detail-intro">
-      <div class="detail-header">
+      <!-- Header -->
+      <div class="c-header">
         <div>
-          <h2>Introduction to WIN Trading</h2>
-          <p style="color:var(--muted);font-size:14px;margin-top:6px">12 chapters &middot; Beginner &middot; Free</p>
+          <h1>Courses</h1>
+          <p class="sub">Master the markets — from beginner fundamentals to advanced strategies.</p>
         </div>
-        <button class="close-btn" onclick="toggleCourse('intro')">&times;</button>
-      </div>
-      <div class="chapters-list">
-        <a class="chapter" href="https://youtu.be/M3FKBMtLFAI" target="_blank" rel="noopener">
-          <div class="ch-num" style="background:rgba(47,123,255,.12);color:var(--blue)">1.1</div>
-          <div class="ch-info">
-            <div class="ch-title">Introduction to Win</div>
-            <div class="ch-sub">Welcome &amp; overview of WIN Trading</div>
+        <div class="c-stats">
+          <div class="c-stat">
+            <div class="num" id="statCourses">—</div>
+            <div class="lbl">Courses</div>
           </div>
-          <div class="ch-play"><svg viewBox="0 0 24 24" fill="var(--blue)"><path d="M8 5v14l11-7z"/></svg></div>
-        </a>
-        <a class="chapter" href="https://youtu.be/piS43eTDNsA" target="_blank" rel="noopener">
-          <div class="ch-num" style="background:rgba(47,123,255,.12);color:var(--blue)">1.2</div>
-          <div class="ch-info">
-            <div class="ch-title">How to Register with JP Markets</div>
-            <div class="ch-sub">Dashboard setup &amp; broker registration</div>
+          <div class="c-stat">
+            <div class="num" id="statLessons">—</div>
+            <div class="lbl">Lessons</div>
           </div>
-          <div class="ch-play"><svg viewBox="0 0 24 24" fill="var(--blue)"><path d="M8 5v14l11-7z"/></svg></div>
-        </a>
-        <a class="chapter" href="https://youtu.be/8zFExpPAv_8" target="_blank" rel="noopener">
-          <div class="ch-num" style="background:rgba(47,123,255,.12);color:var(--blue)">1.3</div>
-          <div class="ch-info">
-            <div class="ch-title">What is Forex Trading</div>
-            <div class="ch-sub">Understanding the forex market</div>
+          <div class="c-stat">
+            <div class="num" id="statProgress">0%</div>
+            <div class="lbl">Complete</div>
           </div>
-          <div class="ch-play"><svg viewBox="0 0 24 24" fill="var(--blue)"><path d="M8 5v14l11-7z"/></svg></div>
-        </a>
-        <a class="chapter" href="https://youtu.be/d2sd1-kzv-4" target="_blank" rel="noopener">
-          <div class="ch-num" style="background:rgba(47,123,255,.12);color:var(--blue)">1.4</div>
-          <div class="ch-info">
-            <div class="ch-title">What are Spreads</div>
-            <div class="ch-sub">Bid/ask spreads explained</div>
-          </div>
-          <div class="ch-play"><svg viewBox="0 0 24 24" fill="var(--blue)"><path d="M8 5v14l11-7z"/></svg></div>
-        </a>
-        <a class="chapter" href="https://youtu.be/tDt-9oA665o" target="_blank" rel="noopener">
-          <div class="ch-num" style="background:rgba(47,123,255,.12);color:var(--blue)">1.5</div>
-          <div class="ch-info">
-            <div class="ch-title">Lot Sizes</div>
-            <div class="ch-sub">Understanding position sizing</div>
-          </div>
-          <div class="ch-play"><svg viewBox="0 0 24 24" fill="var(--blue)"><path d="M8 5v14l11-7z"/></svg></div>
-        </a>
-        <a class="chapter" href="https://youtu.be/NBo0iILFFmE" target="_blank" rel="noopener">
-          <div class="ch-num" style="background:rgba(47,123,255,.12);color:var(--blue)">1.6</div>
-          <div class="ch-info">
-            <div class="ch-title">Leverage</div>
-            <div class="ch-sub">How leverage works in trading</div>
-          </div>
-          <div class="ch-play"><svg viewBox="0 0 24 24" fill="var(--blue)"><path d="M8 5v14l11-7z"/></svg></div>
-        </a>
-        <a class="chapter" href="https://youtu.be/2xGfBQ-A-I4" target="_blank" rel="noopener">
-          <div class="ch-num" style="background:rgba(47,123,255,.12);color:var(--blue)">1.7</div>
-          <div class="ch-info">
-            <div class="ch-title">Take Profit &amp; Stop Loss</div>
-            <div class="ch-sub">Managing risk on every trade</div>
-          </div>
-          <div class="ch-play"><svg viewBox="0 0 24 24" fill="var(--blue)"><path d="M8 5v14l11-7z"/></svg></div>
-        </a>
-        <a class="chapter" href="https://youtu.be/vjYzCWmDuHc" target="_blank" rel="noopener">
-          <div class="ch-num" style="background:rgba(47,123,255,.12);color:var(--blue)">1.8</div>
-          <div class="ch-info">
-            <div class="ch-title">Market Orders</div>
-            <div class="ch-sub">Executing trades in the market</div>
-          </div>
-          <div class="ch-play"><svg viewBox="0 0 24 24" fill="var(--blue)"><path d="M8 5v14l11-7z"/></svg></div>
-        </a>
-        <a class="chapter" href="https://youtu.be/8ayZkaeh7tU" target="_blank" rel="noopener">
-          <div class="ch-num" style="background:rgba(47,123,255,.12);color:var(--blue)">1.9</div>
-          <div class="ch-info">
-            <div class="ch-title">Pips</div>
-            <div class="ch-sub">Measuring price movement</div>
-          </div>
-          <div class="ch-play"><svg viewBox="0 0 24 24" fill="var(--blue)"><path d="M8 5v14l11-7z"/></svg></div>
-        </a>
-        <a class="chapter" href="https://youtu.be/54eKLMdNZMw" target="_blank" rel="noopener">
-          <div class="ch-num" style="background:rgba(47,123,255,.12);color:var(--blue)">1.10</div>
-          <div class="ch-info">
-            <div class="ch-title">How MT5 Works</div>
-            <div class="ch-sub">Navigating MetaTrader 5</div>
-          </div>
-          <div class="ch-play"><svg viewBox="0 0 24 24" fill="var(--blue)"><path d="M8 5v14l11-7z"/></svg></div>
-        </a>
-        <a class="chapter" href="https://youtu.be/TaP_f9AhjjQ" target="_blank" rel="noopener">
-          <div class="ch-num" style="background:rgba(47,123,255,.12);color:var(--blue)">1.11</div>
-          <div class="ch-info">
-            <div class="ch-title">TradingView</div>
-            <div class="ch-sub">Charting &amp; analysis platform</div>
-          </div>
-          <div class="ch-play"><svg viewBox="0 0 24 24" fill="var(--blue)"><path d="M8 5v14l11-7z"/></svg></div>
-        </a>
-        <a class="chapter" href="https://youtu.be/p1Xf0HrJsQE" target="_blank" rel="noopener">
-          <div class="ch-num" style="background:rgba(47,123,255,.12);color:var(--blue)">1.12</div>
-          <div class="ch-info">
-            <div class="ch-title">Real &amp; Demo Accounts</div>
-            <div class="ch-sub">Practice vs live trading</div>
-          </div>
-          <div class="ch-play"><svg viewBox="0 0 24 24" fill="var(--blue)"><path d="M8 5v14l11-7z"/></svg></div>
-        </a>
-      </div>
-    </div>
-
-    <!-- ===== COURSE DETAIL: Hanre's Forex Course ===== -->
-    <div class="course-detail" id="detail-forex">
-      <div class="detail-header">
-        <div>
-          <h2>Hanr&eacute;'s Forex Course</h2>
-          <p style="color:var(--muted);font-size:14px;margin-top:6px">11 chapters &middot; Intermediate &middot; Free</p>
         </div>
-        <button class="close-btn" onclick="toggleCourse('forex')">&times;</button>
       </div>
-      <div class="chapters-list">
-        <a class="chapter" href="https://youtu.be/DcpnFbOmT7A" target="_blank" rel="noopener">
-          <div class="ch-num" style="background:rgba(162,89,255,.12);color:var(--purple)">1</div>
-          <div class="ch-info">
-            <div class="ch-title">Candles</div>
-            <div class="ch-sub">Reading candlestick charts</div>
-          </div>
-          <div class="ch-play"><svg viewBox="0 0 24 24" fill="var(--purple)"><path d="M8 5v14l11-7z"/></svg></div>
-        </a>
-        <a class="chapter" href="https://youtu.be/2eRxD2exvpo" target="_blank" rel="noopener">
-          <div class="ch-num" style="background:rgba(162,89,255,.12);color:var(--purple)">2</div>
-          <div class="ch-info">
-            <div class="ch-title">Patterns</div>
-            <div class="ch-sub">Identifying chart patterns</div>
-          </div>
-          <div class="ch-play"><svg viewBox="0 0 24 24" fill="var(--purple)"><path d="M8 5v14l11-7z"/></svg></div>
-        </a>
-        <a class="chapter" href="https://youtu.be/tq9xjZbTPyQ" target="_blank" rel="noopener">
-          <div class="ch-num" style="background:rgba(162,89,255,.12);color:var(--purple)">3</div>
-          <div class="ch-info">
-            <div class="ch-title">Trendlines</div>
-            <div class="ch-sub">Drawing &amp; trading trendlines</div>
-          </div>
-          <div class="ch-play"><svg viewBox="0 0 24 24" fill="var(--purple)"><path d="M8 5v14l11-7z"/></svg></div>
-        </a>
-        <a class="chapter" href="https://youtu.be/4OZ0QojFp4E" target="_blank" rel="noopener">
-          <div class="ch-num" style="background:rgba(162,89,255,.12);color:var(--purple)">4</div>
-          <div class="ch-info">
-            <div class="ch-title">Support &amp; Resistance</div>
-            <div class="ch-sub">Key price levels</div>
-          </div>
-          <div class="ch-play"><svg viewBox="0 0 24 24" fill="var(--purple)"><path d="M8 5v14l11-7z"/></svg></div>
-        </a>
-        <a class="chapter" href="https://youtu.be/LSImmLMmma8" target="_blank" rel="noopener">
-          <div class="ch-num" style="background:rgba(162,89,255,.12);color:var(--purple)">5</div>
-          <div class="ch-info">
-            <div class="ch-title">Retests</div>
-            <div class="ch-sub">Confirmation through retests</div>
-          </div>
-          <div class="ch-play"><svg viewBox="0 0 24 24" fill="var(--purple)"><path d="M8 5v14l11-7z"/></svg></div>
-        </a>
-        <a class="chapter" href="https://youtu.be/BV9wsRbDwRI" target="_blank" rel="noopener">
-          <div class="ch-num" style="background:rgba(162,89,255,.12);color:var(--purple)">6</div>
-          <div class="ch-info">
-            <div class="ch-title">Example Trades</div>
-            <div class="ch-sub">Real trade setups walkthrough</div>
-          </div>
-          <div class="ch-play"><svg viewBox="0 0 24 24" fill="var(--purple)"><path d="M8 5v14l11-7z"/></svg></div>
-        </a>
-        <a class="chapter" href="https://youtu.be/pQ0F4VTjz8Y" target="_blank" rel="noopener">
-          <div class="ch-num" style="background:rgba(162,89,255,.12);color:var(--purple)">7</div>
-          <div class="ch-info">
-            <div class="ch-title">Order Blocks</div>
-            <div class="ch-sub">Smart money concepts</div>
-          </div>
-          <div class="ch-play"><svg viewBox="0 0 24 24" fill="var(--purple)"><path d="M8 5v14l11-7z"/></svg></div>
-        </a>
-        <a class="chapter" href="https://youtu.be/O1ORrqhUZ6o" target="_blank" rel="noopener">
-          <div class="ch-num" style="background:rgba(162,89,255,.12);color:var(--purple)">8</div>
-          <div class="ch-info">
-            <div class="ch-title">Fair Value Gaps</div>
-            <div class="ch-sub">Imbalance &amp; liquidity zones</div>
-          </div>
-          <div class="ch-play"><svg viewBox="0 0 24 24" fill="var(--purple)"><path d="M8 5v14l11-7z"/></svg></div>
-        </a>
-        <a class="chapter" href="https://youtu.be/SUOT7gmXF0o" target="_blank" rel="noopener">
-          <div class="ch-num" style="background:rgba(162,89,255,.12);color:var(--purple)">9</div>
-          <div class="ch-info">
-            <div class="ch-title">Break of Structure</div>
-            <div class="ch-sub">Market structure shifts</div>
-          </div>
-          <div class="ch-play"><svg viewBox="0 0 24 24" fill="var(--purple)"><path d="M8 5v14l11-7z"/></svg></div>
-        </a>
-        <a class="chapter" href="https://youtu.be/8JdlgLTwVLU" target="_blank" rel="noopener">
-          <div class="ch-num" style="background:rgba(162,89,255,.12);color:var(--purple)">10</div>
-          <div class="ch-info">
-            <div class="ch-title">Fibonacci</div>
-            <div class="ch-sub">Fibonacci retracement levels</div>
-          </div>
-          <div class="ch-play"><svg viewBox="0 0 24 24" fill="var(--purple)"><path d="M8 5v14l11-7z"/></svg></div>
-        </a>
-        <a class="chapter" href="https://youtu.be/klrX0e4RwMw" target="_blank" rel="noopener">
-          <div class="ch-num" style="background:rgba(162,89,255,.12);color:var(--purple)">11</div>
-          <div class="ch-info">
-            <div class="ch-title">Example Trades</div>
-            <div class="ch-sub">Advanced trade examples</div>
-          </div>
-          <div class="ch-play"><svg viewBox="0 0 24 24" fill="var(--purple)"><path d="M8 5v14l11-7z"/></svg></div>
-        </a>
-      </div>
-    </div>
 
-    <!-- ===== COURSE DETAIL: Hanre's Synthetics Course ===== -->
-    <div class="course-detail" id="detail-synth">
-      <div class="detail-header">
-        <div>
-          <h2>Hanr&eacute;'s Synthetics Course</h2>
-          <p style="color:var(--muted);font-size:14px;margin-top:6px">2 chapters &middot; Advanced &middot; Free</p>
-        </div>
-        <button class="close-btn" onclick="toggleCourse('synth')">&times;</button>
+      <!-- Course grid (populated by JS) -->
+      <div class="c-grid" id="courseGrid">
+        <!-- Loading skeletons -->
+        <div class="c-skeleton"><div class="skel-banner"></div><div class="skel-body"><div class="skel-line w80"></div><div class="skel-line w60"></div><div class="skel-line w40"></div></div></div>
+        <div class="c-skeleton"><div class="skel-banner"></div><div class="skel-body"><div class="skel-line w80"></div><div class="skel-line w60"></div><div class="skel-line w40"></div></div></div>
+        <div class="c-skeleton"><div class="skel-banner"></div><div class="skel-body"><div class="skel-line w80"></div><div class="skel-line w60"></div><div class="skel-line w40"></div></div></div>
       </div>
-      <div class="chapters-list">
-        <a class="chapter" href="https://youtu.be/e8kpztbHn34" target="_blank" rel="noopener">
-          <div class="ch-num" style="background:rgba(255,140,66,.12);color:var(--orange)">1</div>
-          <div class="ch-info">
-            <div class="ch-title">The Basics</div>
-            <div class="ch-sub">Introduction to synthetic indices</div>
-          </div>
-          <div class="ch-play"><svg viewBox="0 0 24 24" fill="var(--orange)"><path d="M8 5v14l11-7z"/></svg></div>
-        </a>
-        <a class="chapter" href="https://youtu.be/yh6b27lz7d8" target="_blank" rel="noopener">
-          <div class="ch-num" style="background:rgba(255,140,66,.12);color:var(--orange)">2</div>
-          <div class="ch-info">
-            <div class="ch-title">Advanced</div>
-            <div class="ch-sub">Advanced synthetics strategies</div>
-          </div>
-          <div class="ch-play"><svg viewBox="0 0 24 24" fill="var(--orange)"><path d="M8 5v14l11-7z"/></svg></div>
-        </a>
-      </div>
-    </div>
 
+      <!-- Detail panel (shown when a course is clicked) -->
+      <div class="c-detail" id="courseDetail"></div>
+
+    </main>
   </div>
-</section>
+</div>
 
-<footer>
-  <div class="foot">
-    <span>&copy;WIN 2026. All rights reserved.</span>
-    <div class="socials">
-      <a class="soc" href="#" onclick="toast('X / Twitter coming soon');return false" aria-label="Twitter">&#120143;</a>
-      <a class="soc" href="#" onclick="toast('Instagram coming soon');return false" aria-label="Instagram">&#9678;</a>
-      <a class="soc" href="https://t.me/" target="_blank" aria-label="Telegram">&#9992;</a>
-      <a class="soc" href="#" onclick="toast('Facebook coming soon');return false" aria-label="Facebook">f</a>
-    </div>
-  </div>
-</footer>
-
-<div class="toast" id="toast"></div>
-
+<script src="shared-shell.js"></script>
 <script>
-let toastTimer;
-function toast(msg){
-  const t=document.getElementById('toast');
-  t.textContent=msg;t.classList.add('show');
-  clearTimeout(toastTimer);
-  toastTimer=setTimeout(()=>t.classList.remove('show'),2600);
+WIN.initShell({ activePage: 'courses' });
+
+/* ================================================================
+   Supabase config — replace with your actual keys
+   ================================================================ */
+const SUPABASE_URL = 'https://ffxlryusmstnfjedleds.supabase.co';
+const SUPABASE_ANON = 'YOUR_ANON_KEY';
+
+/* ================================================================
+   State
+   ================================================================ */
+let courses = [];
+let chapters = {};   // { courseId: [...chapters] }
+let progress = {};   // { chapterId: true }
+let openCourseId = null;
+
+/* ================================================================
+   Course visuals — gradient + icon + level per sort_order
+   ================================================================ */
+const COURSE_THEMES = [
+  { gradient:'linear-gradient(135deg,#0a1628 0%,#142952 40%,#2a5aad 100%)', icon:'\u{1F4C8}', level:'beginner',     color:'var(--green-val)',  numBg:'rgba(53,215,155,.12)' },
+  { gradient:'linear-gradient(135deg,#140a28 0%,#2d1452 40%,#6b3fad 100%)', icon:'\u{1F4C9}', level:'intermediate', color:'var(--accent)',     numBg:'var(--accent-soft)' },
+  { gradient:'linear-gradient(135deg,#1a1a06 0%,#3d3510 40%,#ad8a2a 100%)', icon:'⚡',     level:'advanced',     color:'var(--purple-val)', numBg:'var(--purple-soft)' },
+];
+
+/* ================================================================
+   Fetch data from Supabase (with fallback to demo data)
+   ================================================================ */
+async function loadData() {
+  try {
+    if (SUPABASE_ANON === 'YOUR_ANON_KEY') throw new Error('No key — use demo data');
+
+    const headers = { apikey: SUPABASE_ANON, Authorization: `Bearer ${SUPABASE_ANON}` };
+
+    const [coursesRes, chaptersRes, progressRes] = await Promise.all([
+      fetch(`${SUPABASE_URL}/rest/v1/courses?select=*&published=eq.true&order=sort_order`, { headers }),
+      fetch(`${SUPABASE_URL}/rest/v1/course_chapters?select=*&published=eq.true&order=sort_order`, { headers }),
+      fetch(`${SUPABASE_URL}/rest/v1/course_progress?select=chapter_id`, { headers }),
+    ]);
+
+    courses = await coursesRes.json();
+    const allChapters = await chaptersRes.json();
+    const progressRows = await progressRes.json();
+
+    allChapters.forEach(ch => {
+      if (!chapters[ch.course_id]) chapters[ch.course_id] = [];
+      chapters[ch.course_id].push(ch);
+    });
+    progressRows.forEach(p => { progress[p.chapter_id] = true; });
+
+  } catch {
+    loadDemoData();
+  }
+
+  render();
 }
 
-let openCourse=null;
-function toggleCourse(id){
-  const detail=document.getElementById('detail-'+id);
-  if(openCourse===id){
-    detail.classList.remove('open');
-    openCourse=null;
+function loadDemoData() {
+  const cIntro = 'demo-intro';
+  const cForex = 'demo-forex';
+  const cSynth = 'demo-synth';
+
+  courses = [
+    { id: cIntro, title: 'Introduction to WIN Trading', description: 'Start your trading journey here. Learn the fundamentals of forex — from registering with a broker to understanding pips, leverage, lot sizes, and how to use MT5 & TradingView.', sort_order: 1 },
+    { id: cForex, title: 'Hanré’s Forex Course',     description: 'Take your trading to the next level with technical analysis. Master candlestick patterns, trendlines, support & resistance, order blocks, fair value gaps, and Fibonacci retracements.', sort_order: 2 },
+    { id: cSynth, title: 'Hanré’s Synthetics Course', description: 'Explore the world of synthetic indices trading. From the basics to advanced strategies — learn how to trade volatility indices with confidence.', sort_order: 3 },
+  ];
+
+  chapters[cIntro] = [
+    { id:'c1-1',  course_id:cIntro, chapter_num:'1.1',  title:'Introduction to Win',              description:'Welcome & overview of WIN Trading',     video_url:'https://youtu.be/M3FKBMtLFAI' },
+    { id:'c1-2',  course_id:cIntro, chapter_num:'1.2',  title:'How to Register with JP Markets',   description:'Dashboard setup & broker registration',  video_url:'https://youtu.be/piS43eTDNsA' },
+    { id:'c1-3',  course_id:cIntro, chapter_num:'1.3',  title:'What is Forex Trading',             description:'Understanding the forex market',          video_url:'https://youtu.be/8zFExpPAv_8' },
+    { id:'c1-4',  course_id:cIntro, chapter_num:'1.4',  title:'What are Spreads',                  description:'Bid/ask spreads explained',               video_url:'https://youtu.be/d2sd1-kzv-4' },
+    { id:'c1-5',  course_id:cIntro, chapter_num:'1.5',  title:'Lot Sizes',                         description:'Understanding position sizing',            video_url:'https://youtu.be/tDt-9oA665o' },
+    { id:'c1-6',  course_id:cIntro, chapter_num:'1.6',  title:'Leverage',                          description:'How leverage works in trading',            video_url:'https://youtu.be/NBo0iILFFmE' },
+    { id:'c1-7',  course_id:cIntro, chapter_num:'1.7',  title:'Take Profit & Stop Loss',           description:'Managing risk on every trade',             video_url:'https://youtu.be/2xGfBQ-A-I4' },
+    { id:'c1-8',  course_id:cIntro, chapter_num:'1.8',  title:'Market Orders',                     description:'Executing trades in the market',           video_url:'https://youtu.be/vjYzCWmDuHc' },
+    { id:'c1-9',  course_id:cIntro, chapter_num:'1.9',  title:'Pips',                              description:'Measuring price movement',                 video_url:'https://youtu.be/8ayZkaeh7tU' },
+    { id:'c1-10', course_id:cIntro, chapter_num:'1.10', title:'How MT5 Works',                     description:'Navigating MetaTrader 5',                  video_url:'https://youtu.be/54eKLMdNZMw' },
+    { id:'c1-11', course_id:cIntro, chapter_num:'1.11', title:'TradingView',                       description:'Charting & analysis platform',             video_url:'https://youtu.be/TaP_f9AhjjQ' },
+    { id:'c1-12', course_id:cIntro, chapter_num:'1.12', title:'Real & Demo Accounts',              description:'Practice vs live trading',                 video_url:'https://youtu.be/p1Xf0HrJsQE' },
+  ];
+
+  chapters[cForex] = [
+    { id:'c2-1',  course_id:cForex, chapter_num:'1',  title:'Candles',              description:'Reading candlestick charts',     video_url:'https://youtu.be/DcpnFbOmT7A' },
+    { id:'c2-2',  course_id:cForex, chapter_num:'2',  title:'Patterns',             description:'Identifying chart patterns',     video_url:'https://youtu.be/2eRxD2exvpo' },
+    { id:'c2-3',  course_id:cForex, chapter_num:'3',  title:'Trendlines',           description:'Drawing & trading trendlines',   video_url:'https://youtu.be/tq9xjZbTPyQ' },
+    { id:'c2-4',  course_id:cForex, chapter_num:'4',  title:'Support & Resistance', description:'Key price levels',               video_url:'https://youtu.be/4OZ0QojFp4E' },
+    { id:'c2-5',  course_id:cForex, chapter_num:'5',  title:'Retests',              description:'Confirmation through retests',   video_url:'https://youtu.be/LSImmLMmma8' },
+    { id:'c2-6',  course_id:cForex, chapter_num:'6',  title:'Example Trades',       description:'Real trade setups walkthrough',  video_url:'https://youtu.be/BV9wsRbDwRI' },
+    { id:'c2-7',  course_id:cForex, chapter_num:'7',  title:'Order Blocks',         description:'Smart money concepts',           video_url:'https://youtu.be/pQ0F4VTjz8Y' },
+    { id:'c2-8',  course_id:cForex, chapter_num:'8',  title:'Fair Value Gaps',      description:'Imbalance & liquidity zones',    video_url:'https://youtu.be/O1ORrqhUZ6o' },
+    { id:'c2-9',  course_id:cForex, chapter_num:'9',  title:'Break of Structure',   description:'Market structure shifts',        video_url:'https://youtu.be/SUOT7gmXF0o' },
+    { id:'c2-10', course_id:cForex, chapter_num:'10', title:'Fibonacci',            description:'Fibonacci retracement levels',   video_url:'https://youtu.be/8JdlgLTwVLU' },
+    { id:'c2-11', course_id:cForex, chapter_num:'11', title:'Example Trades',       description:'Advanced trade examples',        video_url:'https://youtu.be/klrX0e4RwMw' },
+  ];
+
+  chapters[cSynth] = [
+    { id:'c3-1', course_id:cSynth, chapter_num:'1', title:'The Basics', description:'Introduction to synthetic indices', video_url:'https://youtu.be/e8kpztbHn34' },
+    { id:'c3-2', course_id:cSynth, chapter_num:'2', title:'Advanced',   description:'Advanced synthetics strategies',    video_url:'https://youtu.be/yh6b27lz7d8' },
+  ];
+}
+
+/* ================================================================
+   Render
+   ================================================================ */
+function render() {
+  const grid = document.getElementById('courseGrid');
+
+  if (!courses.length) {
+    grid.innerHTML = '<div class="c-empty"><div class="icon">\u{1F4DA}</div><h3>No courses yet</h3><p>Courses will appear here once they’re published.</p></div>';
     return;
   }
-  document.querySelectorAll('.course-detail').forEach(d=>d.classList.remove('open'));
-  detail.classList.add('open');
-  openCourse=id;
-  setTimeout(()=>{
-    detail.scrollIntoView({behavior:'smooth',block:'start'});
-  },100);
+
+  let totalChapters = 0;
+  let totalDone = 0;
+  courses.forEach(c => {
+    const chs = chapters[c.id] || [];
+    totalChapters += chs.length;
+    chs.forEach(ch => { if (progress[ch.id]) totalDone++; });
+  });
+
+  document.getElementById('statCourses').textContent = courses.length;
+  document.getElementById('statLessons').textContent = totalChapters;
+  document.getElementById('statProgress').textContent = totalChapters ? Math.round((totalDone / totalChapters) * 100) + '%' : '0%';
+
+  grid.innerHTML = courses.map((c, i) => {
+    const theme = COURSE_THEMES[i % COURSE_THEMES.length];
+    const chs = chapters[c.id] || [];
+    const done = chs.filter(ch => progress[ch.id]).length;
+    const pct = chs.length ? Math.round((done / chs.length) * 100) : 0;
+
+    return `
+      <div class="c-card" onclick="toggleCourse('${c.id}')">
+        <div class="c-banner">
+          <div class="grad" style="background:${theme.gradient}"></div>
+          <span class="icon">${theme.icon}</span>
+          <span class="c-badge ${theme.level}">${theme.level}</span>
+          <span class="c-count">${chs.length} chapter${chs.length !== 1 ? 's' : ''}</span>
+        </div>
+        <div class="c-body">
+          <h3>${esc(c.title)}</h3>
+          <p class="desc">${esc(c.description)}</p>
+          ${chs.length ? `
+          <div class="c-progress">
+            <div class="c-progress-bar"><div class="c-progress-fill" style="width:${pct}%"></div></div>
+            <div class="c-progress-text"><span>${done} / ${chs.length} completed</span><span class="pct">${pct}%</span></div>
+          </div>` : ''}
+          <div class="c-meta">
+            <span class="mi"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg> ${chs.length} lessons</span>
+            <span class="mi"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 3h6a4 4 0 014 4v14a3 3 0 00-3-3H2z"/><path d="M22 3h-6a4 4 0 00-4 4v14a3 3 0 013-3h7z"/></svg> ${theme.level.charAt(0).toUpperCase() + theme.level.slice(1)}</span>
+            <span class="free">FREE</span>
+          </div>
+        </div>
+      </div>`;
+  }).join('');
+
+  if (openCourseId) renderDetail(openCourseId);
 }
+
+function renderDetail(courseId) {
+  const detail = document.getElementById('courseDetail');
+  const course = courses.find(c => c.id === courseId);
+  if (!course) { detail.classList.remove('open'); return; }
+
+  const idx = courses.indexOf(course);
+  const theme = COURSE_THEMES[idx % COURSE_THEMES.length];
+  const chs = chapters[courseId] || [];
+  const done = chs.filter(ch => progress[ch.id]).length;
+  const pct = chs.length ? Math.round((done / chs.length) * 100) : 0;
+
+  const checkSvg = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6"><path d="m5 12 5 5L20 7"/></svg>';
+  const playSvg = '<svg viewBox="0 0 24 24" fill="var(--accent)"><path d="M8 5v14l11-7z"/></svg>';
+
+  detail.innerHTML = `
+    <div class="c-detail-head">
+      <div>
+        <h2>${esc(course.title)}</h2>
+        <p class="info">${chs.length} chapters · ${done} completed · ${pct}% done</p>
+      </div>
+      <button class="close-btn" onclick="toggleCourse('${courseId}')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6 6 18M6 6l12 12"/></svg>
+      </button>
+    </div>
+    <div class="c-detail-progress">
+      <div class="c-progress-bar"><div class="c-progress-fill" style="width:${pct}%"></div></div>
+    </div>
+    <div class="ch-list">
+      ${chs.map(ch => {
+        const isDone = progress[ch.id];
+        return `
+        <div class="ch${isDone ? ' completed' : ''}">
+          <div class="ch-num" style="background:${theme.numBg};color:${theme.color}">${esc(ch.chapter_num)}</div>
+          <div class="ch-info">
+            <div class="ch-title">${esc(ch.title)}</div>
+            <div class="ch-sub">${esc(ch.description)}</div>
+          </div>
+          <div class="ch-actions">
+            <button class="ch-check${isDone ? ' done' : ''}" onclick="event.stopPropagation();toggleProgress('${ch.id}')" title="${isDone ? 'Mark incomplete' : 'Mark complete'}">
+              ${checkSvg}
+            </button>
+            <a class="ch-play" href="${esc(ch.video_url)}" target="_blank" rel="noopener" onclick="event.stopPropagation()" title="Watch video">
+              ${playSvg}
+            </a>
+          </div>
+        </div>`;
+      }).join('')}
+    </div>`;
+
+  detail.classList.add('open');
+}
+
+function toggleCourse(id) {
+  const detail = document.getElementById('courseDetail');
+  if (openCourseId === id) {
+    detail.classList.remove('open');
+    openCourseId = null;
+    return;
+  }
+  openCourseId = id;
+  renderDetail(id);
+  setTimeout(() => detail.scrollIntoView({ behavior:'smooth', block:'start' }), 80);
+}
+
+/* ================================================================
+   Progress toggle
+   ================================================================ */
+async function toggleProgress(chapterId) {
+  if (progress[chapterId]) {
+    delete progress[chapterId];
+    // If connected to Supabase, delete
+    if (SUPABASE_ANON !== 'YOUR_ANON_KEY') {
+      fetch(`${SUPABASE_URL}/rest/v1/course_progress?chapter_id=eq.${chapterId}`, {
+        method: 'DELETE',
+        headers: { apikey: SUPABASE_ANON, Authorization: `Bearer ${SUPABASE_ANON}` },
+      });
+    }
+  } else {
+    progress[chapterId] = true;
+    // If connected to Supabase, insert
+    if (SUPABASE_ANON !== 'YOUR_ANON_KEY') {
+      fetch(`${SUPABASE_URL}/rest/v1/course_progress`, {
+        method: 'POST',
+        headers: {
+          apikey: SUPABASE_ANON,
+          Authorization: `Bearer ${SUPABASE_ANON}`,
+          'Content-Type': 'application/json',
+          Prefer: 'return=minimal',
+        },
+        body: JSON.stringify({ chapter_id: chapterId }),
+      });
+    }
+  }
+  render();
+}
+
+/* ================================================================
+   Utils
+   ================================================================ */
+function esc(s) {
+  const d = document.createElement('div');
+  d.textContent = s || '';
+  return d.innerHTML;
+}
+
+/* ── Boot ── */
+loadData();
 </script>
 </body>
 </html>

@@ -60,7 +60,7 @@ const SIDEBAR_HTML = `
       <svg class="grp-chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="m6 9 6 6 6-6"/></svg>
     </button>
     <div class="nav-group" id="coursesGroup">
-      <div class="nav-empty">No courses yet</div>
+      <a class="nav-sub" data-page="courses" href="courses.html"><span class="dot"></span><span>All Courses</span></a>
     </div>
 
     <a class="nav-item" data-page="economic-calendar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18M8 14h.01M12 14h.01M16 14h.01M8 18h.01M12 18h.01"/></svg><span>Economic Calendar</span></a>
