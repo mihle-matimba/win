@@ -9,13 +9,15 @@ module.exports = async (req, res) => {
 
   const supabase = createClient(url, key);
 
-  const { account_id, page = '0', per_page = '16', symbol, type, profit_min, profit_max } = req.query;
+  const { account_id, page = '0', per_page = '16', symbol, type, profit_min, profit_max, tab } = req.query;
   if (!account_id) return res.status(400).json({ error: 'Missing account_id' });
 
   const pageNum = Math.max(0, parseInt(page, 10) || 0);
   const perPage = Math.min(100, Math.max(1, parseInt(per_page, 10) || 16));
   const from = pageNum * perPage;
   const to = from + perPage - 1;
+
+  const BALANCE_TYPES = ['balance', 'deposit', 'withdrawal', 'credit'];
 
   let q = supabase
     .from('transactions')
@@ -24,8 +26,16 @@ module.exports = async (req, res) => {
     .order('open_time', { ascending: false })
     .range(from, to);
 
+  if (tab === 'balance') {
+    /* balance operations tab: only deposit/withdrawal/balance/credit rows */
+    q = q.in('type', BALANCE_TYPES);
+  } else {
+    /* trades tab: exclude balance operation types */
+    q = q.not('type', 'in', `(${BALANCE_TYPES.join(',')})`);
+  }
+
   if (symbol) q = q.ilike('symbol', `%${symbol}%`);
-  if (type) q = q.ilike('type', type);
+  if (type)   q = q.ilike('type', type);
   if (profit_min !== undefined) q = q.gte('profit', parseFloat(profit_min));
   if (profit_max !== undefined) q = q.lte('profit', parseFloat(profit_max));
 
