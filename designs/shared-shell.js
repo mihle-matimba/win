@@ -64,7 +64,7 @@ const SIDEBAR_HTML = `
     </div>
   </nav>
   <div class="side-foot">
-    <a class="side-user" href="profile.html" title="View profile">
+    <a class="side-user" title="Profile">
       <div class="side-avatar-wrap" id="sideAvatarWrap"></div>
       <div class="meta"><div class="nm" id="sideUserName"></div><div class="em" id="sideUserEmail"></div></div>
     </a>
@@ -76,9 +76,16 @@ const TOPBAR_HTML = `
   <button class="icon-rnd collapse-btn" id="collapseBtn" aria-label="Collapse sidebar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m13 17-5-5 5-5M19 17l-5-5 5-5"/></svg></button>
   <div class="acct" id="acctMenu">
     <button class="acct-trigger" id="acctTrigger" aria-expanded="false">
-      <span class="acct-tx">
-        <span class="r2"><span class="acct-name" id="acctBroker">No accounts</span><span class="acct-num" id="acctNum"></span></span>
-        <span class="r3"><span class="mut" id="acctSynced"></span></span>
+      <span class="acct-tx" id="acctTx">
+        <span class="r2 acct-skel-row" id="acctSkелRow" style="display:flex;gap:6px;align-items:center">
+          <span class="acct-skel" style="width:110px;height:11px;border-radius:5px"></span>
+          <span class="acct-skel" style="width:52px;height:10px;border-radius:5px;opacity:.6"></span>
+        </span>
+        <span class="r3 acct-skel-row" style="display:flex">
+          <span class="acct-skel" style="width:80px;height:9px;border-radius:5px;opacity:.4"></span>
+        </span>
+        <span class="r2" id="acctBrokerRow" style="display:none"><span class="acct-name" id="acctBroker"></span><span class="acct-num" id="acctNum"></span></span>
+        <span class="r3" id="acctSyncedRow" style="display:none"><span class="mut" id="acctSynced"></span></span>
       </span>
       <svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="m6 9 6 6 6-6"/></svg>
     </button>
@@ -86,7 +93,7 @@ const TOPBAR_HTML = `
   </div>
   <div class="tb-spacer"></div>
   <button class="tb-btn" id="refresh" aria-label="Refresh"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12a9 9 0 0 1 9-9 9 9 0 0 1 6.7 3L21 8"/><path d="M21 3v5h-5M21 12a9 9 0 0 1-9 9 9 9 0 0 1-6.7-3L3 16"/><path d="M3 21v-5h5"/></svg></button>
-  <a class="tb-avatar-wrap" id="tbAvatarWrap" href="profile.html" title="View profile"></a>`;
+  <a class="tb-avatar-wrap" id="tbAvatarWrap" title="Profile"></a>`;
 
 const ACCOUNTS = [];
 
@@ -210,6 +217,12 @@ async function loadLinkedAccounts() {
       const synced = document.getElementById('acctSynced');
       if (synced) synced.textContent = a.synced;
     }
+    // hide skeleton, reveal real account rows
+    document.querySelectorAll('.acct-skel-row').forEach(el => el.style.display = 'none');
+    const br = document.getElementById('acctBrokerRow');
+    const sr = document.getElementById('acctSyncedRow');
+    if (br) br.style.display = '';
+    if (sr) sr.style.display = '';
   } catch { /* silent fail */ }
 }
 
@@ -264,6 +277,14 @@ function initShell({ activePage = '' } = {}) {
   const topbar  = document.querySelector('.topbar');
   if (sidebar) sidebar.innerHTML = SIDEBAR_HTML;
   if (topbar)  topbar.innerHTML  = TOPBAR_HTML;
+
+  /* inject skeleton shimmer styles once */
+  if (!document.getElementById('_acctSkelStyle')) {
+    const s = document.createElement('style');
+    s.id = '_acctSkelStyle';
+    s.textContent = `@keyframes _acctShimmer{0%{background-position:200% 0}100%{background-position:-200% 0}}.acct-skel{display:inline-block;background:linear-gradient(90deg,rgba(255,255,255,.06) 25%,rgba(255,255,255,.13) 50%,rgba(255,255,255,.06) 75%);background-size:200% 100%;animation:_acctShimmer 1.5s infinite;border-radius:5px}`;
+    document.head.appendChild(s);
+  }
 
   loadChannels();
   communityLoadPromise = loadCommunity();
@@ -406,6 +427,12 @@ function initAccountMenu(activePage) {
     document.getElementById('acctNum').textContent = a.num;
     const synced = document.getElementById('acctSynced');
     if (synced) synced.textContent = a.synced;
+    // ensure skeleton is hidden after account switch
+    document.querySelectorAll('.acct-skel-row').forEach(el => el.style.display = 'none');
+    const br = document.getElementById('acctBrokerRow');
+    const sr = document.getElementById('acctSyncedRow');
+    if (br) br.style.display = '';
+    if (sr) sr.style.display = '';
   }
 
   function open() { renderOptions(); menu.classList.add('open'); trigger.setAttribute('aria-expanded', 'true'); }
