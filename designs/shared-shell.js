@@ -105,6 +105,7 @@ const BROKERS_FALLBACK = [
 ];
 
 let communityBrokers = null; // null = not loaded yet
+let networksLocked  = false;
 
 // ── Helper functions (defined before initShell to avoid hoisting issues) ──
 
@@ -195,14 +196,32 @@ async function loadLinkedAccounts() {
         synced:  timeAgo(bc.synced_at)
       });
     });
-    // Notify account menu to refresh display
+    // Restore selected account (clamp to valid range) and refresh display
+    const storedIdx = +(localStorage.getItem('win_selected_account') || 0);
+    const idx = Math.min(storedIdx, ACCOUNTS.length - 1);
     const acctBroker = document.getElementById('acctBroker');
     if (acctBroker && ACCOUNTS.length) {
-      const a = ACCOUNTS[0];
+      const a = ACCOUNTS[idx];
       acctBroker.textContent = a.broker;
       document.getElementById('acctNum').textContent = a.num;
+      const synced = document.getElementById('acctSynced');
+      if (synced) synced.textContent = a.synced;
     }
   } catch { /* silent fail */ }
+}
+
+const navLockSvg = '<svg class="nav-lock-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>';
+
+function lockNetworkChannels() {
+  const group = document.getElementById('networkGroup');
+  if (!group) return;
+  group.querySelectorAll('.nav-sub').forEach(a => {
+    a.removeAttribute('href');
+    a.removeAttribute('target');
+    a.removeAttribute('rel');
+    a.classList.add('nav-sub-locked');
+    if (!a.querySelector('.nav-lock-icon')) a.insertAdjacentHTML('beforeend', navLockSvg);
+  });
 }
 
 async function loadChannels() {
@@ -220,6 +239,7 @@ async function loadChannels() {
       <a class="nav-sub" href="${ch.url}" target="_blank" rel="noopener">
         <span class="dot"></span><span>${ch.name}</span>
       </a>`).join('');
+    if (networksLocked) lockNetworkChannels();
   } catch {
     const group = document.getElementById('networkGroup');
     if (group) group.innerHTML = '<div class="nav-empty">No channels yet</div>';
@@ -239,6 +259,17 @@ function initShell({ activePage = '' } = {}) {
   applyUserInfo();
   initAccountMenu(activePage);
   loadLinkedAccounts();
+
+  // sign out
+  const signoutBtn = sidebar && sidebar.querySelector('.signout');
+  if (signoutBtn) {
+    signoutBtn.onclick = () => {
+      localStorage.removeItem('win_session');
+      localStorage.removeItem('win_user');
+      localStorage.removeItem('win_selected_account');
+      window.location.href = 'auth.html';
+    };
+  }
 
   // logo fallback
   const brandLogo = document.getElementById('brandLogo');
@@ -324,7 +355,7 @@ function initAccountMenu(activePage) {
   const trigger = document.getElementById('acctTrigger');
   const drop = document.getElementById('acctDrop');
   if (!menu || !trigger || !drop) return;
-  let selected = 0;
+  let selected = +(localStorage.getItem('win_selected_account') || 0);
 
   const manageIcon = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"/><circle cx="12" cy="12" r="3"/></svg>';
 
@@ -365,7 +396,7 @@ function initAccountMenu(activePage) {
   drop.addEventListener('click', e => {
     if (e.target.closest('#manageAcctsBtn')) { close(); openManageModal(); return; }
     const opt = e.target.closest('.acct-opt'); if (!opt) return;
-    selected = +opt.dataset.i; applyAccount(selected); close();
+    selected = +opt.dataset.i; localStorage.setItem('win_selected_account', selected); applyAccount(selected); close();
   });
   document.addEventListener('click', e => { if (!e.target.closest('#acctMenu')) close(); });
   addEventListener('keydown', e => { if (e.key === 'Escape') close(); });
@@ -733,6 +764,8 @@ function initAccountMenu(activePage) {
       const lk = el.querySelector('.card-lock');
       if (lk) lk.remove();
     });
+    networksLocked = false;
+    document.querySelectorAll('.nav-sub-locked').forEach(a => a.classList.remove('nav-sub-locked'));
   }
 
   function showAccountGate() {
@@ -819,6 +852,8 @@ function initAccountMenu(activePage) {
       const { accounts } = await res.json();
       if (accounts && accounts.length > 0) return;
     } catch { return; }
+    networksLocked = true;
+    lockNetworkChannels();
     applyPageLocks(page);
     showAccountGate();
   }

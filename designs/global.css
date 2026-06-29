@@ -734,3 +734,7 @@ td.neg{color:var(--red-val)}
   box-shadow:0 4px 20px -4px var(--accent-glow)
 }
 .lock-unlock-btn:hover{opacity:.88;transform:translateY(-1px)}
+
+/* ── Locked network nav items ── */
+.nav-sub-locked{pointer-events:none;opacity:.5;cursor:default}
+.nav-lock-icon{width:13px;height:13px;flex-shrink:0;margin-left:auto;opacity:.7;stroke:var(--muted)}
