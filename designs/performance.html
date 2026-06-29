@@ -12,7 +12,8 @@
 <link rel="stylesheet" href="global.css">
 <style>
 /* ── Performance page layout ── */
-.perf-wrap{padding:28px clamp(14px,2.5vw,32px) 40px;display:flex;flex-direction:column;gap:18px;max-width:1400px}
+/* horizontal padding comes from .content in global.css — only add vertical here */
+.perf-wrap{padding:4px 0 40px;display:flex;flex-direction:column;gap:18px;width:100%}
 
 /* ── Page header ── */
 .perf-header{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-bottom:4px}
@@ -29,7 +30,7 @@
 /* ── Summary stat strip ── */
 .perf-strip{display:grid;grid-template-columns:repeat(4,1fr);gap:14px}
 @media(max-width:900px){.perf-strip{grid-template-columns:repeat(2,1fr)}}
-@media(max-width:480px){.perf-strip{grid-template-columns:1fr}}
+@media(max-width:480px){.perf-strip{grid-template-columns:1fr 1fr}}
 
 .stat-tile{
   background:var(--card);border:1px solid var(--line);border-radius:var(--radius);
@@ -50,7 +51,7 @@
 .perf-row-2{grid-template-columns:3fr 2fr}
 .perf-row-3{grid-template-columns:1fr 1fr 1fr}
 @media(max-width:1050px){.perf-row-2{grid-template-columns:1fr}.perf-row-3{grid-template-columns:1fr 1fr}}
-@media(max-width:650px){.perf-row-3{grid-template-columns:1fr}}
+@media(max-width:580px){.perf-row-2{grid-template-columns:1fr}.perf-row-3{grid-template-columns:1fr}}
 
 /* ── Cards ── */
 .perf-card{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);padding:22px 22px 20px}
@@ -151,6 +152,19 @@
   .bal-stat{border-right:none;padding:0}
   .risk-grid{grid-template-columns:1fr}
   .risk-item:nth-child(odd){border-right:none}
+  .bal-amount{font-size:28px}
+  .stat-tile-value{font-size:22px}
+  .ws-grid{grid-template-columns:1fr}
+  .pnl-chart-wrap{height:160px}
+  .monthly-chart-wrap{height:130px}
+}
+@media(max-width:480px){
+  .bal-amount{font-size:24px}
+  .bal-stats{grid-template-columns:1fr}
+  .stat-tile{padding:14px 16px}
+  .stat-tile-value{font-size:20px}
+  .perf-card{padding:16px 16px 14px}
+  .balance-card{padding:16px 18px 14px}
 }
 
 /* ── Skeleton shimmer ── */
