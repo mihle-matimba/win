@@ -245,7 +245,7 @@
 
 <script src="shared-shell.js"></script>
 <script>
-WIN.initShell({ activePage: ‘courses’ });
+WIN.initShell({ activePage: 'courses' });
 
 /* ================================================================
    State
@@ -260,19 +260,19 @@ let userId = null;   // set after auth is wired up
    Course visuals — gradient + icon + level per sort_order
    ================================================================ */
 const COURSE_THEMES = [
-  { gradient:’linear-gradient(135deg,#0a1628 0%,#142952 40%,#2a5aad 100%)’, icon:’\u{1F4C8}’, level:’beginner’,     color:’var(--green-val)’,  numBg:’rgba(53,215,155,.12)’ },
-  { gradient:’linear-gradient(135deg,#140a28 0%,#2d1452 40%,#6b3fad 100%)’, icon:’\u{1F4C9}’, level:’intermediate’, color:’var(--accent)’,     numBg:’var(--accent-soft)’ },
-  { gradient:’linear-gradient(135deg,#1a1a06 0%,#3d3510 40%,#ad8a2a 100%)’, icon:’⚡’,    level:’advanced’,     color:’var(--purple-val)’, numBg:’var(--purple-soft)’ },
+  { gradient:'linear-gradient(135deg,#0a1628 0%,#142952 40%,#2a5aad 100%)', icon:'\u{1F4C8}', level:'beginner',     color:'var(--green-val)',  numBg:'rgba(53,215,155,.12)' },
+  { gradient:'linear-gradient(135deg,#140a28 0%,#2d1452 40%,#6b3fad 100%)', icon:'\u{1F4C9}', level:'intermediate', color:'var(--accent)',     numBg:'var(--accent-soft)' },
+  { gradient:'linear-gradient(135deg,#1a1a06 0%,#3d3510 40%,#ad8a2a 100%)', icon:'⚡',    level:'advanced',     color:'var(--purple-val)', numBg:'var(--purple-soft)' },
 ];
 
 /* ================================================================
    Fetch data via API endpoints (server-side Supabase key)
-   Falls back to demo data if API isn’t available
+   Falls back to demo data if API isn't available
    ================================================================ */
 async function loadData() {
   try {
-    const res = await fetch(‘/api/courses’);
-    if (!res.ok) throw new Error(‘API error’);
+    const res = await fetch('/api/courses');
+    if (!res.ok) throw new Error('API error');
     const data = await res.json();
 
     courses = data.courses || [];
@@ -297,48 +297,48 @@ async function loadData() {
 }
 
 function loadDemoData() {
-  const cIntro = ‘demo-intro’;
-  const cForex = ‘demo-forex’;
-  const cSynth = ‘demo-synth’;
+  const cIntro = 'demo-intro';
+  const cForex = 'demo-forex';
+  const cSynth = 'demo-synth';
 
   courses = [
-    { id: cIntro, title: ‘Introduction to WIN Trading’, description: ‘Start your trading journey here. Learn the fundamentals of forex — from registering with a broker to understanding pips, leverage, lot sizes, and how to use MT5 & TradingView.’, sort_order: 1 },
-    { id: cForex, title: ‘Hanré’s Forex Course’,     description: ‘Take your trading to the next level with technical analysis. Master candlestick patterns, trendlines, support & resistance, order blocks, fair value gaps, and Fibonacci retracements.’, sort_order: 2 },
-    { id: cSynth, title: ‘Hanré’s Synthetics Course’, description: ‘Explore the world of synthetic indices trading. From the basics to advanced strategies — learn how to trade volatility indices with confidence.’, sort_order: 3 },
+    { id: cIntro, title: 'Introduction to WIN Trading', description: 'Start your trading journey here. Learn the fundamentals of forex — from registering with a broker to understanding pips, leverage, lot sizes, and how to use MT5 & TradingView.', sort_order: 1 },
+    { id: cForex, title: "Hanré's Forex Course",     description: 'Take your trading to the next level with technical analysis. Master candlestick patterns, trendlines, support & resistance, order blocks, fair value gaps, and Fibonacci retracements.', sort_order: 2 },
+    { id: cSynth, title: "Hanré's Synthetics Course", description: 'Explore the world of synthetic indices trading. From the basics to advanced strategies — learn how to trade volatility indices with confidence.', sort_order: 3 },
   ];
 
   chapters[cIntro] = [
-    { id:’c1-1’,  course_id:cIntro, chapter_num:’1.1’,  title:’Introduction to Win’,              description:’Welcome & overview of WIN Trading’,     video_url:’https://youtu.be/M3FKBMtLFAI’ },
-    { id:’c1-2’,  course_id:cIntro, chapter_num:’1.2’,  title:’How to Register with JP Markets’,   description:’Dashboard setup & broker registration’,  video_url:’https://youtu.be/piS43eTDNsA’ },
-    { id:’c1-3’,  course_id:cIntro, chapter_num:’1.3’,  title:’What is Forex Trading’,             description:’Understanding the forex market’,          video_url:’https://youtu.be/8zFExpPAv_8’ },
-    { id:’c1-4’,  course_id:cIntro, chapter_num:’1.4’,  title:’What are Spreads’,                  description:’Bid/ask spreads explained’,               video_url:’https://youtu.be/d2sd1-kzv-4’ },
-    { id:’c1-5’,  course_id:cIntro, chapter_num:’1.5’,  title:’Lot Sizes’,                         description:’Understanding position sizing’,            video_url:’https://youtu.be/tDt-9oA665o’ },
-    { id:’c1-6’,  course_id:cIntro, chapter_num:’1.6’,  title:’Leverage’,                          description:’How leverage works in trading’,            video_url:’https://youtu.be/NBo0iILFFmE’ },
-    { id:’c1-7’,  course_id:cIntro, chapter_num:’1.7’,  title:’Take Profit & Stop Loss’,           description:’Managing risk on every trade’,             video_url:’https://youtu.be/2xGfBQ-A-I4’ },
-    { id:’c1-8’,  course_id:cIntro, chapter_num:’1.8’,  title:’Market Orders’,                     description:’Executing trades in the market’,           video_url:’https://youtu.be/vjYzCWmDuHc’ },
-    { id:’c1-9’,  course_id:cIntro, chapter_num:’1.9’,  title:’Pips’,                              description:’Measuring price movement’,                 video_url:’https://youtu.be/8ayZkaeh7tU’ },
-    { id:’c1-10’, course_id:cIntro, chapter_num:’1.10’, title:’How MT5 Works’,                     description:’Navigating MetaTrader 5’,                  video_url:’https://youtu.be/54eKLMdNZMw’ },
-    { id:’c1-11’, course_id:cIntro, chapter_num:’1.11’, title:’TradingView’,                       description:’Charting & analysis platform’,             video_url:’https://youtu.be/TaP_f9AhjjQ’ },
-    { id:’c1-12’, course_id:cIntro, chapter_num:’1.12’, title:’Real & Demo Accounts’,              description:’Practice vs live trading’,                 video_url:’https://youtu.be/p1Xf0HrJsQE’ },
+    { id:'c1-1',  course_id:cIntro, chapter_num:'1.1',  title:'Introduction to Win',              description:'Welcome & overview of WIN Trading',     video_url:'https://youtu.be/M3FKBMtLFAI' },
+    { id:'c1-2',  course_id:cIntro, chapter_num:'1.2',  title:'How to Register with JP Markets',   description:'Dashboard setup & broker registration',  video_url:'https://youtu.be/piS43eTDNsA' },
+    { id:'c1-3',  course_id:cIntro, chapter_num:'1.3',  title:'What is Forex Trading',             description:'Understanding the forex market',          video_url:'https://youtu.be/8zFExpPAv_8' },
+    { id:'c1-4',  course_id:cIntro, chapter_num:'1.4',  title:'What are Spreads',                  description:'Bid/ask spreads explained',               video_url:'https://youtu.be/d2sd1-kzv-4' },
+    { id:'c1-5',  course_id:cIntro, chapter_num:'1.5',  title:'Lot Sizes',                         description:'Understanding position sizing',            video_url:'https://youtu.be/tDt-9oA665o' },
+    { id:'c1-6',  course_id:cIntro, chapter_num:'1.6',  title:'Leverage',                          description:'How leverage works in trading',            video_url:'https://youtu.be/NBo0iILFFmE' },
+    { id:'c1-7',  course_id:cIntro, chapter_num:'1.7',  title:'Take Profit & Stop Loss',           description:'Managing risk on every trade',             video_url:'https://youtu.be/2xGfBQ-A-I4' },
+    { id:'c1-8',  course_id:cIntro, chapter_num:'1.8',  title:'Market Orders',                     description:'Executing trades in the market',           video_url:'https://youtu.be/vjYzCWmDuHc' },
+    { id:'c1-9',  course_id:cIntro, chapter_num:'1.9',  title:'Pips',                              description:'Measuring price movement',                 video_url:'https://youtu.be/8ayZkaeh7tU' },
+    { id:'c1-10', course_id:cIntro, chapter_num:'1.10', title:'How MT5 Works',                     description:'Navigating MetaTrader 5',                  video_url:'https://youtu.be/54eKLMdNZMw' },
+    { id:'c1-11', course_id:cIntro, chapter_num:'1.11', title:'TradingView',                       description:'Charting & analysis platform',             video_url:'https://youtu.be/TaP_f9AhjjQ' },
+    { id:'c1-12', course_id:cIntro, chapter_num:'1.12', title:'Real & Demo Accounts',              description:'Practice vs live trading',                 video_url:'https://youtu.be/p1Xf0HrJsQE' },
   ];
 
   chapters[cForex] = [
-    { id:’c2-1’,  course_id:cForex, chapter_num:’1’,  title:’Candles’,              description:’Reading candlestick charts’,     video_url:’https://youtu.be/DcpnFbOmT7A’ },
-    { id:’c2-2’,  course_id:cForex, chapter_num:’2’,  title:’Patterns’,             description:’Identifying chart patterns’,     video_url:’https://youtu.be/2eRxD2exvpo’ },
-    { id:’c2-3’,  course_id:cForex, chapter_num:’3’,  title:’Trendlines’,           description:’Drawing & trading trendlines’,   video_url:’https://youtu.be/tq9xjZbTPyQ’ },
-    { id:’c2-4’,  course_id:cForex, chapter_num:’4’,  title:’Support & Resistance’, description:’Key price levels’,               video_url:’https://youtu.be/4OZ0QojFp4E’ },
-    { id:’c2-5’,  course_id:cForex, chapter_num:’5’,  title:’Retests’,              description:’Confirmation through retests’,   video_url:’https://youtu.be/LSImmLMmma8’ },
-    { id:’c2-6’,  course_id:cForex, chapter_num:’6’,  title:’Example Trades’,       description:’Real trade setups walkthrough’,  video_url:’https://youtu.be/BV9wsRbDwRI’ },
-    { id:’c2-7’,  course_id:cForex, chapter_num:’7’,  title:’Order Blocks’,         description:’Smart money concepts’,           video_url:’https://youtu.be/pQ0F4VTjz8Y’ },
-    { id:’c2-8’,  course_id:cForex, chapter_num:’8’,  title:’Fair Value Gaps’,      description:’Imbalance & liquidity zones’,    video_url:’https://youtu.be/O1ORrqhUZ6o’ },
-    { id:’c2-9’,  course_id:cForex, chapter_num:’9’,  title:’Break of Structure’,   description:’Market structure shifts’,        video_url:’https://youtu.be/SUOT7gmXF0o’ },
-    { id:’c2-10’, course_id:cForex, chapter_num:’10’, title:’Fibonacci’,            description:’Fibonacci retracement levels’,   video_url:’https://youtu.be/8JdlgLTwVLU’ },
-    { id:’c2-11’, course_id:cForex, chapter_num:’11’, title:’Example Trades’,       description:’Advanced trade examples’,        video_url:’https://youtu.be/klrX0e4RwMw’ },
+    { id:'c2-1',  course_id:cForex, chapter_num:'1',  title:'Candles',              description:'Reading candlestick charts',     video_url:'https://youtu.be/DcpnFbOmT7A' },
+    { id:'c2-2',  course_id:cForex, chapter_num:'2',  title:'Patterns',             description:'Identifying chart patterns',     video_url:'https://youtu.be/2eRxD2exvpo' },
+    { id:'c2-3',  course_id:cForex, chapter_num:'3',  title:'Trendlines',           description:'Drawing & trading trendlines',   video_url:'https://youtu.be/tq9xjZbTPyQ' },
+    { id:'c2-4',  course_id:cForex, chapter_num:'4',  title:'Support & Resistance', description:'Key price levels',               video_url:'https://youtu.be/4OZ0QojFp4E' },
+    { id:'c2-5',  course_id:cForex, chapter_num:'5',  title:'Retests',              description:'Confirmation through retests',   video_url:'https://youtu.be/LSImmLMmma8' },
+    { id:'c2-6',  course_id:cForex, chapter_num:'6',  title:'Example Trades',       description:'Real trade setups walkthrough',  video_url:'https://youtu.be/BV9wsRbDwRI' },
+    { id:'c2-7',  course_id:cForex, chapter_num:'7',  title:'Order Blocks',         description:'Smart money concepts',           video_url:'https://youtu.be/pQ0F4VTjz8Y' },
+    { id:'c2-8',  course_id:cForex, chapter_num:'8',  title:'Fair Value Gaps',      description:'Imbalance & liquidity zones',    video_url:'https://youtu.be/O1ORrqhUZ6o' },
+    { id:'c2-9',  course_id:cForex, chapter_num:'9',  title:'Break of Structure',   description:'Market structure shifts',        video_url:'https://youtu.be/SUOT7gmXF0o' },
+    { id:'c2-10', course_id:cForex, chapter_num:'10', title:'Fibonacci',            description:'Fibonacci retracement levels',   video_url:'https://youtu.be/8JdlgLTwVLU' },
+    { id:'c2-11', course_id:cForex, chapter_num:'11', title:'Example Trades',       description:'Advanced trade examples',        video_url:'https://youtu.be/klrX0e4RwMw' },
   ];
 
   chapters[cSynth] = [
-    { id:’c3-1’, course_id:cSynth, chapter_num:’1’, title:’The Basics’, description:’Introduction to synthetic indices’, video_url:’https://youtu.be/e8kpztbHn34’ },
-    { id:’c3-2’, course_id:cSynth, chapter_num:’2’, title:’Advanced’,   description:’Advanced synthetics strategies’,    video_url:’https://youtu.be/yh6b27lz7d8’ },
+    { id:'c3-1', course_id:cSynth, chapter_num:'1', title:'The Basics', description:'Introduction to synthetic indices', video_url:'https://youtu.be/e8kpztbHn34' },
+    { id:'c3-2', course_id:cSynth, chapter_num:'2', title:'Advanced',   description:'Advanced synthetics strategies',    video_url:'https://youtu.be/yh6b27lz7d8' },
   ];
 }
 
@@ -346,10 +346,10 @@ function loadDemoData() {
    Render
    ================================================================ */
 function render() {
-  const grid = document.getElementById(‘courseGrid’);
+  const grid = document.getElementById('courseGrid');
 
   if (!courses.length) {
-    grid.innerHTML = ‘<div class="c-empty"><div class="icon">\u{1F4DA}</div><h3>No courses yet</h3><p>Courses will appear here once they\’re published.</p></div>’;
+    grid.innerHTML = '<div class="c-empty"><div class="icon">\u{1F4DA}</div><h3>No courses yet</h3><p>Courses will appear here once they\'re published.</p></div>';
     return;
   }
 
@@ -361,9 +361,9 @@ function render() {
     chs.forEach(ch => { if (progress[ch.id]) totalDone++; });
   });
 
-  document.getElementById(‘statCourses’).textContent = courses.length;
-  document.getElementById(‘statLessons’).textContent = totalChapters;
-  document.getElementById(‘statProgress’).textContent = totalChapters ? Math.round((totalDone / totalChapters) * 100) + ‘%’ : ‘0%’;
+  document.getElementById('statCourses').textContent = courses.length;
+  document.getElementById('statLessons').textContent = totalChapters;
+  document.getElementById('statProgress').textContent = totalChapters ? Math.round((totalDone / totalChapters) * 100) + '%' : '0%';
 
   grid.innerHTML = courses.map((c, i) => {
     const theme = COURSE_THEMES[i % COURSE_THEMES.length];
@@ -372,12 +372,12 @@ function render() {
     const pct = chs.length ? Math.round((done / chs.length) * 100) : 0;
 
     return `
-      <div class="c-card" onclick="toggleCourse(‘${c.id}’)">
+      <div class="c-card" onclick="toggleCourse('${c.id}')">
         <div class="c-banner">
           <div class="grad" style="background:${theme.gradient}"></div>
           <span class="icon">${theme.icon}</span>
           <span class="c-badge ${theme.level}">${theme.level}</span>
-          <span class="c-count">${chs.length} chapter${chs.length !== 1 ? ‘s’ : ‘’}</span>
+          <span class="c-count">${chs.length} chapter${chs.length !== 1 ? 's' : ''}</span>
         </div>
         <div class="c-body">
           <h3>${esc(c.title)}</h3>
@@ -386,7 +386,7 @@ function render() {
           <div class="c-progress">
             <div class="c-progress-bar"><div class="c-progress-fill" style="width:${pct}%"></div></div>
             <div class="c-progress-text"><span>${done} / ${chs.length} completed</span><span class="pct">${pct}%</span></div>
-          </div>` : ‘’}
+          </div>` : ''}
           <div class="c-meta">
             <span class="mi"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg> ${chs.length} lessons</span>
             <span class="mi"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 3h6a4 4 0 014 4v14a3 3 0 00-3-3H2z"/><path d="M22 3h-6a4 4 0 00-4 4v14a3 3 0 013-3h7z"/></svg> ${theme.level.charAt(0).toUpperCase() + theme.level.slice(1)}</span>
@@ -394,15 +394,15 @@ function render() {
           </div>
         </div>
       </div>`;
-  }).join(‘’);
+  }).join('');
 
   if (openCourseId) renderDetail(openCourseId);
 }
 
 function renderDetail(courseId) {
-  const detail = document.getElementById(‘courseDetail’);
+  const detail = document.getElementById('courseDetail');
   const course = courses.find(c => c.id === courseId);
-  if (!course) { detail.classList.remove(‘open’); return; }
+  if (!course) { detail.classList.remove('open'); return; }
 
   const idx = courses.indexOf(course);
   const theme = COURSE_THEMES[idx % COURSE_THEMES.length];
@@ -410,8 +410,8 @@ function renderDetail(courseId) {
   const done = chs.filter(ch => progress[ch.id]).length;
   const pct = chs.length ? Math.round((done / chs.length) * 100) : 0;
 
-  const checkSvg = ‘<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6"><path d="m5 12 5 5L20 7"/></svg>’;
-  const playSvg = ‘<svg viewBox="0 0 24 24" fill="var(--accent)"><path d="M8 5v14l11-7z"/></svg>’;
+  const checkSvg = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6"><path d="m5 12 5 5L20 7"/></svg>';
+  const playSvg = '<svg viewBox="0 0 24 24" fill="var(--accent)"><path d="M8 5v14l11-7z"/></svg>';
 
   detail.innerHTML = `
     <div class="c-detail-head">
@@ -419,7 +419,7 @@ function renderDetail(courseId) {
         <h2>${esc(course.title)}</h2>
         <p class="info">${chs.length} chapters · ${done} completed · ${pct}% done</p>
       </div>
-      <button class="close-btn" onclick="toggleCourse(‘${courseId}’)">
+      <button class="close-btn" onclick="toggleCourse('${courseId}')">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6 6 18M6 6l12 12"/></svg>
       </button>
     </div>
@@ -430,14 +430,14 @@ function renderDetail(courseId) {
       ${chs.map(ch => {
         const isDone = progress[ch.id];
         return `
-        <div class="ch${isDone ? ‘ completed’ : ‘’}">
+        <div class="ch${isDone ? ' completed' : ''}">
           <div class="ch-num" style="background:${theme.numBg};color:${theme.color}">${esc(ch.chapter_num)}</div>
           <div class="ch-info">
             <div class="ch-title">${esc(ch.title)}</div>
             <div class="ch-sub">${esc(ch.description)}</div>
           </div>
           <div class="ch-actions">
-            <button class="ch-check${isDone ? ‘ done’ : ‘’}" onclick="event.stopPropagation();toggleProgress(‘${ch.id}’)" title="${isDone ? ‘Mark incomplete’ : ‘Mark complete’}">
+            <button class="ch-check${isDone ? ' done' : ''}" onclick="event.stopPropagation();toggleProgress('${ch.id}')" title="${isDone ? 'Mark incomplete' : 'Mark complete'}">
               ${checkSvg}
             </button>
             <a class="ch-play" href="${esc(ch.video_url)}" target="_blank" rel="noopener" onclick="event.stopPropagation()" title="Watch video">
@@ -445,22 +445,22 @@ function renderDetail(courseId) {
             </a>
           </div>
         </div>`;
-      }).join(‘’)}
+      }).join('')}
     </div>`;
 
-  detail.classList.add(‘open’);
+  detail.classList.add('open');
 }
 
 function toggleCourse(id) {
-  const detail = document.getElementById(‘courseDetail’);
+  const detail = document.getElementById('courseDetail');
   if (openCourseId === id) {
-    detail.classList.remove(‘open’);
+    detail.classList.remove('open');
     openCourseId = null;
     return;
   }
   openCourseId = id;
   renderDetail(id);
-  setTimeout(() => detail.scrollIntoView({ behavior:’smooth’, block:’start’ }), 80);
+  setTimeout(() => detail.scrollIntoView({ behavior:'smooth', block:'start' }), 80);
 }
 
 /* ================================================================
@@ -470,18 +470,18 @@ async function toggleProgress(chapterId) {
   if (progress[chapterId]) {
     delete progress[chapterId];
     if (userId) {
-      fetch(‘/api/progress’, {
-        method: ‘DELETE’,
-        headers: { ‘Content-Type’: ‘application/json’ },
+      fetch('/api/progress', {
+        method: 'DELETE',
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ user_id: userId, chapter_id: chapterId }),
       });
     }
   } else {
     progress[chapterId] = true;
     if (userId) {
-      fetch(‘/api/progress’, {
-        method: ‘POST’,
-        headers: { ‘Content-Type’: ‘application/json’ },
+      fetch('/api/progress', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ user_id: userId, chapter_id: chapterId }),
       });
     }
@@ -493,8 +493,8 @@ async function toggleProgress(chapterId) {
    Utils
    ================================================================ */
 function esc(s) {
-  const d = document.createElement(‘div’);
-  d.textContent = s || ‘’;
+  const d = document.createElement('div');
+  d.textContent = s || '';
   return d.innerHTML;
 }
 
