@@ -22,12 +22,12 @@ module.exports = async (req, res) => {
     .from('transactions')
     .select('*', { count: 'exact' })
     .eq('account_id', account_id)
-    .not('type',   'ilike', '%deposit%')
-    .not('type',   'ilike', '%withdrawal%')
-    .not('type',   'ilike', '%balance%')
-    .not('type',   'ilike', '%credit%')
-    .not('symbol', 'ilike', '%deposit%')
-    .not('symbol', 'ilike', '%withdrawal%');
+    .not('type', 'ilike', '%deposit%')
+    .not('type', 'ilike', '%withdrawal%')
+    .not('type', 'ilike', '%balance%')
+    .not('type', 'ilike', '%credit%')
+    /* NULL symbol rows must pass — only exclude if symbol explicitly matches */
+    .or('symbol.is.null,and(symbol.not.ilike.%deposit%,symbol.not.ilike.%withdrawal%)');
 
   if (symbol)                    q = q.ilike('symbol', `%${symbol}%`);
   if (type)                      q = q.ilike('type', type);
