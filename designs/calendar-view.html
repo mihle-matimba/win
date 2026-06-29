@@ -151,10 +151,12 @@ function fmtDur(ms){
 }
 
 /* --- data helpers --- */
+function tradeDate(t){ return parseUTC(t.close_time) || parseUTC(t.open_time); }
+
 function getMonthData(y,m){
   const map={};
   for(const t of _allTransactions){
-    const dt=parseUTC(t.close_time);
+    const dt=tradeDate(t);
     if(!dt||dt.getFullYear()!==y||dt.getMonth()!==m)continue;
     const d=dt.getDate();
     map[d]=+((( map[d]||0)+netPnl(t)).toFixed(2));
@@ -165,7 +167,7 @@ function getMonthData(y,m){
 function getMonthSummary(y,m){
   let trades=0,wins=0,total=0;
   for(const t of _allTransactions){
-    const dt=parseUTC(t.close_time);
+    const dt=tradeDate(t);
     if(!dt||dt.getFullYear()!==y||dt.getMonth()!==m)continue;
     trades++;const n=netPnl(t);if(n>0)wins++;total+=n;
   }
@@ -176,12 +178,12 @@ function getMonthSummary(y,m){
 
 function getMonthTrades(y,m){
   return _allTransactions
-    .filter(t=>{const dt=parseUTC(t.close_time);return dt&&dt.getFullYear()===y&&dt.getMonth()===m;})
+    .filter(t=>{const dt=tradeDate(t);return dt&&dt.getFullYear()===y&&dt.getMonth()===m;})
     .map(t=>{
-      const ct=parseUTC(t.close_time),ot=parseUTC(t.open_time);
+      const ct=parseUTC(t.close_time),ot=parseUTC(t.open_time),dt=ct||ot;
       return{
-        date:ct?ct.toLocaleDateString('en-US',{month:'2-digit',day:'2-digit',year:'numeric'}):'--',
-        ts:ct?ct.getTime():0,
+        date:dt?dt.toLocaleDateString('en-US',{month:'2-digit',day:'2-digit',year:'numeric'}):'--',
+        ts:dt?dt.getTime():0,
         sym:t.symbol||'--',symC:symColor(t.symbol),
         pnl:netPnl(t),qty:t.volume||0,
         comm:parseFloat(t.commission||0),
@@ -326,7 +328,7 @@ document.getElementById('nextM').onclick=()=>{cm++;if(cm>11){cm=0;cy++;}renderCa
 /* --- Modal day stats (real data) --- */
 function dayStats(y,m,d){
   const dayTrades=_allTransactions.filter(t=>{
-    const dt=parseUTC(t.close_time);
+    const dt=tradeDate(t);
     return dt&&dt.getFullYear()===y&&dt.getMonth()===m&&dt.getDate()===d;
   });
   const pnlList=dayTrades.map(t=>netPnl(t));
