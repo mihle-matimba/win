@@ -719,6 +719,13 @@ td.neg{color:var(--red-val)}
 .gate-connect-btn:hover{opacity:.85}
 .gate-connect-btn:disabled{opacity:.4;cursor:not-allowed}
 .gate-msg{font-size:12px;min-height:16px;text-align:left}
+.gate-broker-logo-wrap{
+  display:flex;align-items:center;justify-content:center;
+  background:rgba(255,255,255,.06);border:1px solid var(--line);
+  border-radius:14px;padding:12px 24px;margin-bottom:4px;
+}
+.gate-broker-logo-img{height:36px;max-width:160px;object-fit:contain;display:block}
+.gate-existing-desc{font-size:12px;color:var(--muted);text-align:left;margin:0 0 10px;line-height:1.5}
 .gate-close{position:absolute;top:14px;right:14px;width:30px;height:30px;border-radius:50%;
   display:flex;align-items:center;justify-content:center;
   background:rgba(255,255,255,.06);color:var(--muted);transition:background .15s,color .15s}

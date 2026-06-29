@@ -779,6 +779,11 @@ function initAccountMenu(activePage) {
     const signupUrl  = broker && typeof broker !== 'string' ? (broker.signup_url || null) : null;
     const externalIcon = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:14px;height:14px;flex-shrink:0"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>';
 
+    const brokerLogo = broker && typeof broker !== 'string' ? (broker.logo_url || null) : null;
+    const brokerLogoHtml = brokerLogo
+      ? `<div class="gate-broker-logo-wrap"><img class="gate-broker-logo-img" src="${brokerLogo}" alt="${brokerName}"></div>`
+      : '';
+
     const gate = document.createElement('div');
     gate.id = 'accountGate';
     gate.className = 'account-gate';
@@ -786,13 +791,15 @@ function initAccountMenu(activePage) {
       <div class="gate-card">
         <button class="gate-close" id="gateClose" aria-label="Close"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M18 6 6 18M6 6l12 12"/></svg></button>
         <img class="gate-logo" src="https://ffxlryusmstnfjedleds.supabase.co/storage/v1/object/public/Assets/WIN.png" alt="WIN">
-        <p class="gate-desc">To enjoy the WIN platform for free, please connect your brokerage account.</p>
+        <p class="gate-desc">To enjoy the WIN platform for free, connect a Live, Funded, ${brokerName} account.</p>
+        ${brokerLogoHtml}
         ${signupUrl
           ? `<a class="gate-btn gate-broker-btn" href="${signupUrl}" target="_blank" rel="noopener"><span>Create Account</span>${externalIcon}</a>`
           : `<button class="gate-btn gate-broker-btn" disabled>Create Account</button>`
         }
         <p class="gate-support">Struggling to create an account? <a href="mailto:support@mdmtraders.com">Contact support</a></p>
         <div class="gate-divider"><span>Already have an account?</span></div>
+        <p class="gate-existing-desc">Already have a ${brokerName} account? Enter your existing account ID below.</p>
         <div class="gate-search-row">
           <input class="gate-input" id="gateAcctNum" type="text" placeholder="Enter your account number" autocomplete="off" maxlength="20">
           <button class="gate-connect-btn" id="gateConnectBtn" disabled>Connect</button>
