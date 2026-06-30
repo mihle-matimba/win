@@ -1,7 +1,44 @@
 -- ============================================================
--- Courses: create all tables
--- Run AFTER communities table exists
+-- Courses: create all tables (self-contained)
 -- ============================================================
+
+-- Updated_at helper (no-op if already exists)
+create or replace function public.handle_updated_at()
+returns trigger as $$
+begin
+  new.updated_at = now();
+  return new;
+end;
+$$ language plpgsql;
+
+-- Communities
+create table if not exists public.communities (
+  id            uuid primary key default gen_random_uuid(),
+  name          text not null,
+  slug          text not null unique,
+  domain        text unique,
+
+  logo_url        text,
+  favicon_url     text,
+  primary_color   text default '#5b74ff',
+  accent_color    text default '#3f8bff',
+  bg_color        text default '#060810',
+  font_family     text default 'Inter',
+
+  layout          text default 'default' check (layout in ('default', 'minimal', 'pro')),
+  enabled_pages   jsonb default '["performance","calendar","journal"]'::jsonb,
+
+  allowed_brokers jsonb default '[]'::jsonb,
+
+  support_email   text,
+  email_from      text,
+  email_from_name text,
+
+  created_at timestamptz default now(),
+  updated_at timestamptz default now()
+);
+
+create index if not exists idx_communities_domain on public.communities (domain);
 
 -- Courses
 create table public.courses (
