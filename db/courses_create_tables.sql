@@ -11,39 +11,31 @@ begin
 end;
 $$ language plpgsql;
 
--- Communities
-create table if not exists public.communities (
-  id            uuid primary key default gen_random_uuid(),
-  name          text not null,
-  slug          text not null unique,
-  domain        text unique,
-
-  logo_url        text,
-  favicon_url     text,
-  primary_color   text default '#5b74ff',
-  accent_color    text default '#3f8bff',
-  bg_color        text default '#060810',
-  font_family     text default 'Inter',
-
-  layout          text default 'default' check (layout in ('default', 'minimal', 'pro')),
-  enabled_pages   jsonb default '["performance","calendar","journal"]'::jsonb,
-
-  allowed_brokers jsonb default '[]'::jsonb,
-
-  support_email   text,
-  email_from      text,
-  email_from_name text,
-
-  created_at timestamptz default now(),
-  updated_at timestamptz default now()
+-- Themes (parent of courses)
+create table if not exists public.themes (
+  code            text not null,
+  name            text not null,
+  is_active       boolean not null default true,
+  id              uuid not null default gen_random_uuid(),
+  datecreated     timestamptz default now(),
+  datemodified    timestamptz default now(),
+  brokername      text,
+  brokerurl       text,
+  brokerapikey1   text,
+  brokerapikey2   text,
+  shelllogourl    text,
+  shelllogotext   text,
+  communitytext   text,
+  constraint themes_pkey primary key (code),
+  constraint themes_id_key unique (id)
 );
 
-create index if not exists idx_communities_domain on public.communities (domain);
+create index if not exists themes_code_idx on public.themes using btree (code);
 
 -- Courses
 create table public.courses (
   id            uuid primary key default gen_random_uuid(),
-  community_id  uuid not null references public.communities (id) on delete cascade,
+  theme_code    text not null references public.themes (code) on delete cascade,
 
   title         text not null,
   description   text default '',
@@ -63,7 +55,7 @@ create trigger courses_updated_at
   before update on public.courses
   for each row execute function public.handle_updated_at();
 
-create index idx_courses_community on public.courses (community_id, sort_order);
+create index idx_courses_theme on public.courses (theme_code, sort_order);
 
 -- Course chapters
 create table public.course_chapters (
