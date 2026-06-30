@@ -1,222 +1,155 @@
-# Courses Page
+# Courses — Database Reference
 
-`app/courses.html` — the learning hub where members browse and work through courses.
-
----
-
-## Overview
-
-The page has two views that swap in place:
-
-| View | Element ID | Shown when |
-|---|---|---|
-| Grid | `#gridView` | Default / after closing a course |
-| Detail | `#detailView` | A course card is clicked |
+Run the migration files in order. Each file depends on the one before it.
 
 ---
 
-## Grid View
+## Migration order
 
-### Header stats
-
-Three stat cards in the top-right corner update after data loads:
-
-| Stat | ID | Value |
-|---|---|---|
-| Courses | `#statCourses` | Total published courses |
-| Lessons | `#statLessons` | Total published chapters across all courses |
-| Complete | `#statProgress` | `(completed chapters / total chapters) × 100%` |
-
-### Course sections
-
-Courses are grouped into sections rendered in this order:
-
-1. **Continue Learning** — courses where the user has started but not finished (amber dot). Only shown when at least one such course exists.
-2. **Beginner** — green dot
-3. **Intermediate** — accent (blue/purple) dot
-4. **Advanced** — purple dot
-
-Each section has a heading, a pill showing the count, and a responsive card grid (`auto-fill, minmax(320px, 1fr)`).
-
-### Course card
-
-Each card shows:
-
-- **Banner** — 160 px tall. Background is a CSS gradient keyed to the course level. If `thumbnail_url` is set on the course it renders as a cover image instead of the emoji icon.
-- **Level badge** — top-left corner (Beginner / Intermediate / Advanced).
-- **Chapter count** — top-right corner.
-- **Title** and **description** (2-line clamp).
-- **Progress bar** — visible only when the course has chapters. Shows `completed / total` and a percentage.
-- **Continue button** — visible only when the course is in-progress. Clicking it opens the detail view at the first incomplete chapter.
-- **Meta row** — lesson count, level label, and a FREE tag.
-
-Clicking anywhere on the card (except the Continue button) calls `openDetail(courseId)`.
-
----
-
-## Detail View
-
-Opened by `openDetail(courseId, startChapterId?)`. Closed by `closeDetail()`.
-
-### Layout
-
-Two-column grid (`1fr 360px`) that collapses to a single column below 900 px.
-
-**Left column — main content**
-
-- 16:9 video embed (`#dvVideoWrap`). Shows a placeholder until a chapter is selected.
-- "Now playing" bar (`#dvNowPlaying`) with an animated pulse dot and the chapter title. Hidden until playback starts.
-- Tabs row (currently only "Overview").
-- Tab body: course description (`#dvDesc`) + a progress row (`#dvProgRow`) showing the overall percentage.
-
-**Right column — chapter sidebar**
-
-- Sticky panel (`position: sticky; top: 20px`), scrollable internally.
-- Header shows the course title and a `done/total` counter.
-- Chapter list (`#dvChList`) — one row per chapter.
-
-### Chapter row
-
-Each row contains:
-
-| Part | Description |
+| File | What it does |
 |---|---|
-| Number chip | `chapter_num` from the DB |
-| Title | `chapter.title` |
-| Subtitle | `chapter.description` |
-| Check button | Toggles `course_progress` for the current user |
-
-States:
-- **Default** — white number chip, normal title.
-- **Active** — left border in accent colour, chip fills with accent colour.
-- **Completed** — title gets a strikethrough, check button fills green. The row also gets the `.completed` class.
-
-Clicking a row calls `playChapter(chId, courseId)`.
+| `db/004_courses.sql` | Creates the `courses` table |
+| `db/006_seed_courses.sql` | Creates `course_chapters`, seeds WIN courses |
+| `db/007_course_progress.sql` | Creates `course_progress` with RLS |
+| `db/009_seed_pst_courses.sql` | Seeds PST courses |
+| `db/012_courses_level.sql` | Adds `level` column to `courses` |
 
 ---
 
-## Video player
-
-`playChapter` extracts a YouTube video ID from `chapter.video_url` using the regex:
-
-```
-/(?:youtu\.be\/|[?&]v=)([a-zA-Z0-9_-]{11})/
-```
-
-If a valid ID is found an `<iframe>` is injected with `autoplay=1`. If the URL is blank or not a recognised YouTube URL the placeholder is shown instead.
-
----
-
-## Progress tracking
-
-`toggleProgress(chapterId, courseId)` flips a chapter's completion state:
-
-- **Mark complete** — adds `chapterId` to the local `progress` object and `POST /api/progress`.
-- **Mark incomplete** — removes it and `DELETE /api/progress`.
-
-Both calls include `{ user_id, chapter_id }` in the JSON body. If no user is logged in the local state is still updated (guest mode), but no API call is made.
-
-After toggling, the active detail view (or the grid if no course is open) re-renders to reflect the new state.
-
----
-
-## Data & API
-
-### `GET /api/courses`
-
-Returns all published courses and chapters:
-
-```json
-{
-  "courses": [ /* rows from public.courses */ ],
-  "chapters": [ /* rows from public.course_chapters */ ]
-}
-```
-
-Implemented in `api/courses.js` using the Supabase service-role key. Both tables are filtered by `published = true` and ordered by `sort_order`.
-
-### `GET /api/progress?user_id=<uuid>`
-
-Returns completed chapter IDs for the user:
-
-```json
-{ "progress": [{ "chapter_id": "..." }, ...] }
-```
-
-### `POST /api/progress`
-
-Body: `{ user_id, chapter_id }` — marks a chapter complete.
-
-### `DELETE /api/progress`
-
-Body: `{ user_id, chapter_id }` — marks a chapter incomplete.
-
----
-
-## Database tables
+## Tables
 
 ### `public.courses`
 
-| Column | Type | Notes |
-|---|---|---|
-| `id` | uuid | PK |
-| `community_id` | uuid | FK → communities |
-| `title` | text | |
-| `description` | text | |
-| `content_url` | text | |
-| `thumbnail_url` | text | Used as card banner image if set |
-| `level` | text | `beginner` / `intermediate` / `advanced` (default `beginner`) |
-| `sort_order` | int | Controls display order |
-| `published` | boolean | Only published courses appear on the page |
-| `created_at` / `updated_at` | timestamptz | |
+```sql
+create table public.courses (
+  id            uuid primary key default gen_random_uuid(),
+  community_id  uuid not null references public.communities (id) on delete cascade,
+
+  title         text not null,
+  description   text default '',
+  content_url   text,
+  thumbnail_url text,
+  level         text not null default 'beginner'
+                  check (level in ('beginner', 'intermediate', 'advanced')),
+
+  sort_order    int default 0,
+  published     boolean default false,
+
+  created_at    timestamptz default now(),
+  updated_at    timestamptz default now()
+);
+```
+
+- `level` was added in `012_courses_level.sql` — backfilled from title keywords.
+- `published = false` hides a course from the page without deleting it.
+- `sort_order` controls display order within the grid.
 
 ### `public.course_chapters`
 
-Chapters belong to a course (`course_id` FK). Key columns used by the UI:
+```sql
+create table public.course_chapters (
+  id          uuid primary key default gen_random_uuid(),
+  course_id   uuid not null references public.courses (id) on delete cascade,
 
-| Column | Notes |
-|---|---|
-| `id` | Referenced by progress tracking |
-| `course_id` | Groups chapters under a course |
-| `chapter_num` | Displayed in the number chip |
-| `title` | Shown in sidebar and "now playing" bar |
-| `description` | Shown as chapter subtitle |
-| `video_url` | YouTube URL — embedded in the player |
-| `sort_order` | Chapter order within a course |
-| `published` | Only published chapters appear |
+  chapter_num text not null,
+  title       text not null,
+  description text default '',
+  video_url   text,
+
+  sort_order  int default 0,
+  published   boolean default true,
+
+  created_at  timestamptz default now(),
+  updated_at  timestamptz default now()
+);
+```
+
+- `chapter_num` is display-only text (e.g. `"1.1"`, `"2"`).
+- `video_url` must be a YouTube URL — the page extracts the video ID client-side.
+- Chapters default to `published = true` (opposite of courses).
 
 ### `public.course_progress`
 
-| Column | Notes |
-|---|---|
-| `user_id` | FK → auth.users |
-| `chapter_id` | FK → course_chapters |
-| `completed_at` | Timestamp of completion |
+```sql
+create table public.course_progress (
+  id           uuid primary key default gen_random_uuid(),
+  user_id      uuid not null references auth.users (id) on delete cascade,
+  chapter_id   uuid not null references public.course_chapters (id) on delete cascade,
 
-Unique constraint on `(user_id, chapter_id)`. RLS ensures users can only read and modify their own rows.
+  completed_at timestamptz default now(),
 
----
+  unique (user_id, chapter_id)
+);
+```
 
-## Level theming
+RLS policies:
 
-Level is inferred by `inferLevel(course)`:
-
-1. If `course.level` is `intermediate` or `advanced`, use it directly.
-2. Otherwise fall back to title keywords (`advanc` → intermediate, `expert`/`master` → advanced, everything else → beginner).
-
-Each level maps to a gradient and an emoji icon used on the card banner:
-
-| Level | Gradient | Icon |
+| Policy | Operation | Rule |
 |---|---|---|
-| Beginner | Dark blue → mid blue | 📈 |
-| Intermediate | Dark purple → mid purple | 📉 |
-| Advanced | Dark gold → mid gold | ⚡ |
+| Users can view their own progress | SELECT | `auth.uid() = user_id` |
+| Users can mark chapters complete | INSERT | `auth.uid() = user_id` |
+| Users can unmark chapters | DELETE | `auth.uid() = user_id` |
 
 ---
 
-## Responsive breakpoints
+## Indexes
 
-| Breakpoint | Change |
-|---|---|
-| `≤ 900 px` | Detail view switches to single column; sidebar becomes static |
-| `≤ 680 px` | Card grid becomes single column; header stacks vertically; detail title shrinks |
+```sql
+-- courses
+create index idx_courses_community on public.courses (community_id, sort_order);
+
+-- course_chapters
+create index idx_course_chapters_course on public.course_chapters (course_id, sort_order);
+
+-- course_progress
+create index idx_course_progress_user    on public.course_progress (user_id);
+create index idx_course_progress_chapter on public.course_progress (chapter_id);
+```
+
+---
+
+## Seeded courses
+
+All seeded courses belong to the community with `slug = 'win'`.
+
+### WIN courses (`006_seed_courses.sql`)
+
+| # | Title | Level | Chapters |
+|---|---|---|---|
+| 1 | Introduction to WIN Trading | beginner | 12 |
+| 2 | Hanré's Forex Course | beginner | 11 |
+| 3 | Hanré's Synthetics Course | beginner | 2 |
+
+### PST courses (`009_seed_pst_courses.sql`)
+
+| # | Title | Level | Chapters |
+|---|---|---|---|
+| 4 | PST Basic Forex Course | beginner | 10 |
+| 5 | PST Advance Forex Course | intermediate | 8 |
+| 6 | PST Basic Synthetic Course | beginner | 9 |
+| 7 | PST Advance Synthetic Course | intermediate | 8 |
+
+---
+
+## Adding a new course
+
+```sql
+-- 1. Insert the course
+insert into public.courses (community_id, title, description, level, sort_order, published)
+values (
+  '<community_uuid>',
+  'My New Course',
+  'Course description here.',
+  'beginner',   -- beginner | intermediate | advanced
+  10,           -- higher = further down the list
+  true
+);
+
+-- 2. Insert chapters (replace <course_uuid> with the ID returned above)
+insert into public.course_chapters (course_id, chapter_num, title, description, video_url, sort_order)
+values
+  ('<course_uuid>', '1', 'Chapter title', 'Short description', 'https://youtu.be/<id>', 1),
+  ('<course_uuid>', '2', 'Chapter title', 'Short description', 'https://youtu.be/<id>', 2);
+```
+
+To hide a course without deleting it: `update public.courses set published = false where id = '<uuid>';`
