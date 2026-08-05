@@ -136,19 +136,9 @@
   .video-card{
     border-radius:var(--radius);border:1px solid var(--line);overflow:hidden;position:relative;
     background:linear-gradient(135deg,#101626,#0b0e18);
-    display:flex;align-items:center;justify-content:center;min-height:190px;cursor:pointer;
+    min-height:190px;
   }
-  .video-card svg{position:absolute;inset:0;width:100%;height:100%;opacity:.6}
-  .play-btn{
-    position:relative;width:58px;height:58px;border-radius:50%;
-    background:rgba(47,123,255,.92);display:flex;align-items:center;justify-content:center;
-    box-shadow:0 0 40px var(--blue-glow);transition:transform .2s;
-  }
-  .video-card:hover .play-btn{transform:scale(1.1)}
-  .play-btn::after{
-    content:"";border-style:solid;border-width:9px 0 9px 15px;
-    border-color:transparent transparent transparent #fff;margin-left:4px;
-  }
+  .video-card iframe{position:absolute;inset:0;width:100%;height:100%;border:0}
 
   /* ---------- network section ---------- */
   section{padding:96px 0}
@@ -410,14 +400,8 @@
         </div>
       </div>
 
-      <div class="video-card reveal" onclick="toast('Video coming soon.')" title="Watch the platform tour">
-        <svg viewBox="0 0 400 220" preserveAspectRatio="none">
-          <polyline points="0,170 50,150 90,160 130,120 170,135 210,95 250,110 290,70 330,85 400,40"
-            fill="none" stroke="#2f7bff" stroke-width="2.5" opacity=".8"/>
-          <polyline points="0,190 60,180 110,185 160,160 210,168 260,140 310,150 400,110"
-            fill="none" stroke="#3ddb9b" stroke-width="1.5" opacity=".4"/>
-        </svg>
-        <div class="play-btn"></div>
+      <div class="video-card reveal">
+        <iframe src="https://www.youtube.com/embed/ozE4ysJvIFI" title="WIN platform tour" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>
       </div>
     </div>
   </div>
